@@ -1,0 +1,574 @@
+{
+  "memory": {
+    "EnemyObjectPageSel": 0,
+    "ScreenRight_X_Pos": 215,
+    "IntervalTimerControl": 5,
+    "EnemyFrenzyBuffer": 0,
+    "VerticalForceDown": 144,
+    "Player_X_MoveForce": 64,
+    "FrictionAdderHigh": 0,
+    "Player_CollisionBits": [
+      255,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "Player_X_Speed": [
+      40,
+      248,
+      248,
+      248,
+      248,
+      8,
+      0
+    ],
+    "Player_PageLoc": 9,
+    "Player_State": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      4,
+      0
+    ],
+    "LevelNumber": 1,
+    "MaximumLeftSpeed": 216,
+    "Player_Rel_XPos": [
+      112,
+      55,
+      0,
+      0,
+      79,
+      191,
+      0
+    ],
+    "Player_MovingDir": [
+      1,
+      2,
+      2,
+      2,
+      2,
+      1,
+      0
+    ],
+    "PlayerStatus": 0,
+    "PseudoRandomBitReg": [
+      167,
+      152,
+      215,
+      230,
+      73,
+      133,
+      22
+    ],
+    "ScreenEdge_PageLoc": 8,
+    "YPlatformTopYPos": [
+      0,
+      128,
+      128,
+      128,
+      128,
+      0,
+      0
+    ],
+    "HorizontalScroll": 216,
+    "SprObject_X_MoveForce": [
+      192,
+      0,
+      128,
+      128,
+      128,
+      128,
+      0
+    ],
+    "Player_X_Scroll": 2,
+    "PlayerChangeSizeFlag": 0,
+    "JumpOrigin_Y_HighPos": 1,
+    "CrouchingFlag": 0,
+    "Player_Pos_ForScroll": 112,
+    "Timers": [
+      0,
+      1,
+      0,
+      5,
+      0,
+      0,
+      0,
+      19,
+      0,
+      24,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "PlayerFacingDir": 1,
+    "Player_X_Position": [
+      72,
+      172,
+      172,
+      188,
+      188,
+      15,
+      224
+    ],
+    "Player_OffscreenBits": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "Enemy_ID": [
+      38,
+      38,
+      39,
+      39,
+      3,
+      0,
+      0
+    ],
+    "BoundingBox_UL_XPos":[115,196,125,208,212,243,255,0,212,122,255,135,0,240,20,253,0,79,20,92,57,193,69,205,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    "FrameCounter": 238,
+    "ScrollAmount": 2,
+    "Player_Y_Position": [
+      96,
+      242,
+      122,
+      241,
+      80,
+      184,
+      224
+    ],
+    "Enemy_Flag": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0
+    ],
+    "EnemyOffscrBitsMasked": [
+      4,
+      4,
+      4,
+      4,
+      0,
+      0,
+      0
+    ],
+    "VerticalForce": 144,
+    "Player_YMF_Dummy": [
+      120,
+      76,
+      1,
+      81,
+      112,
+      120,
+      0
+    ],
+    "JumpOrigin_Y_Position": 164,
+    "YPlatformCenterYPos": [
+      248,
+      248,
+      248,
+      248,
+      8,
+      0,
+      0
+    ],
+    "FrictionAdderLow": 228,
+    "Player_Rel_YPos": [
+      176,
+      184,
+      0,
+      0,
+      144,
+      0,
+      0
+    ],
+    "TimerControl": 0,
+    "BalPlatformAlignment": 255,
+    "WorldNumber": 0,
+    "ScrollFractional": 0,
+    "VerticalScroll": 0,
+    "EnemyObjectPageLoc": 9,
+    "ScrollLock": 0,
+    "Player_Y_HighPos": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "Player_Y_Speed": [
+      0,
+      255,
+      255,
+      0,
+      0,
+      0,
+      0
+    ],
+    "ScrollThirtyTwo": 24,
+    "Player_SprAttrib": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "PlayerSize": 1,
+    "ScreenRight_PageLoc": 9,
+    "ScreenLeft_X_Pos": 216,
+    "Player_XSpeedAbsolute": 40,
+    "EnemyDataOffset": 42,
+    "PlayerAnimCtrl": 1,
+    "Player_Y_MoveForce": [
+      0,
+      16,
+      16,
+      240,
+      240,
+      0,
+      0
+    ],
+    "PlayerAnimTimerSet": 2,
+    "PlatformCollisionFlag": [
+      255,
+      255,
+      255,
+      255,
+      0,
+      0,
+      0
+    ],
+    "SwimmingFlag": 0,
+    "RunningSpeed": 40,
+    "Player_BoundBoxCtrl": [
+      1,
+      6,
+      6,
+      6,
+      6,
+      3,
+      0
+    ],
+    "SprObject_PageLoc": [
+      9,
+      9,
+      9,
+      8,
+      8,
+      9,
+      9
+    ],
+    "Platform_X_Scroll": 0,
+    "MaximumRightSpeed": 40,
+    "AreaNumber": 2,
+    "EnemyFrenzyQueue": 0,
+    "DiffToHaltJump": 1
+  },
+  "name": "1-2G HI",
+  "comment": "Pipe clip to warpzone in 1-2 (going high before platform). To reach the scenario setup in a real game, you must not let go of right for even a frame prior.",
+  "frame": 238,
+  "rules": [
+    [
+      {
+        "y": 161,
+        "x": 202,
+        "method": "pixel",
+        "frame": 35,
+        "comment": "Near the end of the platform."
+      },
+      {
+        "input": "rba",
+        "frame": 35,
+        "method": "input",
+        "comment": "Do a full jump."
+      },
+      {
+        "input": "rba",
+        "frame": 36,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 37,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 38,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 39,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 40,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 41,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 42,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 43,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 44,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 45,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 46,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 47,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 48,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 49,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 50,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 51,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 52,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 53,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 54,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 55,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 56,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 57,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 58,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 59,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 60,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 61,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 62,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 63,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 64,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 65,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 66,
+        "method": "input"
+      },
+      {
+        "input": "r",
+        "frame": 84,
+        "method": "input", 
+        "comment": "Hold R for a single frame to adjust speed."
+      },
+      {
+        "y": 128,
+        "x": 69,
+        "method": "pixel",
+        "frame": 84
+      },
+      {
+        "input": "a",
+        "opt": "r",
+        "frame": 85,
+        "method": "input_opt",
+        "comment": "Make a single frame jump."
+      },
+      {
+        "input": "",
+        "opt": "r",
+        "frame": 86,
+        "method": "input_opt",
+        "comment": "Hold R if you want to, not required."
+      },
+      {
+        "input": "",
+        "opt": "r",
+        "frame": 87,
+        "method": "input_opt"
+      },
+      {
+        "input": "",
+        "opt": "r",
+        "frame": 88,
+        "method": "input_opt"
+      },
+      {
+        "input": "",
+        "opt": "r",
+        "frame": 89,
+        "method": "input_opt"
+      },
+      {
+        "input": "",
+        "opt": "r",
+        "frame": 90,
+        "method": "input_opt"
+      },
+      {
+        "input": "",
+        "opt": "r",
+        "frame": 91,
+        "method": "input_opt"
+      },
+      {
+        "input": "",
+        "opt": "r",
+        "frame": 92,
+        "method": "input_opt"
+      },
+      {
+    "input": "",
+        "opt": "r",
+        "frame": 93,
+        "method": "input_opt"
+      },
+      {
+        "input": "l",
+        "frame": 94,
+        "method": "input",
+        "comment": "When you clip the pipe, start holding left."
+      },
+      {
+        "input": "l",
+        "frame": 95,
+        "method": "input"
+      },
+      {
+        "input": "l",
+        "frame": 96,
+        "method": "input"
+      },
+      {
+        "input": "l",
+        "frame": 97,
+        "method": "input"
+      },
+      {
+        "input": "l",
+        "frame": 98,
+        "method": "input"
+      },
+      {
+        "method": "y",
+        "frame": 134,
+        "y": 112
+      },
+      {
+        "method": "x_ge",
+        "frame": 134,
+        "x": 105
+      },
+      {
+        "method": "win",
+        "frame": 135
+      }
+    ]
+  ],
+  "enemy_ptr_offset": 872
+}

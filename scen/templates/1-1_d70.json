@@ -1,0 +1,806 @@
+{
+  "memory": {
+    "EnemyObjectPageSel": 0,
+    "ScreenRight_X_Pos": 72,
+    "IntervalTimerControl": 16,
+    "EnemyFrenzyBuffer": 0,
+    "VerticalForceDown": 144,
+    "Player_X_MoveForce": 52,
+    "FrictionAdderHigh": 0,
+    "Player_CollisionBits": [
+      255,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "Player_X_Speed": [
+      40,
+      248,
+      248,
+      0,
+      0,
+      0,
+      0
+    ],
+    "Player_PageLoc": 10,
+    "Player_State": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "LevelNumber": 0,
+    "MaximumLeftSpeed": 216,
+    "Player_Rel_XPos": [
+      112,
+      122,
+      0,
+      0,
+      103,
+      183,
+      0
+    ],
+    "Player_MovingDir": [
+      1,
+      2,
+      2,
+      0,
+      0,
+      0,
+      0
+    ],
+    "PlayerStatus": 0,
+    "PseudoRandomBitReg": [
+      33,
+      21,
+      87,
+      125,
+      211,
+      40,
+      142
+    ],
+    "ScreenEdge_PageLoc": 10,
+    "YPlatformTopYPos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "HorizontalScroll": 73,
+    "SprObject_X_MoveForce": [
+      144,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "Player_X_Scroll": 2,
+    "BoundingBox_UL_XPos": [
+      115,
+      169,
+      125,
+      181,
+      101,
+      198,
+      111,
+      204,
+      125,
+      198,
+      135,
+      204,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "JumpOrigin_Y_HighPos": 1,
+    "CrouchingFlag": 0,
+    "Player_Pos_ForScroll": 112,
+    "Timers": [
+      0,
+      0,
+      18,
+      0,
+      11,
+      0,
+      0,
+      22,
+      0,
+      24,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "PlayerFacingDir": 1,
+    "Player_X_Position": [
+      185,
+      171,
+      195,
+      176,
+      80,
+      240,
+      0
+    ],
+    "Player_OffscreenBits": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "Enemy_ID": [
+      6,
+      6,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "FrameCounter": 194,
+    "ScrollAmount": 2,
+    "Player_Y_Position": [
+      149,
+      184,
+      184,
+      0,
+      0,
+      0,
+      0
+    ],
+    "Enemy_Flag": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "EnemyOffscrBitsMasked": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "VerticalForce": 144,
+    "Player_YMF_Dummy": [
+      56,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "JumpOrigin_Y_Position": 176,
+    "YPlatformCenterYPos": [
+      248,
+      248,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "TimerControl": 0,
+    "FrictionAdderLow": 228,
+    "Player_Rel_YPos": [
+      149,
+      184,
+      0,
+      0,
+      136,
+      0,
+      0
+    ],
+    "BalPlatformAlignment": 255,
+    "WorldNumber": 0,
+    "ScrollFractional": 0,
+    "ScrollThirtyTwo": 9,
+    "VerticalScroll": 0,
+    "EnemyObjectPageLoc": 11,
+    "ScrollLock": 0,
+    "Player_Y_HighPos": [
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    "Player_Y_Speed": [
+      3,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "EnemyDataOffset": 29,
+    "Player_SprAttrib": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "ScreenRight_PageLoc": 11,
+    "PlayerSize": 1,
+    "ScreenLeft_X_Pos": 73,
+    "Player_XSpeedAbsolute": 40,
+    "PlayerAnimCtrl": 0,
+    "PlayerAnimTimerSet": 2,
+    "Player_Y_MoveForce": [
+      56,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "PlayerChangeSizeFlag": 0,
+    "PlatformCollisionFlag": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "SwimmingFlag": 0,
+    "RunningSpeed": 40,
+    "Player_BoundBoxCtrl": [
+      1,
+      9,
+      9,
+      0,
+      0,
+      0,
+      0
+    ],
+    "SprObject_PageLoc": [
+      10,
+      10,
+      10,
+      6,
+      7,
+      7,
+      0
+    ],
+    "Platform_X_Scroll": 0,
+    "MaximumRightSpeed": 40,
+    "AreaNumber": 0,
+    "EnemyFrenzyQueue": 0,
+    "DiffToHaltJump": 1
+  },
+  "name": "1-1 D70",
+  "comment": "Flagpole glitch for 1-1 D70. Supports both first and second pixel stairs",
+  "frame": 194,
+  "rules": [
+    [
+      {
+        "y": 80,
+        "x": 149,
+        "method": "pixel",
+        "frame": 27
+      },
+      {
+        "input": "r",
+        "frame": 27,
+        "method": "input"
+      },
+      {
+        "method": "lock",
+        "frame": 28
+      },
+      {
+        "input": "rb",
+        "frame": 28,
+        "method": "input"
+      },
+      {
+        "input": "rb",
+        "frame": 29,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 30,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 31,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 32,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 33,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 34,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 35,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 36,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 37,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 38,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 39,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 40,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 41,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 42,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 43,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 44,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 45,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 46,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 47,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 48,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 49,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 50,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 51,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 52,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 53,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 54,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 55,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 56,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 57,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 58,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 59,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 60,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 61,
+        "method": "input"
+      },
+      {
+        "input": "l",
+        "frame": 108,
+        "method": "input"
+      },
+      {
+        "input": "l",
+        "frame": 109,
+        "method": "input"
+      },
+      {
+        "input": "l",
+        "frame": 110,
+        "method": "input"
+      },
+      {
+        "input": "la",
+        "frame": 111,
+        "method": "input"
+      },
+      {
+        "y": 160,
+        "x": 107,
+        "method": "pixel",
+        "frame": 165
+      },
+      {
+        "method": "win",
+        "frame": 167
+      }
+    ],
+    [
+      {
+        "y": 80,
+        "x": 152,
+        "method": "pixel",
+        "frame": 28
+      },
+      {
+        "input": "r",
+        "frame": 28,
+        "method": "input"
+      },
+      {
+        "input": "rb",
+        "frame": 29,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 30,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 31,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 32,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 33,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 34,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 35,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 36,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 37,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 38,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 39,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 40,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 41,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 42,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 43,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 44,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 45,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 46,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 47,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 48,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 49,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 50,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 51,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 52,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 53,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 54,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 55,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 56,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 57,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 58,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 59,
+        "method": "input"
+      },
+	  {
+        "input": "rba",
+        "frame": 60,
+        "method": "input"
+      },
+      {
+        "input": "rba",
+        "frame": 61,
+        "method": "input"
+      },
+      {
+        "input": "l",
+        "frame": 108,
+        "method": "input"
+      },
+      {
+        "input": "l",
+        "frame": 109,
+        "method": "input"
+      },
+      {
+        "input": "l",
+        "frame": 110,
+        "method": "input"
+      },
+      {
+        "input": "la",
+        "frame": 111,
+        "method": "input"
+      },
+      {
+        "y": 160,
+        "x": 107,
+        "method": "pixel",
+        "frame": 165
+      },
+      {
+        "method": "win",
+        "frame": 167
+      }
+    ]
+  ],
+  "enemy_ptr_offset": 401
+}

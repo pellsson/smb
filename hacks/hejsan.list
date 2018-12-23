@@ -1,0 +1,17 @@
+ca65 V2.17 - Git 66da8e3
+Main file   : hejsan.asm
+Current file: hejsan.asm
+
+000000r 1               .org $8000
+008000  1               .export hejsan
+008000  1               .code
+008000  1               
+008000  1               hejsan:
+008000  1  EA           	nop
+008001  1  20 rr rr     	jsr sko
+008004  1               
+008004  1  EA EA EA EA  .res $C000-*, $EA
+008008  1  EA EA EA EA  
+00800C  1  EA EA EA EA  
+00C000  1               
+00C000  1               

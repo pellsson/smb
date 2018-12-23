@@ -1,0 +1,16 @@
+ca65 V2.17 - Git 66da8e3
+Main file   : sko.asm
+Current file: sko.asm
+
+000000r 1               .org $c000
+00C000  1               .export sko
+00C000  1               .code
+00C000  1               
+00C000  1               sko:
+00C000  1  EA           	nop
+00C001  1  4C rr rr     	jmp hejsan
+00C004  1               
+00C004  1  EA EA EA EA  .res $10000-*, $EA
+00C008  1  EA EA EA EA  
+00C00C  1  EA EA EA EA  
+00C004  1               
