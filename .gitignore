@@ -1,1 +1,6 @@
+chr/org.chr
+chr/lost.chr
+chr/intro.chr
 build
+inc/wram.inc
+wram/init.bin

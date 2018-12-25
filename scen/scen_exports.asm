@@ -1,3 +1,8 @@
+	.export ScenLoadArea
+	.export ScenReset
+	.export ScenUpdateSelected
+	.export ScenValidate
+
 ;
 ; Appended to fpg_data.asm
 ;
@@ -125,44 +130,25 @@ fpg_win:
 		ldx #$04
 		jmp fpg_set_death_flag
 
-EnterFpgLoadArea:
-	lda #BANK_FPG_DATA
-	jsr SetBankFromA
+ScenLoadArea:
 	jsr fpg_load_area
-	lda BANK_SELECTED
-	jmp SetBankFromA
+	jmp ReturnBank
 
-EnterFpgReset:
-	lda #BANK_FPG_DATA
-	jsr SetBankFromA
+ScenReset:
 	jsr fpg_reset
-	lda BANK_SELECTED
-	jmp SetBankFromA
+	jmp ReturnBank
 
-EnterFpgValidate:
-	lda #BANK_FPG_DATA
-	jsr SetBankFromA
+ScenUpdateSelected:
+	jsr fpg_update_selected
+	jmp ReturnBank
+
+ScenValidate:
 	jsr fpg_validate
-	lda BANK_SELECTED
-	jmp SetBankFromA
+	jmp ReturnBank
 
-EnterFpgUpdateSelected:
-  lda #BANK_FPG_DATA
-  jsr SetBankFromA
-  jsr fpg_update_selected
-  lda BANK_SELECTED
-  jmp SetBankFromA
+Start:
+NonMaskableInterrupt:
 
-	.org $fff0
-MapperReset:
-	sei
-	ldx #$FF
-	txs
-	stx $8000
-	jmp HardReset
-	;
-	; Interrupt table
-	;
-	.word MapperReset
-	.word MapperReset
-	.word MapperReset
+scenarios_shared
+control_bank
+

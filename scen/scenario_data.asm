@@ -1,7 +1,9 @@
 
 	.include "org.inc"
+	.include "shared.inc"
+	.include "macros.inc"
+	.segment "bank6"
 	.org $8000
-	.byte $ba, BANK_FPG_DATA
 
 scen_1_2G_HI_load_area:
 		lda #$08
@@ -1088,4 +1090,5 @@ fpg_num_routes:
 		.word scen_1_1_D70_validate
 		.byte $02
 		.byte 0
+
 .include "scen_exports.asm"

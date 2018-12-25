@@ -21,7 +21,46 @@
 
 ;NES specific hardware defines
     .include "org.inc"
+    .include "shared.inc"
+    .include "macros.inc"
+    .segment "bank5"
     .org $8000
+
+Start:
+             lda #%00010000               ;init PPU control register 1 
+             sta PPU_CTRL_REG1
+             ldx #$ff                     ;reset stack pointer
+             txs
+VBlank1:     lda PPU_STATUS               ;wait two frames
+             bpl VBlank1
+VBlank2:     lda PPU_STATUS
+             bpl VBlank2
+             ;
+             ; Load correct CHR rom
+             ;
+             ldy #WarmBootOffset          ;if passed both, load warm boot pointer
+ColdBoot:    jsr InitializeMemory         ;clear memory using pointer in Y
+             sta SND_DELTA_REG+1          ;reset delta counter load register
+             sta OperMode                 ;reset primary mode of operation
+
+             ldx #CHR_SCEN
+             jsr Enter_LoadChrFromX
+
+             lda #$a5                     ;set warm boot flag
+             sta PseudoRandomBitReg       ;set seed for pseudorandom register
+             lda #%00001111
+             sta SND_MASTERCTRL_REG       ;enable all sound channels except dmc
+             lda #%00000110
+             sta PPU_CTRL_REG2            ;turn off clipping for OAM and background
+             jsr MoveAllSpritesOffscreen
+             jsr InitializeNameTables     ;initialize both name tables
+             inc DisableScreenFlag        ;set flag to disable screen output
+             lda Mirror_PPU_CTRL_REG1
+             ora #%10000000               ;enable NMIs
+             jsr WritePPUReg1
+EndlessLoop: jmp EndlessLoop              ;endless loop, need I say more?
+
+;-------------------------------------------------------------------------------------
 
 ;-----------------------------------------------------------------
 
@@ -64,7 +103,7 @@ InitBuffer:    ldx VRAM_Buffer_Offset,y
                sta VRAM_Buffer_AddrCtrl  ;reinit address control to $0301
                lda Mirror_PPU_CTRL_REG2  ;copy mirror of $2001 to register
                sta PPU_CTRL_REG2
-               jsr EnterSoundEngine      ;play sound
+               jsr Enter_SoundEngine      ;play sound
                jsr ReadJoypads           ;read joypads
                lda FpgFlags
                asl
@@ -295,7 +334,7 @@ PrintFpgName:
     sta VRAM_Buffer1+1, x
     lda #$08
     sta VRAM_Buffer1+2, x
-    jsr EnterFpgUpdateSelected
+    jsr Enter_ScenUpdateSelected
     lda #0
     sta VRAM_Buffer1+11, x
     lda #11
@@ -3871,14 +3910,14 @@ FpgInitialize:
       sta $2
       lda #>E_CastleArea1
       sta $3
-      jsr EnterFpgReset
+      jsr Enter_ScenReset
       lda #$0
       sta DisableScreenFlag
 DoRenderPassOrSomeShit:
       rts
 
 FpgSelectScenario:
-      jmp InitMapper
+      jmp Start
 
 GameCoreRoutine:
       lda SavedJoypadBits
@@ -3900,7 +3939,7 @@ FpgIsInitialized:
       jmp RestartFpg
 NoRestartFpg:
       sta FpgLastInput
-      jsr EnterFpgValidate
+      jsr Enter_ScenValidate
       lda FpgFlags
       asl
       bcs FpgNoPlayerUpdates
@@ -6071,7 +6110,7 @@ ClrTimersLoop: sta Timers,x             ;clear out memory between
                lda #0
                jmp LoadWorldStuff
 LoadFpgStuff:
-               jsr EnterFpgLoadArea
+               jsr Enter_ScenLoadArea
                lda #$00
                sta FpgFlags
                sta FpgError
@@ -6282,73 +6321,6 @@ DelayToAreaEnd:
 
 StarFlagExit2:
       rts                       ;otherwise leave
-
-;-------------------------------------------------------------------------------------
-
-Start:
-             lda #%00010000               ;init PPU control register 1 
-             sta PPU_CTRL_REG1
-             ldx #$ff                     ;reset stack pointer
-             txs
-VBlank1:     lda PPU_STATUS               ;wait two frames
-             bpl VBlank1
-VBlank2:     lda PPU_STATUS
-             bpl VBlank2
-             ;
-             ; Load correct CHR rom
-             ;
-             ldy #WarmBootOffset          ;if passed both, load warm boot pointer
-ColdBoot:    jsr InitializeMemory         ;clear memory using pointer in Y
-             sta SND_DELTA_REG+1          ;reset delta counter load register
-             sta OperMode                 ;reset primary mode of operation
-             lda #$a5                     ;set warm boot flag
-             sta WarmBootValidation     
-             sta PseudoRandomBitReg       ;set seed for pseudorandom register
-             lda #%00001111
-             sta SND_MASTERCTRL_REG       ;enable all sound channels except dmc
-             lda #%00000110
-             sta PPU_CTRL_REG2            ;turn off clipping for OAM and background
-             jsr MoveAllSpritesOffscreen
-             jsr InitializeNameTables     ;initialize both name tables
-             inc DisableScreenFlag        ;set flag to disable screen output
-             lda Mirror_PPU_CTRL_REG1
-             ora #%10000000               ;enable NMIs
-             jsr WritePPUReg1
-EndlessLoop: jmp EndlessLoop              ;endless loop, need I say more?
-
-;-------------------------------------------------------------------------------------
-.seekoff $bf00 $ea
-EnterFpgLoadArea:
-  lda #BANK_FPG_DATA
-  jsr SetBankFromA
-  jsr fpg_load_area ; never returns here
-  lda BANK_SELECTED
-  jmp SetBankFromA
-
-EnterFpgReset:
-  lda #BANK_FPG_DATA
-  jsr SetBankFromA
-  jsr fpg_reset ; never returns here
-  lda BANK_SELECTED
-  jmp SetBankFromA
-
-EnterFpgValidate:
-  lda #BANK_FPG_DATA
-  jsr SetBankFromA
-  jsr fpg_validate ; never returns here
-  lda BANK_SELECTED
-  jmp SetBankFromA
-
-EnterFpgUpdateSelected:
-  lda #BANK_FPG_DATA
-  jsr SetBankFromA
-  jsr fpg_update_selected ; never returns here
-  lda BANK_SELECTED
-  jmp SetBankFromA
-
-;
-; Main
-;
 
 ;-------------------------------------------------------------------------------------
 ;$04 - address low to jump address
@@ -14225,142 +14197,8 @@ NoHammer: ldx ObjectOffset         ;get original enemy object offset
           clc                      ;return with carry clear
           rts
 
-AdvanceRandom:
-    lda PseudoRandomBitReg    ;get first memory location of LSFR bytes
-    and #%00000010            ;mask out all but d1
-    sta $00                   ;save here
-    lda PseudoRandomBitReg+1  ;get second memory location
-    and #%00000010            ;mask out all but d1
-    eor $00                   ;perform exclusive-OR on d1 from first and second bytes
-    clc                       ;if neither or both are set, carry will be clear
-    beq RotPRandomBit
-    sec                       ;if one or the other is set, carry will be set
-RotPRandomBit:
-    ror PseudoRandomBitReg+0  ;rotate carry into d7, and rotate last bit into carry
-    ror PseudoRandomBitReg+1  ;rotate carry into d7, and rotate last bit into carry
-    ror PseudoRandomBitReg+2  ;rotate carry into d7, and rotate last bit into carry
-    ror PseudoRandomBitReg+3  ;rotate carry into d7, and rotate last bit into carry
-    ror PseudoRandomBitReg+4  ;rotate carry into d7, and rotate last bit into carry
-    ror PseudoRandomBitReg+5  ;rotate carry into d7, and rotate last bit into carry
-    ror PseudoRandomBitReg+6  ;rotate carry into d7, and rotate last bit into carry
-    rts
+          .include "div10.inc"
 
-MulByTen:
-    asl
-    sta $0
-    asl
-    asl
-    clc
-    adc $0
-    rts
-
-DivByTen:
-    ldx #$00
-DivMore:
-    cmp #$0a
-    bcc DivByTenDone
-    sbc #$0a
-    inx
-    sec
-    bcs DivMore
-DivByTenDone:
-    rts
-
-;
-; Exported from swappable banks
-;
-;
-EnterSoundEngine:
-  lda #BANK_SOUND
-  jsr SetBankFromA
-  jsr SoundEngine
-  lda BANK_SELECTED
-  jmp SetBankFromA
-
-EnterAdvanceToRule:
-  lda #BANK_SOUND
-  jsr SetBankFromA
-  jsr AdvanceToRule
-  lda BANK_SELECTED
-  jmp SetBankFromA
-
-EnterSmlSoundInit:
-  lda #BANK_SMLSOUND
-  jsr SetBankFromA
-  jsr sml_export_init
-  lda BANK_SELECTED
-  jmp SetBankFromA
-
-EnterSmlSoundPlay:
-  lda #BANK_SMLSOUND
-  jsr SetBankFromA
-  jsr sml_export_play
-  lda BANK_SELECTED
-  jmp SetBankFromA
-
-
-SetBankFromA:
-  sta $E000
-  lsr
-  sta $E000
-  lsr
-  sta $E000
-  lsr
-  sta $E000
-  lsr
-  sta $E000
-  rts
-
-SetChrFromA:
-  sta $A000
-  lsr 
-  sta $A000
-  lsr 
-  sta $A000
-  lsr 
-  sta $A000
-  lsr 
-  sta $A000
-  rts
-
-HardReset:
-  sei
-  cld
-  lda #BANK_LOADER
-  sta BANK_SELECTED
-InitMapper:
-  lda #$00
-  sta PPU_CTRL_REG2
-  ;
-  ; Initialize MMC1 - Fixed 0xC000, Swap 0x8000 - 8kb CHR - Vertical Mirror
-  ;
-  lda #$0E
-  sta $8000
-  lsr
-  sta $8000
-  lsr
-  sta $8000
-  lsr
-  sta $8000
-  lsr
-  sta $8000
-  lda BANK_SELECTED
-  jsr SetBankFromA
-  jsr LoadChrROM
-  jmp Start
-
-MapperReset:
-  sei
-  ldx #$FF
-  txs
-  stx $8000
-  jmp HardReset
-  ;
-  ; Interrupt table
-  ;
-  .word NonMaskableInterrupt
-  .word MapperReset
-  .word $fff0  ;unused
-
-
+          scenarios_shared
+          control_bank
 

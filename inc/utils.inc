@@ -1,3 +1,6 @@
+.ifndef __UTILS_INC_DEF__
+.define __UTILS_INC_DEF__
+
 AdvanceRandom:
     lda PseudoRandomBitReg    ;get first memory location of LSFR bytes
     and #%00000010            ;mask out all but d1
@@ -27,14 +30,6 @@ MulByTen:
     adc $0
     rts
 
-DivByTen:
-    ldx #$00
-DivMore:
-    cmp #$0a
-    bcc DivByTenDone
-    sbc #$0a
-    inx
-    sec
-    bcs DivMore
-DivByTenDone:
-    rts
+.include "div10.inc"
+
+.endif

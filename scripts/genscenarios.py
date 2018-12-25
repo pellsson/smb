@@ -206,8 +206,10 @@ def make_rules(name, rules):
 
 print('''
 	.include "org.inc"
+	.include "shared.inc"
+	.include "macros.inc"
+	.segment "bank6"
 	.org $8000
-	.byte $ba, BANK_FPG_DATA
 ''')
 
 scenarios = []

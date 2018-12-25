@@ -16,7 +16,6 @@
 .endif
 
 Start:
-  nop
              lda #%00010000               ;init PPU control register 1 
              sta PPU_CTRL_REG1
              ldx #$ff                     ;reset stack pointer
@@ -30,8 +29,11 @@ ColdBoot:    jsr InitializeMemory         ;clear memory using pointer in Y
              sta SND_DELTA_REG+1          ;reset delta counter load register
              sta OperMode                 ;reset primary mode of operation
              lda #$a5                     ;set warm boot flag
-             sta WarmBootValidation     
              sta PseudoRandomBitReg       ;set seed for pseudorandom register
+
+             ldx #CHR_ORG
+             jsr Enter_LoadChrFromX
+
              lda #%00001111
              sta SND_MASTERCTRL_REG       ;enable all sound channels except dmc
              lda #%00000110
@@ -48,7 +50,6 @@ EndlessLoop: jmp EndlessLoop              ;endless loop, need I say more?
 ;-----------------------------------------------------------------
 
 NonMaskableInterrupt:
-    nop
                lda Mirror_PPU_CTRL_REG1  ;disable NMIs in mirror reg
                and #%01111111            ;save all other bits
                sta Mirror_PPU_CTRL_REG1

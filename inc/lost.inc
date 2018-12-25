@@ -1,7 +1,82 @@
-CHR_SMB = 0
-CHR_PRACTICE = 2
-CHR_FPG = 4
-CHR_LOADER = 6
+FDS_IRQ_RELOAD_LOW = $4020
+FDS_IRQ_RELOAD_HIGH = $4021
+FDS_IRQ_CONTROL = $4022
+FDS_CONTROL  = $4024
+FDS_DISK_STATUS = $4030
+FDS_DRIVE_STATUS = $4032
+
+FdsOperTask = $07FC				; SMB2J
+WaitForIRQ = $077B				; SMB2J
+LoadListIndex = $07f7			; SMB2J
+IsPlayingLuigi = $0753			; SMB2J
+FdsBiosIrqAction = $101			; SMB2J
+FdsLastWrite4025 = $fa			; SMB2J
+UseNtBase2400 = $77a			; SMB2J
+IsPlayingExtendedWorlds = $7FB	; SMB2J
+
+GameTimerDisplay_OBSOLETE = $07f8
+
+byte_2 = $2
+byte_3 = $3
+byte_4 = $4
+byte_5 = $5
+byte_6 = $6
+unk_7 = $7
+
+byte_14 = $14
+byte_1B = $1b
+byte_23 = $23
+byte_73 = $73
+byte_8C = $8c
+byte_BB = $bb
+byte_D4 = $d4
+byte_EB = $eb
+byte_EC = $ec
+byte_ED = $ed
+byte_EF = $ef
+byte_138 = $138
+byte_139 = $139
+byte_1A9 = $1a9
+byte_207 = $207
+byte_222 = $222
+byte_226 = $226
+byte_2A9 = $2a9
+byte_308 = $308
+byte_309 = $309
+byte_314 = $314
+byte_316 = $316
+byte_31C = $31c
+byte_3A9 = $3a9
+byte_3B2 = $3b2
+byte_3BD = $3bd
+byte_3CA = $3ca
+byte_49F = $49f
+byte_4A9 = $4a9
+byte_5B4 = $5b4
+unk_6A2 = $6a2
+byte_6A8 = $6a8
+byte_6AB = $6ab
+byte_6C9 = $6c9
+byte_6E2 = $6e2
+byte_6E3 = $6e3
+unk_6E9 = $6e9
+byte_6EA = $6ea
+unk_6F2 = $6f2
+byte_731 = $731
+byte_732 = $732
+byte_7A9 = $7a9
+byte_7F6 = $7f6
+byte_7F9 = $7f9
+byte_7FA = $7fa
+byte_7E7 = $7e7
+byte_7E8 = $7e8
+byte_7EC = $7ec
+byte_7ED = $7ed
+byte_7EE = $7ee
+
+
+TMP_0 = $0
+TMP_1 = $1
 
 ;
 ; FPG vars
@@ -59,6 +134,15 @@ SND_TRIANGLE_REG      = $4008
 SND_NOISE_REG         = $400c
 SND_DELTA_REG         = $4010
 SND_MASTERCTRL_REG    = $4015
+
+SND_TIMER_LOW = $4002
+SND_4003 = $4003
+SND_4005 = $4005
+SND_4006 = $4006
+SND_400A = $400a
+SND_400B = $400b
+SND_400E = $400e
+SND_400F = $400f
 
 SPR_DMA               = $4014
 JOYPAD_PORT           = $4016
@@ -228,7 +312,7 @@ PlayerEntranceCtrl    = $0710
 GameTimerSetting      = $0715
 AltEntranceControl    = $0752
 EntrancePage          = $0751
-NumberOfPlayers       = $077a
+; NumberOfPlayers       = $077a ; Not smb2j
 WarpZoneControl       = $06d6
 ChangeAreaTimer       = $06de
 
@@ -241,7 +325,7 @@ GameTimerExpiredFlag  = $0759
 PrimaryHardMode       = $076a
 SecondaryHardMode     = $06cc
 WorldSelectNumber     = $076b
-WorldSelectEnableFlag = $07fc
+; WorldSelectEnableFlag = $07fc ; Not in smb2j
 ContinueWorld         = $07fd
 
 CurrentPlayer         = $0753
@@ -665,9 +749,6 @@ ColdBootOffset        = <$07fe
 TitleScreenDataOffset = $1ec0
 SoundMemory           = $07b0
 
-.define SwimTileRepOffset		PlayerGraphicsTable + $9e
-.define MusicHeaderOffsetData	MusicHeaderData - 1
-.define MHD 					MusicHeaderData
 
 A_Button              = %10000000
 B_Button              = %01000000

@@ -4,11 +4,35 @@
 	.endrep
 .endmacro
 
+.macro scenarios_shared
+	.res $FE00 - *, $EA
+	Enter_ScenLoadArea:
+		lda #BANK_SCEN_DATA
+		jsr SetBankFromA
+		jmp ScenLoadArea
+
+	Enter_ScenReset:
+		lda #BANK_SCEN_DATA
+		jsr SetBankFromA
+		jmp ScenReset
+
+	Enter_ScenUpdateSelected:
+		lda #BANK_SCEN_DATA
+		jsr SetBankFromA
+		jmp ScenUpdateSelected
+
+	Enter_ScenValidate:
+		lda #BANK_SCEN_DATA
+		jsr SetBankFromA
+		jmp ScenValidate
+
+.endmacro
+
 ;
 ; Lower banks
 ; 
 .macro control_bank
-	.res $FE00 - *, $EA
+	.res $FF00 - *, $EA
 
 	Enter_AdvanceToRule:
 		lda #BANK_COMMON
@@ -67,7 +91,8 @@
 		; 0 Bank selected
 		;
 		sta BANK_SELECTED
-		ldx #0
+		ldx #$00
+		stx PPU_CTRL_REG1
 		stx PPU_CTRL_REG2
 		jsr SetBankFromA
 		jmp Start
