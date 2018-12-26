@@ -14199,6 +14199,6 @@ NoHammer: ldx ObjectOffset         ;get original enemy object offset
 
           .include "div10.inc"
 
-          scenarios_shared
+          scenarios_callgate
           control_bank
 

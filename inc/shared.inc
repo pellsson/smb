@@ -12,3 +12,12 @@ CHR_INTRO	= 0
 CHR_ORG		= 1
 CHR_SCEN	= 2
 CHR_LOST	= 3
+
+.ifndef LOAD_GAME_BUTTONS
+	.define LOAD_GAME_BUTTONS Select_Button|Up_Dir
+.endif
+
+.ifndef RESTART_GAME_BUTTONS
+	.define RESTART_GAME_BUTTONS Select_Button|Down_Dir
+.endif
+

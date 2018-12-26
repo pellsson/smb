@@ -149,6 +149,6 @@ ScenValidate:
 Start:
 NonMaskableInterrupt:
 
-scenarios_shared
+scenarios_callgate
 control_bank
 

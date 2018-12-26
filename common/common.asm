@@ -13,8 +13,13 @@ NonMaskableInterrupt: ; Dummy
 	.include "practice.asm"
 
 	.export SoundEngine
-	.export Enter_SoundEngine
 	.export AdvanceToRule
-	.export Enter_AdvanceToRule
+	.export RedrawPosition
+	.export RedrawAll
+	.export UpdateFrameRule
+	.export WritePracticeTop
+	.export RedrawFrameNumbers
 
+
+practice_callgate
 control_bank

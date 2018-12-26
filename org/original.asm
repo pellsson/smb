@@ -7,14 +7,6 @@
 	.org $8000
   .segment "bank3"
 
-.ifndef LOAD_GAME_BUTTONS
-	.define LOAD_GAME_BUTTONS Select_Button|Up_Dir
-.endif
-
-.ifndef RESTART_GAME_BUTTONS
-	.define RESTART_GAME_BUTTONS Select_Button|Down_Dir
-.endif
-
 Start:
              lda #%00010000               ;init PPU control register 1 
              sta PPU_CTRL_REG1
@@ -111,10 +103,10 @@ DecTimersLoop: lda Timers,x              ;check current timer
                dec Timers,x              ;otherwise decrement the current timer
 SkipExpTimer:  dex                       ;move onto next timer
                bpl DecTimersLoop         ;do this until all timers are dealt with
-               jsr UpdateFrameRule
+               jsr Enter_UpdateFrameRule
 NoDecTimers:   inc FrameCounter          ;increment frame counter
                jmp NotPaused
-PauseSkip:     jsr RedrawFrameNumbers
+PauseSkip:     jsr Enter_RedrawFrameNumbers
 NotPaused:
                jsr AdvanceRandom
                lda Sprite0HitDetectFlag  ;check for flag here
@@ -266,52 +258,10 @@ ToggleRenderMode:
 		clc
 		adc #$05
 		sta VRAM_Buffer1_Offset
-		jmp RedrawFrameNumbers
+		jmp Enter_RedrawFrameNumbers
 SockMode:
 		jmp ForceUpdateSockHash
 
-;-------------------------------------------------------------------------------------
-
-UpdateFrameRule:
-		lda #$14
-		cmp IntervalTimerControl
-		bne NotEvenFrameRule
-		lda #$01
-		sta DigitModifier+5
-		ldy #RULE_COUNT_OFFSET
-		ldx #2
-		jsr DigitsMathRoutineN
-NotEvenFrameRule:
-		rts
-
-;-------------------------------------------------------------------------------------
-
-RedrawRemaining:
-		lda IntervalTimerControl
-		jsr DivByTen
-		sta DisplayDigits+FRAMES_REMAIN_OFFSET
-		stx DisplayDigits+FRAMES_REMAIN_OFFSET-1
-		lda #$a6
-		jsr PrintStatusBarNumbers
-		rts
-
-RedrawAll:
-		jsr RedrawRemaining
-		jmp RedrawFrameNumbers
-
-;-------------------------------------------------------------------------------------
-
-RedrawPosition:
-		lda Player_Rel_XPos
-		jsr DivByTen
-		sta DisplayDigits+POSITION_OFFSET
-		txa
-		jsr DivByTen
-		sta DisplayDigits+POSITION_OFFSET-1
-		stx DisplayDigits+POSITION_OFFSET-2
-		lda #$a5
-		jsr PrintStatusBarNumbers
-		rts
 
 ;-------------------------------------------------------------------------------------
 ;$00 - vram buffer address table low, also used for pseudorandom bit
@@ -699,7 +649,7 @@ MenuDone:
 		lda #$fa
 		jsr UpdateNumber
 		sta SavedJoypad1Bits
-		jsr RedrawFrameNumbers
+		jsr Enter_RedrawFrameNumbers
 		rts
 
 ;-------------------------------------------------------------------------------------
@@ -986,7 +936,7 @@ IncMsgCounter: lda SecondaryMsgCounter
                sta PrimaryMsgCounter
                cmp #$07                      ;check primary counter one more time
 SetEndTimer:   bcc ExitMsgs                  ;if not reached value yet, branch to leave
-               jsr RedrawAll
+               jsr Enter_RedrawAll
                lda #$06
                sta WorldEndTimer             ;otherwise set world end timer
 IncModeTask_A: inc OperMode_Task             ;move onto next task in mode
@@ -1062,7 +1012,7 @@ DecNumTimer:  dec FloateyNum_Timer,x       ;decrement value here
               bne LoadNumTiles             ;branch ahead if not found
               lda #Sfx_ExtraLife
               sta Square2SoundQueue        ;and play the 1-up sound
-LoadNumTiles: jsr RedrawFrameNumbers
+LoadNumTiles: jsr Enter_RedrawFrameNumbers
 ChkTallEnemy: ldy Enemy_SprDataOffset,x    ;get OAM data offset for enemy object
               lda Enemy_ID,x               ;get enemy object identifier
               cmp #Spiny
@@ -1163,15 +1113,8 @@ SetupIntermediate:
 
 ;-------------------------------------------------------------------------------------
 
-WriteTopStatusLine:
-      lda #$00          ;select main status bar
-      jsr WriteGameText ;output it
-      jmp IncSubtask    ;onto the next task
-
-;-------------------------------------------------------------------------------------
-
 WriteBottomStatusLine:
-      jsr GetSBNybbles        ;write player's score and coin tally to screen
+      jsr Enter_RedrawFrameNumbers
       jmp IncSubtask
 
 ;-------------------------------------------------------------------------------------
@@ -1187,6 +1130,10 @@ NoTimeUp: inc ScreenRoutineTask     ;increment control task 2 tasks forward
           jmp IncSubtask
 
 ;-------------------------------------------------------------------------------------
+
+WriteTopStatusLine:
+    jsr Enter_WritePracticeTop
+    jmp IncSubtask
 
 DisplayIntermediate:
                lda OperMode                 ;check primary mode of operation
@@ -1285,23 +1232,6 @@ IncModeTask_B: inc OperMode_Task  ;move onto next mode
 ;-------------------------------------------------------------------------------------
 
 GameText:
-TopStatusBarLine:
-  ; <off, size>
-  .byte $20, $44, $0c
-  ;
-  .byte $1b, $1e, $15, $0e      ; "RULE"
-  .byte $24, $29, $24           ; "x"
-  .byte $0f, $1b, $0a, $16, $0e ; "FRAME"
-  ; <off, size>
-  .byte $20, $52, $0c
-  ; 'RM POS  TIME J'
-  .byte $1b, $16, $24, $19, $18, $1c, $24, $1d, $12, $16, $0e, $24
-   ; <off, size>
-  .byte $20, $68, $05, $24, $fe, $24, $2e, $29 ; score trailing digit and coin display
-  .byte $23, $c0, $7f, $aa ; attribute table data, clears name table 0 to palette 2
-  .byte $23, $c2, $01, $ea ; attribute table data, used for coin icon in status bar
-  .byte $ff ; end of data block
-
 WorldLivesDisplay:
   .byte $21, $cd, $07, $24, $24 ; cross with spaces used on
   .byte $29, $24, $24, $24, $24 ; lives display
@@ -1336,7 +1266,6 @@ WarpZoneNumbers:
   .byte $08, $07, $06, $00         ; the minus world
 
 GameTextOffsets:
-  .byte TopStatusBarLine-GameText
   .byte WorldLivesDisplay-GameText
   .byte TwoPlayerTimeUp-GameText
   .byte TwoPlayerGameOver-GameText
@@ -2216,7 +2145,7 @@ ChkSwimE: ldy AreaType                ;if level not water-type,
           jsr SetupBubble             ;otherwise, execute sub to set up air bubbles
 SetPESub: lda #$07                    ;set to run player entrance subroutine
           sta GameEngineSubroutine    ;on the next frame of game engine
-          jsr RedrawFrameNumbers
+          jsr Enter_RedrawFrameNumbers
           rts
 
 ;-------------------------------------------------------------------------------------
@@ -4452,10 +4381,7 @@ ProcELoop:    stx ObjectOffset           ;put incremented offset in X as enemy o
               jsr ProcessWhirlpools      ;process whirlpools
               jsr FlagpoleRoutine        ;process the flagpole
               jsr RunGameTimer           ;count down the game timer
-              lda VRAM_Buffer1_Offset
-              bne DontRedrawPosition
-              jsr RedrawPosition
-DontRedrawPosition:
+              jsr Enter_RedrawPosition
               jsr ColorRotation          ;cycle one of the background colors
               lda Player_Y_HighPos
               cmp #$02                   ;if player is below the screen, don't bother with the music
@@ -5195,7 +5121,7 @@ ProcJumping:
            lda Player_Y_Speed         ;check player's vertical speed
            bpl InitJS                 ;if player's vertical speed motionless or down, branch
            jmp X_Physics              ;if timer at zero and player still rising, do not swim
-InitJS:    jsr RedrawFrameNumbers
+InitJS:    jsr Enter_RedrawFrameNumbers
            lda #$20                   ;set jump/swim timer
            sta JumpSwimTimer
            ldy #$00                   ;initialize vertical force and dummy variable
@@ -5951,27 +5877,15 @@ MiscLoopBack:
 
 GiveOneCoin:
 AddToScore:
-RedrawFrameNumbers:
-GetSBNybbles:
-		;
-		; Update frame
-		; 
-		lda FrameCounter
-		jsr DivByTen
-		sta DisplayDigits+FRAME_NUMBER_OFFSET
-		txa
-		jsr DivByTen
-		sta DisplayDigits+FRAME_NUMBER_OFFSET-1
-		stx DisplayDigits+FRAME_NUMBER_OFFSET-2
-		;
-		; Print it i think...
-		;
-      lda PracticeFlags
-      and #$80
-      ora #$02
+    jmp Enter_RedrawFrameNumbers
+
+    ;
+    ; TODO Kill?
+    ;
 UpdateNumber:
 		jsr PrintStatusBarNumbers ;print status bar numbers based on nybbles, whatever they be
-NoZSup: ldx ObjectOffset          ;get enemy object buffer offset
+NoZSup:
+    ldx ObjectOffset          ;get enemy object buffer offset
 		rts
 
 
@@ -6072,7 +5986,7 @@ HandlePipeEntry:
          sta ChangeAreaTimer       ;set timer for change of area
          lda #$03
          sta GameEngineSubroutine  ;set to run vertical pipe entry routine on next frame
-         jsr RedrawAll
+         jsr Enter_RedrawAll
          lda #Sfx_PipeDown_Injury
          sta Square1SoundQueue     ;load pipedown/injury sound
          lda #%00100000
@@ -6859,7 +6773,7 @@ DrawFlagSetTimer:
       sta EnemyIntervalTimer,x  ;set interval timer here
 
 IncrementSFTask2:
-      jsr RedrawAll
+      jsr Enter_RedrawAll
       inc StarFlagTaskControl   ;move onto next task
       rts
 
@@ -14832,5 +14746,6 @@ NoHammer: ldx ObjectOffset         ;get original enemy object offset
 
           .include "utils.inc"
 
+practice_callgate
 control_bank
 

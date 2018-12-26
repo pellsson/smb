@@ -4,7 +4,44 @@
 	.endrep
 .endmacro
 
-.macro scenarios_shared
+.macro practice_callgate
+	.res $FE00 - *, $EA
+
+	Enter_UpdateFrameRule:
+		lda #BANK_COMMON
+		jsr SetBankFromA
+		jmp UpdateFrameRule
+
+	Enter_WritePracticeTop:
+		lda #BANK_COMMON
+		jsr SetBankFromA
+		jmp WritePracticeTop
+
+	Enter_RedrawPosition:
+		lda #BANK_COMMON
+		jsr SetBankFromA
+		jmp RedrawPosition
+
+	Enter_RedrawAll:
+		lda #BANK_COMMON
+		jsr SetBankFromA
+		jmp RedrawAll
+
+	Enter_RedrawFrameNumbers:
+		lda #BANK_COMMON
+		jsr SetBankFromA
+		jmp RedrawFrameNumbers
+
+	Enter_AdvanceToRule:
+		lda #BANK_COMMON
+		jsr SetBankFromA
+		jmp AdvanceToRule
+
+
+.endmacro
+
+
+.macro scenarios_callgate
 	.res $FE00 - *, $EA
 	Enter_ScenLoadArea:
 		lda #BANK_SCEN_DATA
@@ -28,16 +65,12 @@
 
 .endmacro
 
+
 ;
 ; Lower banks
 ; 
 .macro control_bank
 	.res $FF00 - *, $EA
-
-	Enter_AdvanceToRule:
-		lda #BANK_COMMON
-		jsr SetBankFromA
-		jmp AdvanceToRule
 
 	Enter_SoundEngine:
 		lda #BANK_COMMON

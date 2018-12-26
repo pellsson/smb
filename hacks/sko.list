@@ -3,14 +3,59 @@ Main file   : sko.asm
 Current file: sko.asm
 
 000000r 1               .org $c000
-00C000  1               .export sko
-00C000  1               .code
+00C000  1               .segment "bank1"
+00C000  1               .include "../inc/text.inc"
+00C000  2               .charmap '0', 0
+00C000  2               .charmap '1', 1
+00C000  2               .charmap '2', 2
+00C000  2               .charmap '3', 3
+00C000  2               .charmap '4', 4
+00C000  2               .charmap '5', 5
+00C000  2               .charmap '6', 6
+00C000  2               .charmap '7', 7
+00C000  2               .charmap '8', 8
+00C000  2               .charmap '9', 9
+00C000  2               .charmap 'A', $0A
+00C000  2               .charmap 'B', $0B
+00C000  2               .charmap 'C', $0C
+00C000  2               .charmap 'D', $0D
+00C000  2               .charmap 'E', $0E
+00C000  2               .charmap 'F', $0F
+00C000  2               .charmap 'G', $10
+00C000  2               .charmap 'H', $11
+00C000  2               .charmap 'I', $12
+00C000  2               .charmap 'J', $13
+00C000  2               .charmap 'K', $14
+00C000  2               .charmap 'L', $15
+00C000  2               .charmap 'M', $16
+00C000  2               .charmap 'N', $17
+00C000  2               .charmap 'O', $18
+00C000  2               .charmap 'P', $19
+00C000  2               .charmap 'Q', $1a
+00C000  2               .charmap 'R', $1b
+00C000  2               .charmap 'S', $1c
+00C000  2               .charmap 'T', $1d
+00C000  2               .charmap 'U', $1e
+00C000  2               .charmap 'V', $1f
+00C000  2               .charmap 'W', $20
+00C000  2               .charmap 'X', $21
+00C000  2               .charmap 'Y', $22
+00C000  2               .charmap 'Z', $23
+00C000  2               .charmap '-', $28
+00C000  2               .charmap '!', $2b
+00C000  2               .charmap '*', $29
+00C000  2               .charmap ' ', $24
+00C000  2               
+00C000  2               .macro text_block at, txt
+00C000  2               	.byte at >> 8
+00C000  2               	.byte at & $ff
+00C000  2               	.byte .strlen(txt)
+00C000  2               	.byte txt
+00C000  2               .endmacro
+00C000  2               
 00C000  1               
-00C000  1               sko:
-00C000  1  EA           	nop
-00C001  1  4C rr rr     	jmp hejsan
-00C004  1               
-00C004  1  EA EA EA EA  .res $10000-*, $EA
-00C008  1  EA EA EA EA  
-00C00C  1  EA EA EA EA  
-00C004  1               
+00C000  1  10 20 07 11  text_block $1020, "HEJSAN!"
+00C004  1  0E 13 1C 0A  
+00C008  1  17 2B        
+00C00A  1               
+00C00A  1               

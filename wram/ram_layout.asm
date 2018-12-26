@@ -1,5 +1,5 @@
 		.org $6000
-
+		.include "text.inc"
 WRAM_StartAddress:
 
 ;
@@ -78,12 +78,9 @@ WRAM_HalfwayPageNybbles:
 ; Thank you mario buffer
 ;
 WRAM_ThankYouMario:
-		.byte $25, $48
-		.byte $10
-		.byte $1D, $11, $0A, $17, $14, $24	; "THANK "
-		.byte $22, $18, $1E, $24				; "YOU "
+		text_block $2548, "THANK YOU "
 WRAM_PatchMarioName1:
-		.byte $16, $0A, $1B, $12, $18, $2B	; "MARIO!"
+		.byte "MARIO"
 		.byte $00
 ;
 ; Game texts (only really need to copy the one that is patched)

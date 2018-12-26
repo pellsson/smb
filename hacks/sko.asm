@@ -1,9 +1,6 @@
 .org $c000
-.export sko
-.code 
+.segment "bank1"
+.include "../inc/text.inc"
 
-sko:
-	nop
-	jmp hejsan
+text_block $1020, "HEJSAN!"
 
-.res $10000-*, $EA

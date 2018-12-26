@@ -166,9 +166,9 @@ DecTimersLoop:
 		beq SkipExpTimer
 		dec SelectTimer,x
 SkipExpTimer:
-
 		dex
 		bpl DecTimersLoop
+		jsr Enter_UpdateFrameRule
 NoDecTimers:
 		inc FrameCounter
 PauseSkip:
@@ -522,6 +522,7 @@ loc_6391:
 		cmp #6
 loc_63A4:
 		bcc locret_63AE
+		jsr Enter_RedrawAll ; TODO Correct?
 		lda #8
 		sta WorldEndTimer
 loc_63AB:
@@ -608,8 +609,8 @@ ScoreUpdateData:
 		.byte $35
 		.byte $38
 		.byte 0
-FloateyNumbersRoutine:
 
+FloateyNumbersRoutine:
 		lda FloateyNum_Control,x
 		beq locret_63FC
 		cmp #$B
@@ -617,36 +618,23 @@ FloateyNumbersRoutine:
 		lda #$B
 		sta FloateyNum_Control,x
 loc_642F:
-
 		tay
 		lda FloateyNum_Timer,x
 		bne loc_6439
 		sta FloateyNum_Control,x
 		rts
 loc_6439:
-
 		dec FloateyNum_Timer,x
 		cmp #$2B
-		bne loc_645E
+		bne ChkTallEnemy
 		cpy #$B
-		bne loc_644B
+		bne LoadNumTiles
 		inc NumberofLives
 		lda #$40
 		sta Square2SoundQueue
-loc_644B:
-
-		lda ScoreUpdateData,y
-		lsr
-		lsr
-		lsr
-		lsr
-		tax
-		lda ScoreUpdateData,y
-		and #$F
-		sta DigitModifier,x
-		jsr AddToScore
-loc_645E:
-
+LoadNumTiles:
+		jsr Enter_RedrawFrameNumbers
+ChkTallEnemy:
 		ldy Enemy_SprDataOffset,x
 		lda Enemy_ID,x
 		cmp #$12
@@ -824,32 +812,11 @@ NoAltPal:
 		jmp IncSubtask
 
 WriteTopStatusLine:
-		lda #0
-		jsr WriteGameText_NEW
+		jsr Enter_WritePracticeTop
 		jmp IncSubtask
+
 WriteBottomStatusLine:
-		jsr GetSBNybbles_RW
-		ldx VRAM_Buffer1_Offset
-		lda #$20
-		sta $301,x
-		lda #$73
-		sta $302,x
-		lda #3
-		sta $303,x
-		jsr GetWorldNumber
-		sta $304,x
-		lda #$28
-		sta $305,x
-		ldy LevelNumber
-		iny
-		tya
-		sta $306,x
-		lda #0
-		sta $307,x
-		txa
-		clc
-		adc #6
-		sta VRAM_Buffer1_Offset
+		jsr Enter_RedrawFrameNumbers
 		jmp IncSubtask
 
 GetWorldNumber:
@@ -2588,8 +2555,8 @@ unk_6F6D:
 		.byte 4
 		.byte 3
 		.byte 2
-Entrance_GameTimerSetup:
 
+Entrance_GameTimerSetup:
 		lda ScreenLeft_PageLoc
 		sta Player_PageLoc
 		lda #$28
@@ -2606,7 +2573,6 @@ Entrance_GameTimerSetup:
 		bne loc_6F93
 		iny
 loc_6F93:
-
 		sty SwimmingFlag
 		ldx PlayerEntranceCtrl
 		ldy AltEntranceControl
@@ -2615,7 +2581,6 @@ loc_6F93:
 		beq loc_6FA5
 		ldx byte_6F58,y
 loc_6FA5:
-
 		lda byte_6F56,y
 		sta Player_X_Position
 		lda byte_6F5C,x
@@ -2636,7 +2601,6 @@ loc_6FA5:
 		sta FetchNewGameTimerFlag
 		sta StarInvincibleTimer
 loc_6FD7:
-
 		ldy JoypadOverride
 		beq loc_6FF0
 		lda #3
@@ -2649,14 +2613,13 @@ loc_6FD7:
 		ldy #0
 		jsr Setup_Vine
 loc_6FF0:
-
 		ldy AreaType
 		bne loc_6FF8
 		jsr SetupBubble
 loc_6FF8:
-
 		lda #7
 		sta GameEngineSubroutine
+		jsr Enter_RedrawFrameNumbers
 		rts
 
 
@@ -3079,12 +3042,10 @@ unk_71ED:
 		.byte $FF
 		.byte $1F
 AreaParserCore:
-
 		lda BackloadingFlag
 		beq RenderSceneryTerrain
 		jsr ProcessAreaData
 RenderSceneryTerrain:
-
 		ldx #$C
 		lda #0
 loc_7219:
@@ -4527,6 +4488,7 @@ ProcELoop:
 		jsr ProcessWhirlpools
 		jsr FlagpoleRoutine
 		jsr RunGameTimer
+		jsr Enter_RedrawPosition
 		jsr ColorRotation
 		lda LoadListIndex
 		beq loc_7A97
@@ -5344,11 +5306,11 @@ Climb_Y_MForceData:
 		.byte 0
 		.byte $20
 		.byte $FF
-PlayerPhysicsSub:
 
+PlayerPhysicsSub:
 		lda Player_State
 		cmp #3
-		bne loc_7FE5
+		bne CheckForJumping
 		ldy #0
 		lda Up_Down_Buttons
 		and Player_CollisionBits
@@ -5370,31 +5332,29 @@ loc_7FE1:
 
 		sta PlayerAnimTimerSet
 		rts
-loc_7FE5:
-
+CheckForJumping:
 		lda JumpspringAnimCtrl
-		bne loc_7FF4
+		bne NoJump
 		lda A_B_Buttons
 		and #$80
-		beq loc_7FF4
+		beq NoJump
 		and PreviousA_B_Buttons
-		beq loc_7FF7
-loc_7FF4:
-
+		beq ProcJumping
+NoJump:
 		jmp loc_8088
-loc_7FF7:
 
+ProcJumping:
 		lda Player_State
-		beq loc_800C
+		beq InitJS
 		lda SwimmingFlag
-		beq loc_7FF4
+		beq NoJump
 		lda JumpSwimTimer
-		bne loc_800C
+		bne InitJS
 		lda Player_Y_Speed
-		bpl loc_800C
+		bpl InitJS
 		jmp loc_8088
-loc_800C:
-
+InitJS:
+		jsr Enter_RedrawFrameNumbers
 		lda #$20
 		sta JumpSwimTimer
 		ldy #0
@@ -5802,8 +5762,8 @@ Bubble_MForceData:
 BubbleTimerData:
 		.byte $40
 		.byte $20
-RunGameTimer:
 
+RunGameTimer:
 		lda OperMode
 		beq locret_830F
 		lda GameEngineSubroutine
@@ -5829,7 +5789,6 @@ RunGameTimer:
 		lda #$40
 		sta EventMusicQueue
 loc_82F2:
-
 		lda #$18
 		sta GameTimerCtrlTimer
 		ldy #$17
@@ -5839,15 +5798,13 @@ loc_82F2:
 		lda #$A2
 		jmp PrintStatusBarNumbers
 loc_8306:
-
 		sta PlayerStatus
 		jsr loc_A58F
 		inc GameTimerExpiredFlag
 locret_830F:
-
 		rts
-WarpZoneObject:
 
+WarpZoneObject:
 		lda ScrollLock
 		beq locret_830F
 		lda SprObject_Y_Position
@@ -6491,7 +6448,7 @@ JCoinC:
 		sta $2A,y
 		sta Square2SoundQueue
 		stx ObjectOffset
-		jsr sub_87C3
+		jsr GiveOneCoin
 		inc CoinTallyFor1Ups
 		rts
 sub_874F:
@@ -6566,38 +6523,16 @@ loc_87B3:
 		jsr GetMiscBoundBox
 		jsr JCoinGfxHandler
 loc_87BF:
-
 		dex
 		bpl loc_8763
 		rts
-sub_87C3:
 
-		lda #1
-		sta byte_139
-		ldy #$11
-		jsr DigitsMathRoutine
-		inc CoinTally
-		lda CoinTally
-		cmp #$64
-		bne loc_87E3
-		lda #0
-		sta CoinTally
-		inc NumberofLives
-		lda #$40
-		sta Square2SoundQueue
-loc_87E3:
-
-		lda #2
-		sta byte_138
+GiveOneCoin:
 AddToScore:
-
-		ldy #$B
-		jsr DigitsMathRoutine
 GetSBNybbles_RW:
+		jmp Enter_RedrawFrameNumbers
 
-		lda #1
 UpdateNumber:
-
 		jsr PrintStatusBarNumbers
 		ldy VRAM_Buffer1_Offset
 		lda $2FB,y
@@ -6605,11 +6540,10 @@ UpdateNumber:
 		lda #$24
 		sta $2FB,y
 loc_87FF:
-
 		ldx ObjectOffset
 		rts
-SetupPowerUp:
 
+SetupPowerUp:
 		lda #$2E
 		sta byte_1B
 		lda $76,x
@@ -10470,8 +10404,8 @@ RaiseFlagSetoffFWorks:
 		jmp DrawStarFlag
 loc_9F85:
 		lda FireworksCounter
-		beq loc_9FC2
-		bmi loc_9FC2
+		beq DrawFlagSetTimer
+		bmi DrawFlagSetTimer
 		lda #$16
 		sta EnemyFrenzyBuffer
 
@@ -10500,13 +10434,13 @@ loc_9F99:
 		bpl loc_9F99
 		ldx ObjectOffset
 		rts
-loc_9FC2:
 
+DrawFlagSetTimer:
 		jsr DrawStarFlag
 		lda #6
 		sta $796,x
-loc_9FCA:
-
+IncrementSFTask2:
+		jsr Enter_RedrawAll
 		inc StarFlagTaskControl
 		rts
 
@@ -10515,7 +10449,7 @@ DelayToAreaEnd:
 		lda EnemyIntervalTimer,x
 		bne locret_9FDB
 		lda EventMusicBuffer
-		beq loc_9FCA
+		beq IncrementSFTask2
 locret_9FDB:
 		rts
 
@@ -12066,7 +12000,7 @@ loc_A9B2:
 		lda #$F0
 		and SprObject_Y_Position
 		sta SprObject_Y_Position
-		jsr sub_AB76
+		jsr HandlePipeEntry
 		lda #0
 		sta Player_Y_Speed
 		sta Player_Y_MoveForce
@@ -12188,7 +12122,7 @@ loc_AA73:
 
 		jsr sub_AA8D
 		inc CoinTallyFor1Ups
-		jmp sub_87C3
+		jmp GiveOneCoin
 loc_AA7C:
 
 		lda #0
@@ -12352,13 +12286,11 @@ sub_AB6B:
 		clc
 		bne locret_AB75
 loc_AB74:
-
 		sec
 locret_AB75:
-
 		rts
-sub_AB76:
 
+HandlePipeEntry:
 		lda Up_Down_Buttons
 		and #4
 		beq locret_ABD3
@@ -12372,6 +12304,7 @@ sub_AB76:
 		sta ChangeAreaTimer
 		lda #3
 		sta GameEngineSubroutine
+		jsr Enter_RedrawAll
 		lda #$10
 		sta Square1SoundQueue
 		lda #$20
@@ -16711,9 +16644,12 @@ loc_C568:
 locret_C572:
 		rts
 
+ShortNextOprTask:
+		jmp Next_OperMode_Task
+
 ClearBuffersDrawIcon:
 		lda OperMode
-		bne loc_C58F
+		bne ShortNextOprTask
 		ldx #0
 loc_C57A:
 		sta $300,x
@@ -16725,10 +16661,6 @@ loc_C57A:
 		rts
 
 WriteTopScore:
-		lda #$FA
-		jsr UpdateNumber
-		jsr RenderStars
-loc_C58F:
 		jmp Next_OperMode_Task
 
 PrepareDrawTitleScreen:
@@ -16751,56 +16683,6 @@ PrepareInitializeArea:
 		sta DemoTimer
 		jsr LoadAreaPointer
 		jmp InitializeArea
-
-RenderStars:
-		;
-		; Also add stars to title screen.
-		; This is orignally done in PrepareDrawTitleScreen,
-		; but reqiures volatile title screen and I can't
-		; be arsed with that.
-		;
-		lda OperMode
-		bne NotOnTitleScreen
-
-		ldx VRAM_Buffer1_Offset
-		lda #$20
-		sta VRAM_Buffer1, x
-		inx
-		lda #$D0
-		sta VRAM_Buffer1, x
-		inx
-		lda #$0C
-		sta VRAM_Buffer1, x 
-		inx
-		lda #$C
-		ldy #$0
-		sta TMP_0
-WriteMoreStars:
-		lda #$26
-		cpy WRAM_NumberOfStars
-		bcs DontWriteAStar
-		lda #$F1
-DontWriteAStar:
-		sta VRAM_Buffer1,x
-		inx
-		dec TMP_0
-		bne StarRowNotFull
-		lda #$20
-		sta VRAM_Buffer1, x
-		inx
-		lda #$F0
-		sta VRAM_Buffer1, x
-		inx
-		lda #$0C
-		sta VRAM_Buffer1, x
-		inx
-StarRowNotFull:
-		iny
-		cpy #$18
-		bne WriteMoreStars
-		stx VRAM_Buffer1_Offset
-NotOnTitleScreen:
-		rts
 
 PrimaryGameSetup:
 		lda #1
@@ -16834,7 +16716,6 @@ loc_C609:
 loc_C60C:
 
 		lda MarioOrLuigiNames,y
-		sta WRAM_PatchMarioName0,x
 		sta WRAM_PatchMarioName1,x
 		dey
 		dex
@@ -16852,356 +16733,152 @@ loc_C620:
 		dex
 		bpl loc_C620
 		rts
-SWAPDATA_C62B:
-		.byte $20
-		.byte $84
-		.byte 1
-		.byte $44
-		.byte $20
+
+AlternatePrintVictoryMessages:
+AlternatePlayerEndWorld:
+unk_C66F:
 unk_C630:
-		.byte $85
+unk_C6AF:
+UNK_C6CA:
+unk_C6E0:
+unk_C708:
+XXX_CopySomethingAndReset:
+XXX_SomethingOrOther:
+unk_C72C:
+FdsWriteFile_SM2SAVE:
+unk_C749:
+unk_C77A:
+		; MOVED.
+
+SWAPDATA_C62B:
+		.byte $20, $84
+		.byte $01
+		.byte $44
+
+		.byte $20, $85
 		.byte $57
 		.byte $48
-		.byte $20
-		.byte $9C
-		.byte 1
+
+		.byte $20, $9C
+		.byte $01
 		.byte $49
-		.byte $20
-		.byte $A4
+
+		.byte $20, $A4
 		.byte $C9
 		.byte $46
-		.byte $20
-		.byte $A5
+
+		.byte $20, $A5
 		.byte $57
 		.byte $26
-		.byte $20
-		.byte $BC
+
+		.byte $20, $BC
 		.byte $C9
-AlternatePrintVictoryMessages:
 		.byte $4A
-		.byte $20
-		.byte $A5
-		.byte $A
-		.byte $D0
-		.byte $D1
-		.byte $D8
-		.byte $D8
-		.byte $DE
-		.byte $D1
-		.byte $D0
-		.byte $DA
-		.byte $DE
-		.byte $D1
-		.byte $20
-		.byte $C5
+
+		.byte $20, $A5
+		.byte $0A
+		.byte $D0, $D1, $D8, $D8, $DE, $D1, $D0, $DA, $DE, $D1
+
+		.byte $20, $C5
 		.byte $17
-		.byte $D2
-		.byte $D3
-		.byte $DB
-		.byte $DB
-		.byte $DB
-		.byte $D9
-		.byte $DB
-		.byte $DC
-		.byte $DB
-		.byte $DF
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $20
-		.byte $E5
+		.byte $D2, $D3, $DB, $DB, $DB, $D9, $DB, $DC
+		.byte $DB, $DF, $26, $26, $26, $26, $26, $26
+		.byte $26, $26, $26, $26, $26, $26, $26
+
+		.byte $20, $E5
 		.byte $17
-		.byte $D4
-		.byte $D5
-unk_C66F:
-		.byte $D4
-		.byte $D9
-		.byte $DB
-		.byte $E2
-		.byte $D4
-		.byte $DA
-		.byte $DB
-		.byte $E0
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $26
-		.byte $21
-		.byte 5
-AlternatePlayerEndWorld:
+		.byte $D4, $D5, $D4, $D9, $DB, $E2, $D4, $DA
+		.byte $DB, $E0, $26, $26, $26, $26, $26, $26
+		.byte $26, $26, $26, $26, $26, $26, $26
+
+		.byte $21, $05
 		.byte $57
 		.byte $26
-		.byte $21
-		.byte 5
-		.byte $A
-		.byte $D6
-		.byte $D7
-		.byte $D6
-		.byte $D7
-		.byte $E1
-		.byte $26
-		.byte $D6
-		.byte $DD
-		.byte $E1
-		.byte $E1
-		.byte $21
-		.byte $25
+
+		.byte $21, $05
+		.byte $0A
+		.byte $D6, $D7, $D6, $D7, $E1, $26, $D6, $DD, $E1, $E1
+		
+		.byte $21, $25
 		.byte $17
-		.byte $D0
-		.byte $E8
-		.byte $D1
-		.byte $D0
-		.byte $D1
-		.byte $DE
-		.byte $D1
-		.byte $D8
-		.byte $D0
-		.byte $D1
-		.byte $26
-		.byte $DE
-		.byte $D1
-		.byte $DE
-		.byte $D1
-		.byte $D0
-		.byte $D1
-		.byte $D0
-		.byte $D1
-		.byte $26
-		.byte $26
-		.byte $D0
-		.byte $D1
-unk_C6AF:
-		.byte $21
-		.byte $45
+		.byte $D0, $E8, $D1, $D0, $D1, $DE, $D1, $D8
+		.byte $D0, $D1, $26, $DE, $D1, $DE, $D1, $D0
+		.byte $D1, $D0, $D1, $26, $26, $D0, $D1
+
+		.byte $21, $45
 		.byte $17
-		.byte $DB
-		.byte $42
-		.byte $42
-		.byte $DB
-		.byte $42
-		.byte $DB
-		.byte $42
-		.byte $DB
-		.byte $DB
-		.byte $42
-		.byte $26
-		.byte $DB
-		.byte $42
-		.byte $DB
-		.byte $42
-		.byte $DB
-		.byte $42
-		.byte $DB
-		.byte $42
-		.byte $26
-		.byte $26
-		.byte $DB
-		.byte $42
-		.byte $21
-UNK_C6CA:
-		.byte $65
+		.byte $DB, $42, $42, $DB, $42, $DB, $42, $DB
+		.byte $DB, $42, $26, $DB, $42, $DB, $42, $DB
+		.byte $42, $DB, $42, $26, $26, $DB, $42
+
+		.byte $21, $65
 		.byte $46
 		.byte $DB
-		.byte $21
-		.byte $6B
-		.byte $11
-		.byte $DF
-		.byte $DB
-		.byte $DB
-		.byte $DB
-		.byte $26
-		.byte $DB
-		.byte $DF
-		.byte $DB
-		.byte $DF
-		.byte $DB
-		.byte $DB
-		.byte $E4
-		.byte $E5
-		.byte $26
-		.byte $26
-		.byte $EC
-unk_C6E0:
+
+		.byte $21, $6B
+		.byte $11 
+		.byte $DF, $DB, $DB, $DB, $26, $DB, $DF, $DB
+		.byte $DF, $DB, $DB, $E4, $E5, $26, $26, $EC
 		.byte $ED
-		.byte $21
-		.byte $85
+
+		.byte $21, $85
 		.byte $17
-		.byte $DB
-		.byte $DB
-		.byte $DB
-		.byte $DE
-		.byte $43
-		.byte $DB
-		.byte $E0
-		.byte $DB
-		.byte $DB
-		.byte $DB
-		.byte $26
-		.byte $DB
-		.byte $E3
-		.byte $DB
-		.byte $E0
-		.byte $DB
-		.byte $DB
-		.byte $E6
-		.byte $E3
-		.byte $26
-		.byte $26
-		.byte $EE
-		.byte $EF
-		.byte $21
-		.byte $A5
+		.byte $DB, $DB, $DB, $DE, $43, $DB, $E0, $DB
+		.byte $DB, $DB, $26, $DB, $E3, $DB, $E0, $DB
+		.byte $DB, $E6, $E3, $26, $26, $EE, $EF
+
+		.byte $21, $A5
 		.byte $17
-		.byte $DB
-		.byte $DB
-		.byte $DB
-		.byte $DB
-		.byte $42
-		.byte $DB
-		.byte $DB
-		.byte $DB
-		.byte $D4
-		.byte $D9
-unk_C708:
-		.byte $26
-		.byte $DB
-		.byte $D9
-		.byte $DB
-		.byte $DB
-		.byte $D4
-		.byte $D9
-		.byte $D4
-XXX_CopySomethingAndReset:
-		.byte $D9
-		.byte $E7
-		.byte $26
-		.byte $DE
-		.byte $DA
-		.byte $21
-		.byte $C4
+		.byte $DB, $DB, $DB, $DB, $42, $DB, $DB, $DB
+		.byte $D4, $D9, $26, $DB, $D9, $DB, $DB, $D4
+		.byte $D9, $D4, $D9, $E7, $26, $DE, $DA
+
+		.byte $21, $C4
 		.byte $19
-		.byte $5F
-		.byte $95
-		.byte $95
-		.byte $95
-		.byte $95
-		.byte $95
-		.byte $95
-		.byte $95
-		.byte $95
-		.byte $97
-		.byte $98
-		.byte $78
-		.byte $95
-		.byte $96
-		.byte $95
-XXX_SomethingOrOther:
-		.byte $95
-		.byte $97
-		.byte $98
-		.byte $97
-		.byte $98
-unk_C72C:
-		.byte $95
-		.byte $78
-		.byte $95
-		.byte $F0
+		.byte $5F, $95, $95, $95, $95, $95, $95, $95
+		.byte $95, $97, $98, $78, $95, $96, $95, $95
+		.byte $97, $98, $97, $98, $95, $78, $95, $F0
 		.byte $7A
-		.byte $21
-		.byte $EF
-		.byte $E
-		.byte $CF
-		.byte 1
-		.byte 9
-		.byte 8
-FdsWriteFile_SM2SAVE:
-		.byte 6
-		.byte $24
-		.byte $17
-		.byte $12
-		.byte $17
-		.byte $1D
-		.byte $E
-		.byte $17
-		.byte $D
-		.byte $18
-		.byte $22
-		.byte $4D
-		.byte $A
-		.byte $16
-		.byte $A
-		.byte $1B
-		.byte $12
-unk_C749:
-		.byte $18
-		.byte $24
-		.byte $10
-		.byte $A
-		.byte $16
-		.byte $E
-		.byte $22
-		.byte $8D
-		.byte $A
-		.byte $15
-		.byte $1E
-		.byte $12
-		.byte $10
-		.byte $12
-		.byte $24
-		.byte $10
-		.byte $A
-		.byte $16
-		.byte $E
-		.byte $22
-		.byte $EB
-		.byte 4
-		.byte $1D
-		.byte $18
-		.byte $19
-		.byte $28
-		.byte $22
-		.byte $F5
-		.byte 1
-		.byte 0
-		.byte $23
-		.byte $C9
+
+		.byte $21, $EF
+		.byte $0E
+		.byte $CF, $01, $09, $08, $06, $24, $17, $12
+		.byte $17, $1D, $0E, $17, $0D, $18
+
+		.byte $22, $4D
+		.byte $0A
+		.byte $16, $0A, $1B, $12, $18, $24, $10, $0A, $16, $0E
+
+		.byte $22, $8D
+		.byte $0A
+		.byte $15, $1E, $12, $10, $12, $24, $10, $0A, $16, $0E
+
+		.byte $22, $EB
+		.byte $04
+		.byte $1D, $18, $19, $28
+		
+		.byte $22, $F5
+		.byte $01
+		.byte $00
+
+		.byte $23, $C9
 		.byte $47
 		.byte $55
-		.byte $23
-		.byte $D1
+
+		.byte $23, $D1
 		.byte $47
 		.byte $55
-		.byte $23
-		.byte $D9
+
+		.byte $23, $D9
 		.byte $47
 		.byte $55
-		.byte $23
-		.byte $CC
+
+		.byte $23, $CC
 		.byte $43
 		.byte $F5
-		.byte $23
-		.byte $D6
-		.byte 1
-unk_C77A:
+
+		.byte $23, $D6
+		.byte $01
 		.byte $DD
 		.byte $23
 		.byte $DE
@@ -19965,4 +19642,5 @@ unk_D242:
 		.byte $FF
 
 
+practice_callgate
 control_bank
