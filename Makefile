@@ -28,7 +28,7 @@ GEN_SCENARIOS = scen/scenario_data.asm
 
 all: test.bin
 
-inc/wram.inc: $(OUT)/ram_layout.map
+inc/wram.inc: wram/ram_layout.asm $(OUT)/ram_layout.map
 	python scripts/genram.py $(OUT)/ram_layout.map inc/wram.inc
 
 wram/init.bin $(OUT)/ram_layout.map: wram/ram_layout.asm

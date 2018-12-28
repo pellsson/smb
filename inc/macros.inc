@@ -7,6 +7,16 @@
 .macro practice_callgate
 	.res $FE00 - *, $EA
 
+	Enter_PracticeOnFrame:
+		lda #BANK_COMMON
+		jsr SetBankFromA
+		jmp PracticeOnFrame
+
+	Enter_PracticeTitleMenu:
+		lda #BANK_COMMON
+		jsr SetBankFromA
+		jmp PracticeTitleMenu
+
 	Enter_UpdateFrameRule:
 		lda #BANK_COMMON
 		jsr SetBankFromA

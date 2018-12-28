@@ -3,6 +3,7 @@
 	.segment "bank7"
 
 	.include "lost.inc"
+	.include "mario.inc"
 	.include "shared.inc"
 	.include "macros.inc"
 	.include "wram.inc"
@@ -15,7 +16,7 @@ WRAM_DefaultState:
 		.incbin "wram/init.bin"
 
 Initialize_WRAM:
-		ldx #Initialize_WRAM-WRAM_DefaultState
+		; ldx #Initialize_WRAM-WRAM_DefaultState
 InitMoreWRAM:
 		lda WRAM_DefaultState - 1, x
 		sta WRAM_StartAddress - 1, x
@@ -141,10 +142,9 @@ InitBuffer:
 		sta VRAM_Buffer_AddrCtrl
 		lda Mirror_PPU_CTRL_REG2
 		sta PPU_CTRL_REG2
-		; CLI
-		jsr Enter_SoundEngine
-		jsr ReadJoypads
-		jsr PauseRoutine
+
+		jsr Enter_PracticeOnFrame
+
 		jsr UpdateTopScore
 		lda GamePauseStatus
 		lsr
@@ -253,45 +253,6 @@ SkipMainOper:
 OnIRQ:
 		rti
 
-
-PauseRoutine:
-		lda OperMode
-		cmp #VictoryModeValue
-		beq ChkPauseTimer
-		cmp #GameModeValue
-		bne ExitPause
-		lda OperMode_Task
-		cmp #4
-		bne ExitPause
-ChkPauseTimer:
-		lda GamePauseTimer
-		beq ChkStart
-		dec GamePauseTimer
-		rts
-ChkStart:
-		lda SavedJoypad1Bits
-		and #Start_Button
-		beq ClrPauseTimer
-		lda GamePauseStatus
-		and #$80
-		bne ExitPause
-		lda #$2B
-		sta GamePauseTimer
-		lda GamePauseStatus
-		tay
-		iny
-		sty PauseSoundQueue
-		eor #1
-		ora #$80
-		bne SetPause
-ClrPauseTimer:
-		lda GamePauseStatus
-		and #$7F
-SetPause:
-		sta GamePauseStatus
-ExitPause:
-		rts
-
 SpriteShuffler:
 		ldy AreaType
 		lda #$28
@@ -341,18 +302,19 @@ loc_6260:
 		dey
 		bpl loc_6260
 		rts
-OperModeExecutionTree:
 
+OperModeExecutionTree:
 		lda OperMode
 		jsr JumpEngine
 		.word TitleScreenMode
 		.word GameMode
 		.word VictoryMode
 		.word GameOverMode
-MoveAllSpritesOffscreen:
 
+MoveAllSpritesOffscreen:
 		ldy #0
 		.byte $2c
+
 MoveSpritesOffscreen:
 		ldy #4
 		lda #$F8
@@ -2098,44 +2060,6 @@ loc_6CC6:
 		sta HorizontalScroll
 		sta VerticalScroll
 		jmp InitScroll
-ReadJoypads:
-
-		lda #1
-		sta JOYPAD_PORT1
-		lsr
-		tax
-		sta JOYPAD_PORT1
-		jsr ReadPortBits
-		inx
-ReadPortBits:
-
-		ldy #8
-loc_6CE5:
-
-		pha
-		lda JOYPAD_PORT1,x
-		sta TMP_0
-		lsr
-		ora TMP_0
-		lsr
-		pla
-		rol
-		dey
-		bne loc_6CE5
-		sta SavedJoypad1Bits,x
-		pha
-		and #$30
-		and JoypadBitMask,x
-		beq loc_6D06
-		pla
-		and #$CF
-		sta SavedJoypad1Bits,x
-		rts
-loc_6D06:
-
-		pla
-		sta JoypadBitMask,x
-		rts
 
 WriteBufferToScreen:
 		sta PPU_ADDRESS
@@ -15807,15 +15731,15 @@ loc_BF85:
 		inx
 		rts
 		.byte $FF
-TitleScreenMode:
 
+TitleScreenMode:
 		lda OperMode_Task
 		jsr JumpEngine
 		.word TitleInitializeFdsLoads
 		.word PrepareDrawTitleScreen
 		.word ScreenRoutines
 		.word PrimaryGameSetup
-		.word GameMenuRoutine_NEW
+		.word Enter_PracticeTitleMenu
 		.word FinalizeTitleScreen
 
 FinalizeTitleScreen:
@@ -15944,8 +15868,8 @@ FdsLoadFile_SM2DATA3:
 		.word WaitFDSReady
 		.word MoreFDSStuff
 		.word FDSResetZero
-LoadFdsFileIndex2:
 
+LoadFdsFileIndex2:
 		lda #2
 		sta LoadListIndex
 		jsr LoadFilesFromFDS
@@ -15955,7 +15879,6 @@ LoadFdsFileIndex2:
 		lda #0
 		sta WRAM_NumberOfStars
 loc_C0B2:
-
 		lda WRAM_NumberOfStars
 		clc
 		adc #1
@@ -16029,8 +15952,8 @@ byte_C1BD:
 byte_C1C0:
 		.byte $77
 		.byte $8F
-loc_C1C2:
 
+loc_C1C2:
 		lda SavedJoypad1Bits
 		and #$10
 		bne loc_C1F6
@@ -16045,10 +15968,8 @@ loc_C1C2:
 		eor #1
 		sta GameTimerDisplay_OBSOLETE
 loc_C1E1:
-
 		ldy #2
 loc_C1E3:
-
 		lda byte_C1BD,y
 		sta $201,y
 		dey
@@ -16844,22 +16765,6 @@ SWAPDATA_C62B:
 		.byte $0E
 		.byte $CF, $01, $09, $08, $06, $24, $17, $12
 		.byte $17, $1D, $0E, $17, $0D, $18
-
-		.byte $22, $4D
-		.byte $0A
-		.byte $16, $0A, $1B, $12, $18, $24, $10, $0A, $16, $0E
-
-		.byte $22, $8D
-		.byte $0A
-		.byte $15, $1E, $12, $10, $12, $24, $10, $0A, $16, $0E
-
-		.byte $22, $EB
-		.byte $04
-		.byte $1D, $18, $19, $28
-		
-		.byte $22, $F5
-		.byte $01
-		.byte $00
 
 		.byte $23, $C9
 		.byte $47

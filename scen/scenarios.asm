@@ -21,6 +21,7 @@
 
 ;NES specific hardware defines
     .include "org.inc"
+    .include "mario.inc"
     .include "shared.inc"
     .include "macros.inc"
     .segment "bank5"

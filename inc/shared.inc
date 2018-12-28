@@ -1,5 +1,7 @@
 BANK_SELECTED = $07ff
 
+TITLE_INIT		= $01
+
 BANK_LOADER		= 0
 BANK_CHR		= 2
 BANK_ORG		= 4
@@ -12,6 +14,10 @@ CHR_INTRO	= 0
 CHR_ORG		= 1
 CHR_SCEN	= 2
 CHR_LOST	= 3
+
+SavedRule = $07d9
+RuleIndex = $0717 ; Previously DemoAction (can be changed to temp?)
+PowerUps = $07e3 ; Previously unused?
 
 .ifndef LOAD_GAME_BUTTONS
 	.define LOAD_GAME_BUTTONS Select_Button|Up_Dir

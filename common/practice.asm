@@ -1,4 +1,7 @@
 	.include "text.inc"
+	.include "org.inc"
+	.include "lost.inc"
+	.include "wram.inc"
 
 ;
 ; Practice stuff
@@ -419,15 +422,7 @@ TopText:
 	.byte $00
 
 WritePracticeTop:
-	ldx #0
-	ldy #0
-CopyMoreStuff:
-	lda TopText, x
-	sta VRAM_Buffer1, y
-	inx
-	iny
-	cmp #0
-	bne CopyMoreStuff
+	inline_write_block TopText
 	jmp ReturnBank
 
 RedrawAll:
@@ -437,7 +432,10 @@ RedrawAll:
 		stx DisplayDigits+FRAMES_REMAIN_OFFSET-1
 		lda #$a6
 		jsr PrintStatusBarNumbers
-RedrawFrameNumbers:
+		jsr RedrawFrameNumbersInner
+		jmp ReturnBank
+
+RedrawFrameNumbersInner:
 		;
 		; Update frame
 		; 
@@ -456,6 +454,10 @@ RedrawFrameNumbers:
 		ora #$02
 		jsr PrintStatusBarNumbers ;print status bar numbers based on nybbles, whatever they be
 		ldx ObjectOffset          ;get enemy object buffer offset
+		rts
+
+RedrawFrameNumbers:
+		jsr RedrawFrameNumbersInner
 		jmp ReturnBank
 
 UpdateFrameRule:
@@ -530,6 +532,630 @@ CarryOne:   sec                       ;subtract ten from our digit to make it a
             sbc #10                   ;proper BCD number, then increment the digit
             inc DigitModifier-1,x     ;preceding current digit to "carry the one" properly
             jmp StoreNewD             ;go back to just after we branched here
+
+
+menu_text:
+	text_block $222B, "% WORLD"
+	text_block $224B, "% LEVEL"
+	text_block $226B, "% P-UPS"
+	text_block $228B, "% HERO"
+	text_block $22f0, "RULE"
+	.byte $00
+
+PrintableWorldNumber:
+		lda BANK_SELECTED
+		cmp BANK_ORG
+		bne @get_ll_world
+@org_world:
+		lda WorldNumber
+		jmp @to_print
+@get_ll_world:
+		lda IsPlayingExtendedWorlds
+		beq @org_world
+		lda WorldNumber
+		and #3
+		clc
+		adc #9
+@to_print:
+		sec
+		adc #0
+		rts
+
+GetSelectedValue:
+		lda $0
+		beq @get_world
+		cmp #1
+		beq @get_level
+		cmp #2
+		beq @get_pups
+		bne @get_player
+@get_level:
+		lda LevelNumber
+		sec
+		adc #0
+		rts
+@get_pups:
+		lda PowerUps
+		rts
+@get_player:
+		lda #$16 ; M
+		sec
+		sbc CurrentPlayer ; M / L
+		rts 
+@get_world:
+		jsr PrintableWorldNumber
+		rts
+
+DrawRuleNumber:
+		ldy VRAM_Buffer1_Offset
+		lda #$22
+		sta VRAM_Buffer1, y
+		lda #$Eb
+		sta VRAM_Buffer1+1, y
+		lda #$04
+		sta VRAM_Buffer1+2, y
+		ldx #0
+@copy_next:
+		lda SavedRule, x
+		sta VRAM_Buffer1+3, y
+		iny
+		inx
+		cpx #4
+		bne @copy_next
+		lda VRAM_Buffer1_Offset
+		clc 
+		adc #7
+		sta VRAM_Buffer1_Offset
+		rts
+
+hero_colors:
+		.byte $3F, $10, $04, $22, $16, $27, $18, $00 ; mario
+		.byte $3F, $10, $04, $22, $30, $27, $19, $00 ; luigi
+
+mario_gfx:
+		.byte $c4, $32, $00, $90
+		.byte $c4, $33, $00, $98
+		.byte $cc, $4f, $00, $90
+		.byte $cc, $4f, $40, $98
+
+DrawMario:
+		ldx #4*4-1
+		ldy #4*4-1
+@copy_next:
+		lda mario_gfx, x
+		sta Sprite_Data+4, y
+		dey
+		dex
+		bpl @copy_next
+
+		ldy VRAM_Buffer1_Offset
+		ldx CurrentPlayer
+		beq @mario_pal
+		ldx #$08
+@mario_pal:
+		lda hero_colors, x
+		beq @copy_done
+		sta VRAM_Buffer1, y
+		inx
+		iny
+		bne @mario_pal
+@copy_done:
+		sty VRAM_Buffer1_Offset
+		rts
+
+draw_menu:
+		ldx #0
+		stx $0
+		ldy VRAM_Buffer1_Offset
+@more_bytes:
+		lda menu_text, x
+		cmp #$25 ; %
+		bne @draw_menu_byte
+		jsr GetSelectedValue
+		inc $0
+@draw_menu_byte:
+		sta VRAM_Buffer1, y
+		lda menu_text, x
+		inx
+		iny
+		cmp #0
+		bne @more_bytes
+		dey
+		sty VRAM_Buffer1_Offset
+		jsr DrawMario
+		jsr DrawRuleCursor
+		jsr DrawMushroomIcon
+		jsr DrawRuleNumber
+		jmp RedrawFrameNumbersInner
+
+;-------------------------------------------------------------------------------------
+
+RuleCursorData:
+	.byte $22, $ca, $06, $24, $24, $24, $24, $24, $24, $00
+
+DrawRuleCursor:
+		ldy #9
+		lda VRAM_Buffer1_Offset
+		clc
+		adc #9
+		sta VRAM_Buffer1_Offset
+		tax
+WriteRuleCursor:
+		lda RuleCursorData,y
+		sta VRAM_Buffer1,x
+		dex
+		dey
+		bpl WriteRuleCursor
+		lda VRAM_Buffer1_Offset
+		sec
+		sbc #6
+		adc RuleIndex
+		tax
+		dex
+		lda #$29
+		sta VRAM_Buffer1,x
+		rts
+
+MushroomIconData:
+		.byte $22, $29, $87, $24, $24, $24, $24, $24, $24, $24
+DrawMushroomIcon:
+		ldy #$0a
+		lda VRAM_Buffer1_Offset
+		clc
+		adc #$0a
+		sta VRAM_Buffer1_Offset
+		tax
+IconDataRead:
+		lda MushroomIconData,y
+		sta VRAM_Buffer1,x
+		dex
+		dey
+		bpl IconDataRead
+		lda WRAM_MenuIndex
+		cmp #4
+		bmi FirstFour
+		clc
+		adc #2
+FirstFour:
+		adc VRAM_Buffer1_Offset
+		tax
+		lda #$ce
+		sta VRAM_Buffer1+3-$0a,x
+		rts
+
+rule_input:
+		ldx RuleIndex
+		cmp #Left_Dir
+		bne @test_right
+		dex
+		jmp @rule_hori
+@test_right:
+		cmp #Right_Dir
+		bne @test_down
+		inx
+@rule_hori:
+		cpx #1
+		bpl @test_high
+		ldx #4
+@test_high:
+		cpx #5
+		bne @save_index
+		ldx #1
+@save_index:
+		stx RuleIndex
+		rts
+@test_down:
+		cmp #Down_Dir
+		bne @test_up
+		lda #$ff
+		jmp @update
+@test_up:
+		cmp #Up_Dir
+		bne rule_done
+		lda #$01
+@update:
+		ldx RuleIndex
+		clc
+		adc SavedRule-1,x
+		bmi @negative
+		cmp #10
+		bmi @save_digit
+		lda #0
+		jmp @save_digit
+@negative:
+		lda #9
+@save_digit:
+		sta SavedRule-1,x
+rule_done:
+		rts
+
+menu_input:
+		cmp #Left_Dir
+		bne @check_right
+		lda #$ff
+		sta $0
+		bne @set_mask
+@check_right:
+		cmp #Right_Dir
+		bne rule_done
+		lda #$01
+		sta $0
+@set_mask:
+		ldx WRAM_MenuIndex
+		dex
+		bmi @world_selected
+		bne @check_pups
+		lda LevelNumber ; level
+		clc
+		adc $00
+		and #$03
+		sta LevelNumber
+		rts
+@world_selected:
+		lda WorldNumber
+		clc
+		adc $00
+		and #$07
+		sta WorldNumber
+		rts
+@check_pups:
+		dex
+		bne @hero_selected
+		lda PowerUps
+		clc
+		adc $00
+		and #$03
+		sta PowerUps
+		rts
+@hero_selected:
+		lda CurrentPlayer
+		clc
+		adc $01
+		and #$01
+		sta CurrentPlayer
+		rts
+
+nuke_timer:
+		lda #0
+		sta SelectTimer
+		jmp ReturnBank
+
+next_task:
+		ldx #4*4-1
+		lda #0
+		sta VRAM_Buffer1
+		sta VRAM_Buffer1_Offset
+@reset_next:
+		sta Sprite_Data+4, x
+		dex
+		bpl @reset_next
+		inc OperMode_Task
+		jmp ReturnBank
+
+PracticeTitleMenu:
+		jsr draw_menu
+		lda JoypadBitMask
+		ora SavedJoypadBits
+		beq nuke_timer
+		ldx SelectTimer
+		bne @dec_timer
+		ldx #32
+		stx SelectTimer
+		cmp #Start_Button
+		beq next_task
+		cmp #Select_Button
+		bne @check_input
+		ldx WRAM_MenuIndex
+		inx
+		cpx #5
+		bne @save_menu_index
+		ldx #0
+@save_menu_index:
+		stx WRAM_MenuIndex
+		jmp @dec_timer
+@check_input:
+		ldx WRAM_MenuIndex
+		cpx #4
+		bne @check_menu_input
+		jsr rule_input
+		jmp @dec_timer
+@check_menu_input:
+		jsr menu_input
+@dec_timer:
+		ldx SelectTimer
+		dex
+		stx SelectTimer
+		jmp ReturnBank
+
+ReadJoypads: 
+		lda #$01               ;reset and clear strobe of joypad ports
+		sta JOYPAD_PORT
+		lsr
+		tax                    ;start with joypad 1's port
+		sta JOYPAD_PORT
+		jsr ReadPortBits
+		inx                    ;increment for joypad 2's port
+ReadPortBits:
+		ldy #$08
+PortLoop:
+		pha                    ;push previous bit onto stack
+		lda JOYPAD_PORT,x      ;read current bit on joypad port
+		sta $00                ;check d1 and d0 of port output
+		lsr                    ;this is necessary on the old
+		ora $00                ;famicom systems in japan
+		lsr
+		pla                    ;read bits from stack
+		rol                    ;rotate bit from carry flag
+		dey
+		bne PortLoop           ;count down bits left
+		sta SavedJoypadBits,x  ;save controller status here always
+		pha
+		and #%00110000         ;check for select or start
+		and JoypadBitMask,x    ;if neither saved state nor current state
+		beq Save8Bits          ;have any of these two set, branch
+		pla
+		and #%11001111         ;otherwise store without select
+		sta SavedJoypadBits,x  ;or start bits and leave
+		rts
+Save8Bits:
+		pla
+		sta JoypadBitMask,x
+		rts
+
+.macro write_segment_macro
+	.local @done
+	.local @copy_more
+	lda $00
+	sta VRAM_Buffer1, y
+	iny
+	lda $01
+	sta VRAM_Buffer1, y
+	iny
+	lda $02
+	sta VRAM_Buffer1, y
+	iny
+@copy_more:
+	lda pause_menu, x
+	sta VRAM_Buffer1, y
+	inx
+	iny
+	dec $02
+	bne @copy_more
+	lda #0
+	sta VRAM_Buffer1, y
+.endmacro
+
+write_segment:
+		lda $03
+		clc
+		adc $01
+		sta $01
+		lda #0
+		adc $00
+		sta $00 
+@write_all:
+		write_segment_macro
+		sty VRAM_Buffer1_Offset
+		rts
+
+.define MENU_ROW_LENGTH 15
+
+pause_menu:
+	.byte $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47
+	.byte $47, " P-UP: SUPER ", $47
+	.byte $47, " SIZE: SMALL ", $47
+	.byte $47, " HERO: MARIO ", $47
+	.byte $47, " SHOW: RULE  ", $47
+	.byte $47, " GET STAR    ", $47
+	.byte $47, " SAVE STATE  ", $47
+	.byte $47, " LOAD STATE  ", $47
+	.byte $47, " RESTART LEV ", $47
+	.byte $47, " TO MAIN MENU", $47
+	.byte $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47
+
+draw_menu_row:
+		ldy #$20
+		sty $00
+		ldy #$81
+		sty $01
+		ldy #MENU_ROW_LENGTH
+		sty $02
+
+		ldx #0
+@next_multi:
+		sec
+		sbc #1
+		bmi @multiply_done
+	pha
+		txa
+		clc
+		adc #MENU_ROW_LENGTH ; line = (row * 10)
+		tax
+
+		lda #$20
+		clc
+		adc $01
+		sta $01
+		lda #0
+		adc $00
+		sta $00
+	pla
+		jmp @next_multi
+
+@multiply_done:
+		ldy $01
+		dey
+		sty $05
+
+		lda Mirror_PPU_CTRL_REG1
+		and #3
+		beq @ntbase_selected
+		lda $00
+		eor #$04
+		sta $00
+@ntbase_selected:
+		ldy VRAM_Buffer1_Offset
+		lda HorizontalScroll
+		lsr
+		lsr
+		lsr ; div8
+		clc
+		adc #MENU_ROW_LENGTH
+		cmp #$1F
+		bcs @segmented_write
+		jsr write_segment
+		rts
+@segmented_write:
+		lda #$1f
+		sec
+		sbc HorizontalScroll
+		beq @aligned_to_next
+		sta $02
+		lda #MENU_ROW_LENGTH
+		sec
+		sbc $02
+	pha
+		jsr write_segment
+	pla
+		sta $02
+@aligned_to_next:
+		lda $00
+		eor #$04
+		sta $00
+		lda $05
+		sta $01
+		write_segment_macro
+		sty VRAM_Buffer1_Offset
+@all_copied:
+		rts
+
+RunPauseMenu:
+		and #$F
+		beq @read_input
+		sec
+		sbc #1
+	pha
+		jsr draw_menu_row
+	pla
+		asl
+		sta $00
+		lda GamePauseStatus
+		and #$81
+		ora $00
+		sta GamePauseStatus
+@read_input:
+		rts
+
+PauseMenu:
+		lda GamePauseStatus
+		lsr
+		bcc @not_paused
+		jsr RunPauseMenu
+@not_paused:
+		lda GamePauseTimer
+		beq @pause_ready
+		dec GamePauseTimer
+		rts
+@pause_ready:
+		lda SavedJoypad1Bits
+		and #Start_Button
+		beq @clear_legacy
+		lda GamePauseStatus
+		and #$80
+		bne @exit
+		lda #$2b
+		sta GamePauseTimer
+		lda GamePauseStatus
+		tay
+		iny
+		sty PauseSoundQueue
+		eor #$01
+		ora #$80
+		sta GamePauseStatus
+		lsr
+		bcc @clear_menu
+		lda GamePauseStatus
+		ora #$0B<<1 ; 0xB<<1
+		sta GamePauseStatus
+		lsr
+		jmp RunPauseMenu
+@clear_menu:
+		rts
+@clear_legacy:
+		lda GamePauseStatus
+		and #$7f
+		sta GamePauseStatus
+@exit:
+		rts
+
+PracticeOnFrame:
+		jsr SoundEngineInner
+		lda SavedJoypad1Bits
+		sta LastInputBits
+		jsr ReadJoypads
+
+		lda OperMode
+		cmp #VictoryModeValue
+		beq @check_pause
+		cmp #GameModeValue
+		bne @exit
+		lda OperMode_Task
+		cmp #$03
+		bne @exit
+@check_pause:
+		; jsr HandleRestarts ; Wont return if it did something
+		jsr PauseMenu
+@exit:
+		jmp ReturnBank
+
+.ifdef KOASKDOASKD
+DoPowerupChange:
+				lda LastInputBits
+				bne SkipMainOper
+				lda SavedJoypad1Bits
+				cmp #Down_Dir
+				bne NoToggleSize
+				lda PlayerSize
+				eor #1
+				sta PlayerSize
+				beq DrawBigMario
+				bne UpdateMarioGraphics
+NoToggleSize:
+				cmp #Left_Dir
+				bne SkipMainOper
+				lda PlayerStatus
+				cmp #2
+				bne FindMarioState
+				ldx #1
+				stx PlayerSize
+				dex
+				stx PlayerStatus
+				jmp UpdateMarioGraphics 
+FindMarioState:
+				ldx #0
+				ldy #1
+				cmp #1
+				bne MakeFireMarioOrBig
+				iny
+MakeFireMarioOrBig:
+				stx PlayerSize
+				sty PlayerStatus
+DrawBigMario:
+				ldy #6
+UpdateMarioGraphics:
+				jsr GrowPlayer
+				jsr PlayerGfxProcessing
+				jsr GetPlayerColors
+				lda PlayerStatus
+				asl
+				sta $0
+				lda SaveStateFlags
+				and #$F8
+				ora PlayerSize
+				ora $0
+				sta SaveStateFlags
+				jmp SkipMainOper
+.endif
 
 	.include "utils.inc"
 

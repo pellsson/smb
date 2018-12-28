@@ -1,0 +1,28 @@
+TODO:
+-- Make ingame menu
+-- Create a common RAM section for all practice stuff
+-- Show sockfolder digit thign
+-- Enable sockhash
+-- Save states
+-- Resume in lost levels
+-- Use common digitsmathfuckery
+-- LL Restart level 
+-- LL Restart game
+-- Maybe do something about coin-firework-thing in LL
+-- Fix intro
+-- Add start on second quest (for smborg).
+-- Only read player 1 joypads (faster).
+-- time-up looks like ass
+-- intermedite always shows time-up. I think...
+-- menu @ border fucks up completely.
+-- Make start menu reflect
+-- Make in-game menu reflect
+
+-- Kill 0x80 in pause. Its retarded and does fuck all
+-- Kill demo for LL
+-- Kill old menu in ORG
+-- Kill GameMenuRoutine_NEW (and friends) PrepareDrawTitleScreen
+
+DONE:
+-- Completely freeze state on pause
+-- Common title screen???

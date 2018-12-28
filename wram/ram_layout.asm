@@ -1,6 +1,34 @@
 		.org $6000
 		.include "text.inc"
+
 WRAM_StartAddress:
+WRAM_MenuIndex:
+	.byte $00
+
+WRAM_OrgRules:
+	.word 0, 0, 0, 0 ; World 1
+	.word 0, 0, 0, 0 ; World 2
+	.word 0, 0, 0, 0 ; World 3
+	.word 0, 0, 0, 0 ; World 4
+	.word 0, 0, 0, 0 ; World 5
+	.word 0, 0, 0, 0 ; World 6
+	.word 0, 0, 0, 0 ; World 7
+	.word 0, 0, 0, 0 ; World 8
+
+WRAM_LostRules:
+	.word 0, 0, 0, 0 ; World 1
+	.word 0, 0, 0, 0 ; World 2
+	.word 0, 0, 0, 0 ; World 3
+	.word 0, 0, 0, 0 ; World 4
+	.word 0, 0, 0, 0 ; World 5
+	.word 0, 0, 0, 0 ; World 6
+	.word 0, 0, 0, 0 ; World 7
+	.word 0, 0, 0, 0 ; World 8
+	.word 0, 0, 0, 0 ; World 9
+	.word 0, 0, 0, 0 ; World A
+	.word 0, 0, 0, 0 ; World B
+	.word 0, 0, 0, 0 ; World C
+	.word 0, 0, 0, 0 ; World D
 
 ;
 ; Number of stars collected

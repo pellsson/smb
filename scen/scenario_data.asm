@@ -1,5 +1,6 @@
 
 	.include "org.inc"
+	.include "mario.inc"
 	.include "shared.inc"
 	.include "macros.inc"
 	.segment "bank6"
@@ -1090,5 +1091,4 @@ fpg_num_routes:
 		.word scen_1_1_D70_validate
 		.byte $02
 		.byte 0
-
 .include "scen_exports.asm"

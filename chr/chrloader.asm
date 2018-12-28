@@ -1,5 +1,5 @@
 	.org $8000
-	.include "org.inc"
+	.include "mario.inc"
 	.include "shared.inc"
 	.include "macros.inc"
 	.segment "bank2"

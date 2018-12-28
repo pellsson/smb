@@ -206,6 +206,7 @@ def make_rules(name, rules):
 
 print('''
 	.include "org.inc"
+	.include "mario.inc"
 	.include "shared.inc"
 	.include "macros.inc"
 	.segment "bank6"

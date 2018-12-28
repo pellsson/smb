@@ -1,6 +1,6 @@
 
 	.include "shared.inc"
-	.include "org.inc"
+	.include "mario.inc"
 	.include "macros.inc"
 
 	.org $8000
@@ -12,6 +12,8 @@ NonMaskableInterrupt: ; Dummy
 	.include "sound.asm"
 	.include "practice.asm"
 
+	.export PracticeOnFrame
+	.export PracticeTitleMenu
 	.export SoundEngine
 	.export AdvanceToRule
 	.export RedrawPosition

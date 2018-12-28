@@ -7,9 +7,10 @@ LoaderFrameCounter = $30
 CurrentHead = $31
 CURSOR_SPRITE = $f9
 
-	.include "org.inc"
+	.include "mario.inc"
 	.include "shared.inc"
 	.include "macros.inc"
+	.include "wram.inc"
 	.org $c000
 	.segment "bank1"
 

@@ -49,4 +49,22 @@
 	.byte txt
 .endmacro
 
+.macro inline_write_block name
+	.local more_bytes
+	ldx #0
+	ldy VRAM_Buffer1_Offset
+more_bytes:
+	lda name, x
+	sta VRAM_Buffer1, y
+	inx
+	iny
+	cmp #0
+	bne more_bytes
+	dey
+	sty VRAM_Buffer1_Offset
+.endmacro
+
 .endif
+
+
+

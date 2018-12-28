@@ -3,6 +3,7 @@
 ;
   .include "shared.inc"
 	.include "org.inc"
+  .include "mario.inc"
 	.include "macros.inc"
 	.org $8000
   .segment "bank3"
@@ -80,11 +81,9 @@ InitBuffer:    ldx VRAM_Buffer_Offset,y
                sta VRAM_Buffer_AddrCtrl  ;reinit address control to $0301
                lda Mirror_PPU_CTRL_REG2  ;copy mirror of $2001 to register
                sta PPU_CTRL_REG2
-               jsr Enter_SoundEngine      ;play sound
-               lda SavedJoypad1Bits
-               sta LastInputBits
-               jsr ReadJoypads           ;read joypads
-               jsr PauseRoutine          ;handle pause
+
+               jsr Enter_PracticeOnFrame
+
                lda GamePauseStatus       ;check for pause status
                lsr
                bcs PauseSkip
@@ -105,10 +104,8 @@ SkipExpTimer:  dex                       ;move onto next timer
                bpl DecTimersLoop         ;do this until all timers are dealt with
                jsr Enter_UpdateFrameRule
 NoDecTimers:   inc FrameCounter          ;increment frame counter
-               jmp NotPaused
-PauseSkip:     jsr Enter_RedrawFrameNumbers
-NotPaused:
                jsr AdvanceRandom
+PauseSkip:
                lda Sprite0HitDetectFlag  ;check for flag here
                beq SkipSprite0
 Sprite0Clr:    lda PPU_STATUS            ;wait for sprite 0 flag to clear, which will
@@ -134,99 +131,14 @@ SkipSprite0:   lda HorizontalScroll      ;set scroll registers from variables
                sta PPU_CTRL_REG1
                lda GamePauseStatus       ;if in pause mode, do not perform operation mode stuff
                lsr
-               bcs DoPowerupChange
+               bcs SkipMainOper
                jsr OperModeExecutionTree ;otherwise do one of many, many possible subroutines
-SkipMainOper:  lda PPU_STATUS            ;reset flip-flop
+SkipMainOper:
+               lda PPU_STATUS            ;reset flip-flop
                pla
                ora #%10000000            ;reactivate NMIs
                sta PPU_CTRL_REG1
                rti                       ;we are done until the next frame!
-DoPowerupChange:
-				lda LastInputBits
-				bne SkipMainOper
-				lda SavedJoypad1Bits
-				cmp #Down_Dir
-				bne NoToggleSize
-				lda PlayerSize
-				eor #1
-				sta PlayerSize
-				beq DrawBigMario
-				bne UpdateMarioGraphics
-NoToggleSize:
-				cmp #Left_Dir
-				bne SkipMainOper
-				lda PlayerStatus
-				cmp #2
-				bne FindMarioState
-				ldx #1
-				stx PlayerSize
-				dex
-				stx PlayerStatus
-				jmp UpdateMarioGraphics 
-FindMarioState:
-				ldx #0
-				ldy #1
-				cmp #1
-				bne MakeFireMarioOrBig
-				iny
-MakeFireMarioOrBig:
-				stx PlayerSize
-				sty PlayerStatus
-DrawBigMario:
-				ldy #6
-UpdateMarioGraphics:
-				jsr GrowPlayer
-				jsr PlayerGfxProcessing
-				jsr GetPlayerColors
-				lda PlayerStatus
-				asl
-				sta $0
-				lda SaveStateFlags
-				and #$F8
-				ora PlayerSize
-				ora $0
-				sta SaveStateFlags
-				jmp SkipMainOper
-
-
-PauseRoutine:
-               lda OperMode           ;are we in victory mode?
-               cmp #VictoryModeValue  ;if so, go ahead
-               beq ChkPauseTimer
-               cmp #GameModeValue     ;are we in game mode?
-               bne ExitPause          ;if not, leave
-               lda OperMode_Task      ;if we are in game mode, are we running game engine?
-               cmp #$03
-               bne ExitPause          ;if not, leave
-               jsr HandleRestarts
-ChkPauseTimer: lda GamePauseTimer     ;check if pause timer is still counting down
-               beq ChkStart
-               dec GamePauseTimer     ;if so, decrement and leave
-               rts
-ChkStart:      lda SavedJoypad1Bits   ;check to see if start is pressed
-               and #Start_Button      ;on controller 1
-               beq ClrPauseTimer
-               lda SavedJoypad1Bits
-               and #Up_Dir
-               beq NoModeChange
-               jmp ToggleRenderMode
-NoModeChange:
-               lda GamePauseStatus    ;check to see if timer flag is set
-               and #%10000000         ;and if so, do not reset timer (residual,
-               bne ExitPause          ;joypad reading routine makes this unnecessary)
-               lda #$2b               ;set pause timer
-               sta GamePauseTimer
-               lda GamePauseStatus
-               tay
-               iny                    ;set pause sfx queue for next pause mode
-               sty PauseSoundQueue
-               eor #%00000001         ;invert d0 and set d7
-               ora #%10000000
-               bne SetPause           ;unconditional branch
-ClrPauseTimer: lda GamePauseStatus    ;clear timer flag if timer is at zero and start button
-               and #%01111111         ;is not pressed
-SetPause:      sta GamePauseStatus
-ExitPause:     rts
 
 ;
 ; The Practice Functions
@@ -351,7 +263,32 @@ TitleScreenMode:
       .word InitializeGame
       .word ScreenRoutines
       .word PrimaryGameSetup
-      .word GameMenuRoutine
+      .word Enter_PracticeTitleMenu
+      .word LoadSelectedWorld
+
+IsBigWorld:
+  .byte 1, 1, 0, 1, 0, 0, 1, 0
+
+LoadSelectedWorld:
+    ldx LevelNumber
+    ldy WorldNumber
+    lda IsBigWorld, y
+    beq @save_area
+    cpx #2
+    bmi @save_area
+    inx
+@save_area:
+    stx AreaNumber
+    ;
+    ; Start it...
+    ;
+    jsr LoadAreaPointer
+    inc Hidden1UpFlag
+    inc FetchNewGameTimerFlag
+    inc OperMode
+    lda #$00
+    sta OperMode_Task
+    rts
 
 ;-------------------------------------------------------------------------------------
 
@@ -567,8 +504,6 @@ DrawSelectedNumber:
 		rts
 
 ;-------------------------------------------------------------------------------------
-IsBigWorld:
-	.byte 1, 1, 0, 1, 0, 0, 1, 0
 
 NukeTimer:
 		lda #0
@@ -617,35 +552,11 @@ IsSelectPressed:
 LetsPlayMarioSecondQuest:
 		inc PrimaryHardMode
 LetsPlayMario:
-		ldx LevelNumber
-		ldy WorldNumber
-		sty OffScr_WorldNumber
-		lda IsBigWorld, y
-		beq SaveAreaNmber
-		cpx #2
-		bmi SaveAreaNmber
-		inx
-SaveAreaNmber:
-		stx AreaNumber
-		stx OffScr_AreaNumber
-		;
-		; Start it...
-		;
-		jsr LoadAreaPointer
-		inc Hidden1UpFlag
-		inc OffScr_Hidden1UpFlag
-		inc FetchNewGameTimerFlag
-		inc OperMode
-		lda #$00
-		sta OperMode_Task
-		rts
 CantMove:
 		lda SelectTimer
 		beq MenuDone
 		dec SelectTimer
 MenuDone:
-		jsr DrawMushroomIcon
-		jsr DrawRuleCursor
 		lda #$fa
 		jsr UpdateNumber
 		sta SavedJoypad1Bits
@@ -763,63 +674,6 @@ RedrawIt:
 		jsr DrawSelectedNumber
 		jsr SetPerfectLevelRule
 WorldSelectionDone:
-		rts
-
-;-------------------------------------------------------------------------------------
-
-RuleCursorData:
-	.byte $22, $aa, $06, $24, $24, $24, $24, $24, $24, $00
-
-DrawRuleCursor:
-		ldy #9
-		lda VRAM_Buffer1_Offset
-		clc
-		adc #9
-		sta VRAM_Buffer1_Offset
-		tax
-WriteRuleCursor:
-		lda RuleCursorData,y
-		sta VRAM_Buffer1,x
-		dex
-		dey
-		bpl WriteRuleCursor
-		lda VRAM_Buffer1_Offset
-		sec
-		sbc #6
-		adc RuleIndex
-		tax
-		dex
-		lda #$29
-		sta VRAM_Buffer1,x
-		rts
-
-;-------------------------------------------------------------------------------------
-
-MushroomIconData:
-		.byte $22, $29, $87, $24, $24, $24, $24, $24, $24, $24, $00
-DrawMushroomIcon:
-		ldy #$0a
-		lda VRAM_Buffer1_Offset
-		clc
-		adc #$0a
-		sta VRAM_Buffer1_Offset
-		tax
-IconDataRead:
-		lda MushroomIconData,y
-		sta VRAM_Buffer1,x
-		dex
-		dey
-		bpl IconDataRead
-		lda MenuSelection
-		cmp #3
-		bmi FirstThree
-		clc
-		adc #2
-FirstThree:
-		adc VRAM_Buffer1_Offset
-		tax
-		lda #$ce
-		sta VRAM_Buffer1+3-$0a,x
 		rts
 
 ;-------------------------------------------------------------------------------------
@@ -1210,22 +1064,12 @@ ChkHiByte:  lda $01                      ;check high byte?
 ;-------------------------------------------------------------------------------------
 
 ClearBuffersDrawIcon:
-             lda OperMode               ;check game mode
-             bne IncModeTask_B          ;if not title screen mode, leave
-             ldx #$00                   ;otherwise, clear buffer space
-TScrClear:   sta VRAM_Buffer1-1,x
-             sta VRAM_Buffer1-1+$100,x
-             dex
-             bne TScrClear
-             jsr DrawMushroomIcon       ;draw player select icon
              inc ScreenRoutineTask      ;move onto next task
              rts
 
 ;-------------------------------------------------------------------------------------
 
 WriteTopScore:
-               lda #$fa           ;run display routine to display top score on title
-               jsr UpdateNumber
 IncModeTask_B: inc OperMode_Task  ;move onto next mode
                rts
 
@@ -7009,41 +6853,6 @@ InitATLoop:   sta PPU_DATA
               sta HorizontalScroll      ;reset scroll variables
               sta VerticalScroll
               jmp InitScroll            ;initialize scroll registers to zero
-
-;-------------------------------------------------------------------------------------
-;$00 - temp joypad bit
-
-ReadJoypads: 
-              lda #$01               ;reset and clear strobe of joypad ports
-              sta JOYPAD_PORT
-              lsr
-              tax                    ;start with joypad 1's port
-              sta JOYPAD_PORT
-              jsr ReadPortBits
-              inx                    ;increment for joypad 2's port
-ReadPortBits: ldy #$08
-PortLoop:     pha                    ;push previous bit onto stack
-              lda JOYPAD_PORT,x      ;read current bit on joypad port
-              sta $00                ;check d1 and d0 of port output
-              lsr                    ;this is necessary on the old
-              ora $00                ;famicom systems in japan
-              lsr
-              pla                    ;read bits from stack
-              rol                    ;rotate bit from carry flag
-              dey
-              bne PortLoop           ;count down bits left
-              sta SavedJoypadBits,x  ;save controller status here always
-              pha
-              and #%00110000         ;check for select or start
-              and JoypadBitMask,x    ;if neither saved state nor current state
-              beq Save8Bits          ;have any of these two set, branch
-              pla
-              and #%11001111         ;otherwise store without select
-              sta SavedJoypadBits,x  ;or start bits and leave
-              rts
-Save8Bits:    pla
-              sta JoypadBitMask,x    ;save with all bits in another place and leave
-              rts
 
 ;-------------------------------------------------------------------------------------
 
