@@ -902,133 +902,182 @@ Save8Bits:
 		sta JoypadBitMask,x
 		rts
 
-.macro write_segment_macro
-	.local @done
-	.local @copy_more
-	lda $00
-	sta VRAM_Buffer1, y
-	iny
-	lda $01
-	sta VRAM_Buffer1, y
-	iny
-	lda $02
-	sta VRAM_Buffer1, y
-	iny
-@copy_more:
-	lda pause_menu, x
-	sta VRAM_Buffer1, y
-	inx
-	iny
-	dec $02
-	bne @copy_more
-	lda #0
-	sta VRAM_Buffer1, y
-.endmacro
-
-write_segment:
-		lda $03
-		clc
-		adc $01
-		sta $01
-		lda #0
-		adc $00
-		sta $00 
-@write_all:
-		write_segment_macro
-		sty VRAM_Buffer1_Offset
-		rts
-
 .define MENU_ROW_LENGTH 16
 
-pause_menu:
+pm_block_row:
 	.byte $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47
-	.byte $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47
+pm_pup_row:
 	.byte $47, $47, " P-UP: SUPER", $47, $47 
+pm_size_row:
 	.byte $47, $47, " SIZE: SMALL", $47, $47
+pm_hero_row:
 	.byte $47, $47, " HERO: MARIO", $47, $47
+pm_show_row:
 	.byte $47, $47, " SHOW: RULE ", $47, $47
+pm_star_row:
 	.byte $47, $47, " GET STAR   ", $47, $47
+pm_save_row:
 	.byte $47, $47, " SAVE STATE ", $47, $47
+pm_load_row:
 	.byte $47, $47, " LOAD STATE ", $47, $47
+pm_restart_row:
 	.byte $47, $47, " RESTART LEV", $47, $47
+pm_reset_row:
 	.byte $47, $47, " EXIT TITLE ", $47, $47
-	.byte $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47
-	.byte $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47
+
+.macro row_dispatch ppu, data
+		lda #<ppu
+		sta $00
+		lda #>ppu
+		sta $01
+		lda #<data
+		sta $02
+		lda #>data
+		sta $03
+		rts
+.endmacro
+
+_draw_pm_row_0:
+		row_dispatch $2080, pm_block_row
+_draw_pm_row_1:
+		row_dispatch $20A0, pm_block_row
+_draw_pm_row_2:
+		row_dispatch $20C0, pm_pup_row
+_draw_pm_row_3:
+		row_dispatch $20E0, pm_size_row
+_draw_pm_row_4:
+		row_dispatch $2100, pm_hero_row
+_draw_pm_row_5:
+		row_dispatch $2120, pm_show_row
+_draw_pm_row_6:
+		row_dispatch $2140, pm_star_row
+_draw_pm_row_7:
+		row_dispatch $2160, pm_save_row
+_draw_pm_row_8:
+		row_dispatch $2180, pm_load_row
+_draw_pm_row_9:
+		row_dispatch $21A0, pm_restart_row
+_draw_pm_row_10:
+		row_dispatch $21C0, pm_reset_row
+_draw_pm_row_11:
+		row_dispatch $21E0, pm_block_row
+_draw_pm_row_12:
+		row_dispatch $2200, pm_block_row
+
+pm_row_initializers:
+		.word _draw_pm_row_0
+		.word _draw_pm_row_1
+		.word _draw_pm_row_2
+		.word _draw_pm_row_3
+		.word _draw_pm_row_4
+		.word _draw_pm_row_5
+		.word _draw_pm_row_6
+		.word _draw_pm_row_7
+		.word _draw_pm_row_8
+		.word _draw_pm_row_9
+		.word _draw_pm_row_10
+		.word _draw_pm_row_11
+		.word _draw_pm_row_12
+
+prepare_draw_row:
+		asl ; *=2
+		tay
+		lda pm_row_initializers, y
+		sta $00
+		lda pm_row_initializers+1, y
+		sta $01
+		jmp ($0000)
 
 draw_menu_row:
-		ldy #$20
-		sty $00
-		ldy #$81
-		sty $01
-		ldy #MENU_ROW_LENGTH
-		sty $02
-
-		ldx #0
-@next_multi:
-		sec
-		sbc #1
-		bmi @multiply_done
+		jsr prepare_draw_row
+		lda $00
 	pha
-		txa
-		clc
-		adc #MENU_ROW_LENGTH ; line = (row * 10)
-		tax
-
-		lda #$20
-		clc
-		adc $01
-		sta $01
-		lda #0
-		adc $00
-		sta $00
-	pla
-		jmp @next_multi
-
-@multiply_done:
-		ldy $01
-		dey
-		sty $05
-
+		lda $01
 		lda Mirror_PPU_CTRL_REG1
 		and #3
 		beq @ntbase_selected
-		lda $00
+		lda $01
 		eor #$04
-		sta $00
+		sta $01
 @ntbase_selected:
-		ldy VRAM_Buffer1_Offset
+		lda $01
+	pha
 		lda HorizontalScroll
 		lsr
 		lsr
-		lsr ; div8
+		lsr
+		sta $04
 		clc
-		adc #MENU_ROW_LENGTH
-		cmp #$1F
-		bcs @segmented_write
-		jsr write_segment
-		rts
-@segmented_write:
-		lda #$1f
+		lda #$20
 		sec
-		sbc HorizontalScroll
-		beq @aligned_to_next
-		sta $02
+		sbc $04
+		beq @all_on_next
+		cmp #MENU_ROW_LENGTH
+		bmi @partial
+		lda #MENU_ROW_LENGTH
+@partial:
+		ldy VRAM_Buffer1_Offset
+		sta $05
+		sta $06
+		sta VRAM_Buffer1+2, y ; Count
+		lda $01
+		sta VRAM_Buffer1+0, y ; High dest
+		lda $04
+		clc
+		adc $00
+		sta VRAM_Buffer1+1, y ; Low dest
+		;
+		; COPY 
+		;
+		ldx #0
+		iny
+		iny
+		iny
+@copy_more_firstpass:
+		lda ($02, x)
+		sta VRAM_Buffer1, y
+		inc $02
+		bne @no_high_inc
+		inc $03
+@no_high_inc:
+		iny
+		dec $06
+		bne @copy_more_firstpass
 		lda #MENU_ROW_LENGTH
 		sec
-		sbc $02
-	pha
-		jsr write_segment
+		sbc $05
+		sta $06
+@all_on_next:
 	pla
-		sta $02
-@aligned_to_next:
-		lda $00
 		eor #$04
-		sta $00
-		lda $05
 		sta $01
-		write_segment_macro
+	pla
+		sta $00
+		lda $06
+		beq @done
+		lda $06 ; remaining to copy
+		sta VRAM_Buffer1+2, y ; Count
+		lda $01
+		sta VRAM_Buffer1+0, y ; High dest
+		lda $00
+		sta VRAM_Buffer1+1, y ; Low dest
+		iny
+		iny
+		iny
+@copy_more_secondpass:
+		lda ($02, x)
+		sta VRAM_Buffer1, y
+		inc $02
+		bne @no_high_inc2
+		inc $03
+@no_high_inc2:
+		iny
+		dec $06
+		bne @copy_more_secondpass
+@done:
+		lda #0
+		sta VRAM_Buffer1, y
 		sty VRAM_Buffer1_Offset
-@all_copied:
 		rts
 
 RunPauseMenu:
