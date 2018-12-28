@@ -903,6 +903,7 @@ Save8Bits:
 		rts
 
 .define MENU_ROW_LENGTH 16
+.define MENU_ROW_COUNT 13
 
 pm_block_row:
 	.byte $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47
@@ -1086,6 +1087,10 @@ RunPauseMenu:
 		sec
 		sbc #1
 	pha
+		sta $0
+		lda #MENU_ROW_COUNT
+		sec
+		sbc $0
 		jsr draw_menu_row
 	pla
 		asl
@@ -1126,7 +1131,7 @@ PauseMenu:
 		lsr
 		bcc @clear_menu
 		lda GamePauseStatus
-		ora #$0d<<1 ; 0xB<<1
+		ora #MENU_ROW_COUNT<<1 ; 0xB<<1
 		sta GamePauseStatus
 		lsr
 		jmp RunPauseMenu
