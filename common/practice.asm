@@ -938,20 +938,22 @@ write_segment:
 		sty VRAM_Buffer1_Offset
 		rts
 
-.define MENU_ROW_LENGTH 15
+.define MENU_ROW_LENGTH 16
 
 pause_menu:
-	.byte $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47
-	.byte $47, " P-UP: SUPER ", $47
-	.byte $47, " SIZE: SMALL ", $47
-	.byte $47, " HERO: MARIO ", $47
-	.byte $47, " SHOW: RULE  ", $47
-	.byte $47, " GET STAR    ", $47
-	.byte $47, " SAVE STATE  ", $47
-	.byte $47, " LOAD STATE  ", $47
-	.byte $47, " RESTART LEV ", $47
-	.byte $47, " TO MAIN MENU", $47
-	.byte $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47
+	.byte $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47
+	.byte $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47
+	.byte $47, $47, " P-UP: SUPER", $47, $47 
+	.byte $47, $47, " SIZE: SMALL", $47, $47
+	.byte $47, $47, " HERO: MARIO", $47, $47
+	.byte $47, $47, " SHOW: RULE ", $47, $47
+	.byte $47, $47, " GET STAR   ", $47, $47
+	.byte $47, $47, " SAVE STATE ", $47, $47
+	.byte $47, $47, " LOAD STATE ", $47, $47
+	.byte $47, $47, " RESTART LEV", $47, $47
+	.byte $47, $47, " EXIT TITLE ", $47, $47
+	.byte $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47
+	.byte $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47
 
 draw_menu_row:
 		ldy #$20
@@ -1075,7 +1077,7 @@ PauseMenu:
 		lsr
 		bcc @clear_menu
 		lda GamePauseStatus
-		ora #$0B<<1 ; 0xB<<1
+		ora #$0d<<1 ; 0xB<<1
 		sta GamePauseStatus
 		lsr
 		jmp RunPauseMenu
