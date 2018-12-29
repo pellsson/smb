@@ -5,6 +5,12 @@ WRAM_StartAddress:
 WRAM_MenuIndex:
 	.byte $00
 
+WRAM_PracticeFlags:
+	.byte $00
+
+WRAM_Temp:
+	.res $64, $00
+
 WRAM_OrgRules:
 	.word 0, 0, 0, 0 ; World 1
 	.word 0, 0, 0, 0 ; World 2

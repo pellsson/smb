@@ -351,7 +351,7 @@ StatusBarData:
 		.byte $6d, $03
 		.byte $7a, $03 ; game timer
 		.byte $75, $03 ; POS
-		.byte $72, $02 ; LEFT
+		.byte $7E, $02 ; RM
 
 StatusBarOffset:
 		.byte $06, $0c, $12, FRAME_NUMBER_OFFSET+1, $1e, $24
@@ -415,7 +415,7 @@ ExitOutputN:
 
 TopText:
 	text_block $2044, "RULE * FRAME"
-	text_block $2052, "RM POS TIME "
+	text_block $2051, "USR POS TIME RM"
 	.byte $20, $68, $05, $24, $fe, $24, $2e, $29 ; score trailing digit and coin display
 	.byte $23, $c0, $7f, $aa ; attribute table data, clears name table 0 to palette 2
 	.byte $23, $c2, $01, $ea ; attribute table data, used for coin icon in status bar
@@ -449,8 +449,11 @@ RedrawFrameNumbersInner:
 		;
 		; Print it i think...
 		;
-		lda PracticeFlags
-		and #$80
+		lda WRAM_PracticeFlags
+		and #PF_SockMode
+		beq @no_sockmode
+		lda #$80
+@no_sockmode:
 		ora #$02
 		jsr PrintStatusBarNumbers ;print status bar numbers based on nybbles, whatever they be
 		ldx ObjectOffset          ;get enemy object buffer offset
@@ -534,14 +537,6 @@ CarryOne:   sec                       ;subtract ten from our digit to make it a
             jmp StoreNewD             ;go back to just after we branched here
 
 
-menu_text:
-	text_block $222B, "% WORLD"
-	text_block $224B, "% LEVEL"
-	text_block $226B, "% P-UPS"
-	text_block $228B, "% HERO"
-	text_block $22f0, "RULE"
-	.byte $00
-
 PrintableWorldNumber:
 		lda BANK_SELECTED
 		cmp BANK_ORG
@@ -608,40 +603,14 @@ DrawRuleNumber:
 		sta VRAM_Buffer1_Offset
 		rts
 
-hero_colors:
-		.byte $3F, $10, $04, $22, $16, $27, $18, $00 ; mario
-		.byte $3F, $10, $04, $22, $30, $27, $19, $00 ; luigi
 
-mario_gfx:
-		.byte $c4, $32, $00, $90
-		.byte $c4, $33, $00, $98
-		.byte $cc, $4f, $00, $90
-		.byte $cc, $4f, $40, $98
-
-DrawMario:
-		ldx #4*4-1
-		ldy #4*4-1
-@copy_next:
-		lda mario_gfx, x
-		sta Sprite_Data+4, y
-		dey
-		dex
-		bpl @copy_next
-
-		ldy VRAM_Buffer1_Offset
-		ldx CurrentPlayer
-		beq @mario_pal
-		ldx #$08
-@mario_pal:
-		lda hero_colors, x
-		beq @copy_done
-		sta VRAM_Buffer1, y
-		inx
-		iny
-		bne @mario_pal
-@copy_done:
-		sty VRAM_Buffer1_Offset
-		rts
+menu_text:
+	text_block $222B, "% WORLD"
+	text_block $224B, "% LEVEL"
+	text_block $226B, "% P-UPS"
+	text_block $228B, "% HERO"
+	text_block $22f0, "RULE"
+	.byte $00
 
 draw_menu:
 		ldx #0
@@ -662,7 +631,7 @@ draw_menu:
 		bne @more_bytes
 		dey
 		sty VRAM_Buffer1_Offset
-		jsr DrawMario
+		jsr DrawTitleMario
 		jsr DrawRuleCursor
 		jsr DrawMushroomIcon
 		jsr DrawRuleNumber
@@ -903,28 +872,43 @@ Save8Bits:
 		rts
 
 .define MENU_ROW_LENGTH 16
-.define MENU_ROW_COUNT 13
+.define MENU_ROW_COUNT 12
 
-pm_block_row:
-	.byte $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47, $47
-pm_pup_row:
-	.byte $47, $47, " P-UP: SUPER", $47, $47 
-pm_size_row:
-	.byte $47, $47, " SIZE: SMALL", $47, $47
-pm_hero_row:
-	.byte $47, $47, " HERO: MARIO", $47, $47
-pm_show_row:
-	.byte $47, $47, " SHOW: RULE ", $47, $47
+pm_empty_row:
+	.byte "                "
+pm_no_pup_row:
+	.byte $24, " P-UP  NONE ", $24, $24, $24
+pm_super_pup_row:
+	.byte $24, " P-UP  SUPER", $24, $24, $24
+pm_fire_pup_row:
+	.byte $24, " P-UP  FIRE ", $24, $24, $24
+pm_small_row:
+	.byte $24, " SIZE  SMALL", $24, $24, $24
+pm_big_row:
+	.byte $24, " SIZE  BIG  ", $24, $24, $24
+
+pm_hero_mario_row:
+	.byte $24, " HERO  MARIO", $24, $24, $24
+pm_hero_luigi_row:
+	.byte $24, " HERO  LUIGI", $24, $24, $24
+
+pm_show_rule_row:
+	.byte $24, " SHOW  RULE ", $24, $24, $24
+pm_show_sock_row:
+	.byte $24, " SHOW  SOCK ", $24, $24, $24
+
+pm_user_row:
+	.byte $24, " USR   7 F F", $24, $24, $24
 pm_star_row:
-	.byte $47, $47, " GET STAR   ", $47, $47
+	.byte $24, " GET STAR   ", $24, $24, $24
 pm_save_row:
-	.byte $47, $47, " SAVE STATE ", $47, $47
+	.byte $24, " SAVE STATE ", $24, $24, $24
 pm_load_row:
-	.byte $47, $47, " LOAD STATE ", $47, $47
+	.byte $24, " LOAD STATE ", $24, $24, $24
 pm_restart_row:
-	.byte $47, $47, " RESTART LEV", $47, $47
+	.byte $24, " RESTART LEV", $24, $24, $24
 pm_reset_row:
-	.byte $47, $47, " EXIT TITLE ", $47, $47
+	.byte $24, " EXIT TITLE ", $24, $24, $24
 
 .macro row_dispatch ppu, data
 		lda #<ppu
@@ -935,35 +919,85 @@ pm_reset_row:
 		sta $02
 		lda #>data
 		sta $03
-		rts
 .endmacro
 
+pm_attr_data:
+		.byte $AA, $AA, $AA, $AA
+
 _draw_pm_row_0:
-		row_dispatch $2080, pm_block_row
+		row_dispatch $23C8, pm_attr_data
+		inc $07
+		jsr draw_menu_row
+		row_dispatch $2080, pm_empty_row
+		rts
+
 _draw_pm_row_1:
-		row_dispatch $20A0, pm_block_row
+		lda PlayerStatus
+		bne @check_is_fire
+		row_dispatch $20A0, pm_no_pup_row
+		rts
+	@check_is_fire:
+		cmp #2
+		beq @is_fire
+		row_dispatch $20A0, pm_super_pup_row
+		rts
+	@is_fire:
+		row_dispatch $20A0, pm_fire_pup_row
+		rts
+
 _draw_pm_row_2:
-		row_dispatch $20C0, pm_pup_row
+		row_dispatch $20C0, pm_big_row
+		lda PlayerSize
+		beq @is_big
+		row_dispatch $20C0, pm_small_row
+	@is_big:
+		rts
+
 _draw_pm_row_3:
-		row_dispatch $20E0, pm_size_row
+		row_dispatch $20E0, pm_hero_mario_row
+		lda CurrentPlayer
+		beq @is_mario
+		row_dispatch $20E0, pm_hero_luigi_row
+	@is_mario:
+		rts
+
 _draw_pm_row_4:
-		row_dispatch $2100, pm_hero_row
+		row_dispatch $23D0, pm_attr_data
+		inc $07
+		jsr draw_menu_row
+
+		row_dispatch $2100, pm_show_sock_row
+		lda WRAM_PracticeFlags
+		and #PF_SockMode
+		bne @is_sock
+		row_dispatch $2100, pm_show_rule_row
+	@is_sock:
+		rts
+
 _draw_pm_row_5:
-		row_dispatch $2120, pm_show_row
+		row_dispatch $2120, pm_user_row
+		rts
 _draw_pm_row_6:
-		row_dispatch $2140, pm_star_row
+		row_dispatch $2140, pm_empty_row
+		rts
 _draw_pm_row_7:
-		row_dispatch $2160, pm_save_row
+		row_dispatch $2160, pm_star_row
+		rts
 _draw_pm_row_8:
-		row_dispatch $2180, pm_load_row
+		row_dispatch $23D8, pm_attr_data
+		inc $07
+		jsr draw_menu_row
+		row_dispatch $2180, pm_save_row
+		rts
 _draw_pm_row_9:
-		row_dispatch $21A0, pm_restart_row
+		row_dispatch $21A0, pm_load_row
+		rts
 _draw_pm_row_10:
-		row_dispatch $21C0, pm_reset_row
+		row_dispatch $21C0, pm_restart_row
+		rts
 _draw_pm_row_11:
-		row_dispatch $21E0, pm_block_row
-_draw_pm_row_12:
-		row_dispatch $2200, pm_block_row
+		row_dispatch $21E0, pm_reset_row
+		rts
 
 pm_row_initializers:
 		.word _draw_pm_row_0
@@ -978,7 +1012,6 @@ pm_row_initializers:
 		.word _draw_pm_row_9
 		.word _draw_pm_row_10
 		.word _draw_pm_row_11
-		.word _draw_pm_row_12
 
 prepare_draw_row:
 		asl ; *=2
@@ -990,7 +1023,6 @@ prepare_draw_row:
 		jmp ($0000)
 
 draw_menu_row:
-		jsr prepare_draw_row
 		lda $00
 	pha
 		lda $01
@@ -1007,12 +1039,28 @@ draw_menu_row:
 		lsr
 		lsr
 		lsr
+		ldx $07
+		beq @copy_names
+		lsr
+		lsr
+@copy_names:
 		sta $04
 		clc
 		lda #$20
+		ldx $07
+		beq @not_attr
+		lda #$20/4
+@not_attr:
 		sec
 		sbc $04
 		beq @all_on_next
+		ldx $07
+		beq @minmax_names
+		cmp #MENU_ROW_LENGTH/4
+		bmi @partial
+		lda #MENU_ROW_LENGTH/4
+		bne @partial
+@minmax_names:
 		cmp #MENU_ROW_LENGTH
 		bmi @partial
 		lda #MENU_ROW_LENGTH
@@ -1045,6 +1093,11 @@ draw_menu_row:
 		dec $06
 		bne @copy_more_firstpass
 		lda #MENU_ROW_LENGTH
+		ldx $07
+		beq @nametable_mode
+		lsr
+		lsr
+@nametable_mode:
 		sec
 		sbc $05
 		sta $06
@@ -1065,6 +1118,7 @@ draw_menu_row:
 		iny
 		iny
 		iny
+		ldx #0
 @copy_more_secondpass:
 		lda ($02, x)
 		sta VRAM_Buffer1, y
@@ -1081,25 +1135,184 @@ draw_menu_row:
 		sty VRAM_Buffer1_Offset
 		rts
 
+playerstatus_to_savestate:
+		lda PlayerStatus
+		asl
+		sta $0
+		lda SaveStateFlags
+		and #$F8
+		ora PlayerSize
+		ora $0
+		sta SaveStateFlags
+		rts
+
+pm_toggle_powerup:
+		lda PlayerStatus
+		cmp #2
+		bne @solve_state
+		ldx #1
+		stx PlayerSize
+		dex
+		stx PlayerStatus
+		jmp RedrawMario
+@solve_state:
+		ldx #0
+		ldy #1
+		cmp #1
+		bne @fire_or_big
+		iny
+@fire_or_big:
+		stx PlayerSize
+		sty PlayerStatus
+		jsr RedrawMario
+		jmp playerstatus_to_savestate
+
+pm_toggle_size:
+		lda PlayerSize
+		eor #1
+		sta PlayerSize
+		jsr RedrawMario
+		jmp playerstatus_to_savestate
+
+pm_toggle_hero:
+		lda CurrentPlayer
+		eor #1
+		sta CurrentPlayer
+		; TODO - More to be done for SMBLL
+		jmp RedrawMario
+
+pm_toggle_show:
+		lda WRAM_PracticeFlags
+		eor #PF_SockMode
+		sta WRAM_PracticeFlags
+		and #PF_SockMode
+		bne @SockMode
+		;
+		; If we change back to rule mode we must remove top sock bytes
+		;
+		ldx VRAM_Buffer1_Offset
+		lda #$20
+		sta VRAM_Buffer1,x
+		lda #$62 ;
+		sta VRAM_Buffer1+1,x
+		lda #$02 ; len
+		sta VRAM_Buffer1+2,x
+		lda #$24
+		sta VRAM_Buffer1+3, x
+		sta VRAM_Buffer1+4, x
+		lda #$00
+		sta VRAM_Buffer1+5, x
+		lda VRAM_Buffer1_Offset
+		clc
+		adc #$05
+		sta VRAM_Buffer1_Offset
+		jmp RedrawFrameNumbersInner
+@SockMode:
+		jmp ForceUpdateSockHashInner
+
+
+pm_activation_slots:
+		.word pm_toggle_powerup
+		.word pm_toggle_size
+		.word pm_toggle_hero
+		.word pm_toggle_show
+
+pause_run_activation:
+		lda WRAM_MenuIndex
+		asl
+		tay
+		lda pm_activation_slots, y
+		sta $00
+		lda pm_activation_slots+1, y
+		sta $01
+		jmp ($0000)
+
+pause_menu_activate:
+		jsr pause_run_activation
+		ldx WRAM_MenuIndex
+		inx
+		txa
+		jsr prepare_draw_row
+		jmp draw_menu_row
+
 RunPauseMenu:
 		and #$F
-		beq @read_input
-		sec
-		sbc #1
+		beq @draw_cursor
 	pha
 		sta $0
 		lda #MENU_ROW_COUNT
 		sec
 		sbc $0
+		jsr prepare_draw_row
+		lda #0
+		sta $07
 		jsr draw_menu_row
 	pla
+		sec
+		sbc #1
 		asl
 		sta $00
 		lda GamePauseStatus
 		and #$81
 		ora $00
 		sta GamePauseStatus
-@read_input:
+@draw_cursor:
+		lda WRAM_MenuIndex
+		asl
+		asl
+		asl
+		clc
+		adc #$26
+		sta $2FC
+		lda #$75
+		sta $2FD
+		lda #$00
+		sta $2FE
+		lda #$04
+		sta $2FF
+
+		lda SavedJoypad1Bits
+		cmp LastInputBits
+		bne @input_changed
+		rts
+@input_changed:
+		cmp #Select_Button
+		bne @check_down
+@move_cursor_down:
+		ldx WRAM_MenuIndex
+		inx
+		cpx #5
+		bne @not_gap
+		inx
+@not_gap:
+		cpx #$0B
+		bmi @no_wrap_down
+		ldx #0
+@no_wrap_down:
+		jmp @save_exit
+@check_down:
+		cmp #Down_Dir
+		beq @move_cursor_down
+		cmp #Up_Dir
+		bne @check_a
+		ldx WRAM_MenuIndex
+		dex
+		cpx #5
+		bne @not_gap_up
+		dex
+@not_gap_up:
+		cpx #0
+		bpl @no_wrap_up
+		ldx #$0A
+@no_wrap_up:
+		jmp @save_exit
+@check_a:
+		cmp #A_Button
+		bne @exit
+		jmp pause_menu_activate
+@save_exit:
+		stx WRAM_MenuIndex
+@exit:
 		rts
 
 PauseMenu:
@@ -1130,6 +1343,18 @@ PauseMenu:
 		sta GamePauseStatus
 		lsr
 		bcc @clear_menu
+		lda #0
+		sta WRAM_MenuIndex
+		ldx #3
+		ldy #$ff
+@save_more_sprite:
+		lda $200, y
+		sta WRAM_Temp, x
+		dey
+		dex
+		bpl @save_more_sprite
+
+
 		lda GamePauseStatus
 		ora #MENU_ROW_COUNT<<1 ; 0xB<<1
 		sta GamePauseStatus
@@ -1159,61 +1384,88 @@ PracticeOnFrame:
 		cmp #$03
 		bne @exit
 @check_pause:
+		; TODO RENABLE
 		; jsr HandleRestarts ; Wont return if it did something
 		jsr PauseMenu
 @exit:
 		jmp ReturnBank
 
-.ifdef KOASKDOASKD
-DoPowerupChange:
-				lda LastInputBits
-				bne SkipMainOper
-				lda SavedJoypad1Bits
-				cmp #Down_Dir
-				bne NoToggleSize
-				lda PlayerSize
-				eor #1
-				sta PlayerSize
-				beq DrawBigMario
-				bne UpdateMarioGraphics
-NoToggleSize:
-				cmp #Left_Dir
-				bne SkipMainOper
-				lda PlayerStatus
-				cmp #2
-				bne FindMarioState
-				ldx #1
-				stx PlayerSize
-				dex
-				stx PlayerStatus
-				jmp UpdateMarioGraphics 
-FindMarioState:
-				ldx #0
-				ldy #1
-				cmp #1
-				bne MakeFireMarioOrBig
-				iny
-MakeFireMarioOrBig:
-				stx PlayerSize
-				sty PlayerStatus
-DrawBigMario:
-				ldy #6
-UpdateMarioGraphics:
-				jsr GrowPlayer
-				jsr PlayerGfxProcessing
-				jsr GetPlayerColors
-				lda PlayerStatus
-				asl
-				sta $0
-				lda SaveStateFlags
-				and #$F8
-				ora PlayerSize
-				ora $0
-				sta SaveStateFlags
-				jmp SkipMainOper
-.endif
+PrintHexByte:
+		sta $0
+		lsr
+		lsr
+		lsr
+		lsr
+		jsr DoNibble
+		lda $0
+DoNibble:
+		and #$0f
+		sta VRAM_Buffer1+3,x
+		inx
+DontUpdateSockHash:
+		rts
 
-	.include "utils.inc"
+ForceUpdateSockHashInner:
+		lda SprObject_X_MoveForce ; Player force
+		sta $3
+		lda SprObject_X_Position ; Player X
+		sta $2
+		lda SprObject_PageLoc ; Player page
+		sta $1
+		lda SprObject_Y_Position ; Player Y
+		eor #$ff
+		lsr
+		lsr
+		lsr
+		bcc something_or_other
+		pha
+		clc
+		lda #$80
+		adc $3
+		sta $3
+		lda $2
+		adc #2
+		sta $2
+		lda $1
+		adc #0
+		sta $1
+		pla
+something_or_other:
+		sta $04
+		asl
+		asl
+		adc $04
+		adc $2
+		sta $2
+		lda $1
+		adc #0
+		sta $1
+		ldx VRAM_Buffer1_Offset 
+		bne skip_sock_hash
+draw_sock_hash:
+		lda #$20
+		sta VRAM_Buffer1
+		lda #$62 ;
+		sta VRAM_Buffer1+1
+		lda #$06 ; len
+		sta VRAM_Buffer1+2
+		ldx #0
+		lda $1
+		jsr PrintHexByte
+		lda $2
+		jsr PrintHexByte
+		lda $3
+		jsr PrintHexByte
+		lda #0
+		sta VRAM_Buffer1+3, x
+		lda #$09
+		sta VRAM_Buffer1_Offset
+skip_sock_hash:
+		rts
+
+ForceUpdateSockHash:
+		jsr ForceUpdateSockHashInner
+		jmp ReturnBank
 
 
 

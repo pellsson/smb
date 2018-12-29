@@ -1,5 +1,7 @@
 BANK_SELECTED = $07ff
 
+.define PF_SockMode $01
+
 TITLE_INIT		= $01
 
 BANK_LOADER		= 0

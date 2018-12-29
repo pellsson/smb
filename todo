@@ -1,5 +1,5 @@
 TODO:
--- Make ingame menu
+-- Make in-game menu reflect
 -- Create a common RAM section for all practice stuff
 -- Show sockfolder digit thign
 -- Enable sockhash
@@ -13,10 +13,15 @@ TODO:
 -- Add start on second quest (for smborg).
 -- Only read player 1 joypads (faster).
 -- time-up looks like ass
+-- Everything jitters and spasms the fuck out.
 -- intermedite always shows time-up. I think...
 -- menu @ border fucks up completely.
 -- Make start menu reflect
--- Make in-game menu reflect
+-- User var
+-- Exit to intro @ title
+-- jsr HandleRestarts disabled in practiceonframe
+-- Color changes on size if underground (something with AreaType?)
+-- Change hero runtime in LL requires patching
 
 -- Kill 0x80 in pause. Its retarded and does fuck all
 -- Kill demo for LL
@@ -26,3 +31,8 @@ TODO:
 DONE:
 -- Completely freeze state on pause
 -- Common title screen???
+-- Make ingame menu
+-- Temp region in RAM
+
+big: $C8?
+small: b8

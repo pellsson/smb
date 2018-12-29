@@ -9,9 +9,12 @@
 Start:	; Dummy
 NonMaskableInterrupt: ; Dummy
 
+	.include "utils.inc"
 	.include "sound.asm"
+	.include "game.asm"
 	.include "practice.asm"
 
+	.export ForceUpdateSockHash
 	.export PracticeOnFrame
 	.export PracticeTitleMenu
 	.export SoundEngine

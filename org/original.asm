@@ -1,12 +1,13 @@
 ;
 ; Practice ROM
 ;
-  .include "shared.inc"
-	.include "org.inc"
-  .include "mario.inc"
-	.include "macros.inc"
-	.org $8000
-  .segment "bank3"
+		.include "shared.inc"
+		.include "org.inc"
+		.include "mario.inc"
+		.include "macros.inc"
+		.include "wram.inc"
+		.org $8000
+		.segment "bank3"
 
 Start:
              lda #%00010000               ;init PPU control register 1 
@@ -139,41 +140,6 @@ SkipMainOper:
                ora #%10000000            ;reactivate NMIs
                sta PPU_CTRL_REG1
                rti                       ;we are done until the next frame!
-
-;
-; The Practice Functions
-;
-;-------------------------------------------------------------------------------------
-
-ToggleRenderMode:
-		lda PracticeFlags
-		eor #$80
-		sta PracticeFlags
-		and #$80
-		bne SockMode
-		;
-		; If we change back to rule mode we must remove top sock bytes
-		;
-		ldx VRAM_Buffer_Offset
-		lda #$20
-		sta VRAM_Buffer1,x
-		lda #$62 ;
-		sta VRAM_Buffer1+1,x
-		lda #$02 ; len
-		sta VRAM_Buffer1+2,x
-		lda #$24
-		sta VRAM_Buffer1+3, x
-		sta VRAM_Buffer1+4, x
-		lda #$00
-		sta VRAM_Buffer1+5, x
-		lda VRAM_Buffer1_Offset
-		clc
-		adc #$05
-		sta VRAM_Buffer1_Offset
-		jmp Enter_RedrawFrameNumbers
-SockMode:
-		jmp ForceUpdateSockHash
-
 
 ;-------------------------------------------------------------------------------------
 ;$00 - vram buffer address table low, also used for pseudorandom bit
@@ -4270,7 +4236,8 @@ ExitEng:      rts                        ;and after all that, we're finally done
 ;-------------------------------------------------------------------------------------
 
 ScrollHandler:
-			jsr UpdateSockHash
+			DoUpdateSockHash
+
             lda Player_X_Scroll       ;load value saved here
             clc
             adc Platform_X_Scroll     ;add value used by left/right platforms
@@ -6630,88 +6597,6 @@ DelayToAreaEnd:
 
 StarFlagExit2:
       rts                       ;otherwise leave
-
-;-------------------------------------------------------------------------------------
-PrintHexByte:
-		sta $0
-		lsr
-		lsr
-		lsr
-		lsr
-		jsr DoNibble
-		lda $0
-DoNibble:
-		and #$0f
-		sta VRAM_Buffer1+3,x
-		inx
-DontUpdateSockHash:
-		rts
-
-UpdateSockHash:
-		lda PracticeFlags
-		and #$80
-		beq DontUpdateSockHash
-		lda IntervalTimerControl
-		and #3
-		cmp #2
-		bne DontUpdateSockHash
-ForceUpdateSockHash:      
-		lda SprObject_X_MoveForce ; Player force
-		sta $3
-		lda SprObject_X_Position ; Player X
-		sta $2
-		lda SprObject_PageLoc ; Player page
-		sta $1
-		lda SprObject_Y_Position ; Player Y
-		eor #$ff
-		lsr
-		lsr
-		lsr
-		bcc something_or_other
-		pha
-		clc
-		lda #$80
-		adc $3
-		sta $3
-		lda $2
-		adc #2
-		sta $2
-		lda $1
-		adc #0
-		sta $1
-		pla
-something_or_other:
-		sta $04
-		asl
-		asl
-		adc $04
-		adc $2
-		sta $2
-		lda $1
-		adc #0
-		sta $1
-		ldx VRAM_Buffer1_Offset 
-		bne skip_sock_hash
-draw_sock_hash:
-		lda #$20
-		sta VRAM_Buffer1
-		lda #$62 ;
-		sta VRAM_Buffer1+1
-		lda #$06 ; len
-		sta VRAM_Buffer1+2
-		ldx #0
-		lda $1
-		jsr PrintHexByte
-		lda $2
-		jsr PrintHexByte
-		lda $3
-		jsr PrintHexByte
-		lda #0
-		sta VRAM_Buffer1+3, x
-		lda #$09
-		sta VRAM_Buffer1_Offset
-skip_sock_hash:
-		rts
 
 ;-------------------------------------------------------------------------------------
 ;$04 - address low to jump address
