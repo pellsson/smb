@@ -19,6 +19,7 @@ TODO:
 -- Rework .word LoadSelectedWorld - CANT ADD STATES!!!!
 -- GamePauseStats | 2 hack? Rework? Also, hit sprite0 when pre-save/-load
 -- Make powerup reflect on title screen?
+-- Pause menu: P-UP should also redraw SIZE
 
 -- Kill 0x80 in pause. Its retarded and does fuck all
 -- Kill demo for LL

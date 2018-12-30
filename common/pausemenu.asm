@@ -1,4 +1,5 @@
-.define UservarIndex WRAM_Temp+4
+.define UservarIndex0 WRAM_Temp+4
+.define UservarIndex1 WRAM_Temp+6
 
 .define MENU_ROW_LENGTH 16
 .define MENU_ROW_COUNT 12
@@ -509,7 +510,8 @@ PauseMenu:
 		dex
 		bpl @save_more_sprite
 		lda #0
-		sta UservarIndex
+		sta UservarIndex0
+		sta UservarIndex1
 		lda GamePauseStatus
 		ora #MENU_ROW_COUNT<<2
 		sta GamePauseStatus
