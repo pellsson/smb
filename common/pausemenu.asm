@@ -1,5 +1,7 @@
-.define UservarIndex0 WRAM_Temp+4
-.define UservarIndex1 WRAM_Temp+6
+.define UservarIndex0	WRAM_Temp+4
+.define UservarIndex1	WRAM_Temp+6
+
+CustomRow = WRAM_Temp+$10
 
 .define MENU_ROW_LENGTH 16
 .define MENU_ROW_COUNT 12
@@ -27,8 +29,6 @@ pm_show_rule_row:
 pm_show_sock_row:
 	.byte $24, " SHOW  SOCK ", $24, $24, $24
 
-pm_user_row:
-	.byte $24, " USR   7 F F", $24, $24, $24
 pm_star_row:
 	.byte $24, " GET STAR   ", $24, $24, $24
 pm_save_row:
@@ -104,12 +104,68 @@ _draw_pm_row_4:
 	@is_sock:
 		rts
 
+copy_user_row:
+		ldx #(MENU_ROW_LENGTH - 1)
+@copy_more:
+		lda pm_empty_row, x
+		sta CustomRow, x
+		dex
+		bpl @copy_more
+		lda $02
+		sta CustomRow+5
+		lda $01
+		and #$F
+		sta CustomRow+$08
+		lda $00
+		and #$F0
+		lsr
+		lsr
+		lsr
+		lsr
+		sta CustomRow+$09
+		lda $00
+		and #$0F
+		sta CustomRow+$0A
+		rts
+
 _draw_pm_row_5:
-		row_dispatch $2120, pm_user_row
+		lda BANK_SELECTED
+		cmp #BANK_ORG
+		beq @is_org
+		lda WRAM_LostUser0
+		ldx WRAM_LostUser0+1
+		jmp @save
+@is_org:
+		lda WRAM_OrgUser0
+		ldx WRAM_OrgUser0+1
+@save:
+		sta $00
+		stx $01
+		lda #$0A
+		sta $02
+		jsr copy_user_row
+		row_dispatch $2120, CustomRow
 		rts
+
 _draw_pm_row_6:
-		row_dispatch $2140, pm_empty_row
+		lda BANK_SELECTED
+		cmp #BANK_ORG
+		beq @is_org
+		lda WRAM_LostUser0
+		ldx WRAM_LostUser0+1
+		jmp @save
+@is_org:
+		lda WRAM_OrgUser0
+		ldx WRAM_OrgUser0+1
+@save:
+		sta $00
+		stx $01
+		lda #$0B
+		sta $02
+		jsr copy_user_row
+		row_dispatch $2140, CustomRow
 		rts
+
 _draw_pm_row_7:
 		row_dispatch $2160, pm_star_row
 		rts
@@ -347,6 +403,18 @@ pm_give_star:
 		sta AreaMusicQueue
 		rts
 
+pm_low_user0:
+		lda WRAM_OrgUser0
+		clc
+		adc #1
+		and #$0F
+		sta $00
+		lda WRAM_OrgUser0
+		and #$F0
+		ora $00
+		sta WRAM_OrgUser0
+		rts
+
 pm_no_activation:
 		rts
 
@@ -355,7 +423,7 @@ pm_activation_slots:
 		.word pm_toggle_size
 		.word pm_toggle_hero
 		.word pm_toggle_show
-		.word pm_no_activation ; user
+		.word pm_low_user0 ; user
 		.word pm_no_activation ; blank
 		.word pm_give_star
 
@@ -379,7 +447,70 @@ pause_menu_activate:
 		sta $07
 		jmp draw_menu_row
 
+get_user_selected:
+		ldx WRAM_MenuIndex
+		lda BANK_SELECTED
+		cmp #BANK_ORG
+		beq @is_org
+		cpx #4
+		bne @is_0
+		lda #<WRAM_LostUser1
+		ldx #>WRAM_LostUser1
+		jmp @save
+@is_0:
+		lda #<WRAM_LostUser0
+		ldx #>WRAM_LostUser0
+		jmp @save
+@is_org:
+		cpx #4
+		beq @is_org_0
+		lda #<WRAM_OrgUser1
+		ldx #>WRAM_OrgUser1
+		jmp @save
+@is_org_0:
+		lda #<WRAM_OrgUser0
+		ldx #>WRAM_OrgUser0
+@save:
+		sta $00
+		stx $01
+		ldy #0
+		rts
+
 do_uservar_input:
+		lda SavedJoypad1Bits
+		cmp #Left_Dir
+		bne @check_right
+		jsr get_user_selected
+		iny
+		lda ($00), y
+		clc
+		adc #1
+		and #7
+		sta ($00), y
+		jmp @redraw
+@check_right:
+		cmp #Right_Dir
+		bne @exit
+		jsr get_user_selected
+		lda ($00), y
+		clc
+		adc #$10
+		and #$F0
+		sta $03
+		jsr get_user_selected
+		lda ($00), y
+		and #$0F
+		ora $03
+		sta ($00), y
+@redraw:
+		ldx WRAM_MenuIndex
+		inx
+		txa
+		jsr prepare_draw_row
+		lda #0
+		sta $07
+		jmp draw_menu_row
+@exit:
 		rts
 
 
@@ -463,8 +594,8 @@ RunPauseMenu:
 		stx WRAM_MenuIndex
 @exit:
 		ldx WRAM_MenuIndex
-		cmp #4
-		beq @doneso
+		cpx #4
+		bne @doneso
 		jmp do_uservar_input
 @doneso:
 		rts

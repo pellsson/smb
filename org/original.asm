@@ -138,6 +138,7 @@ SkipSprite0:   lda HorizontalScroll      ;set scroll registers from variables
                bne SkipMainOper
                jsr OperModeExecutionTree ;otherwise do one of many, many possible subroutines
 SkipMainOper:
+               jsr Enter_RedrawUserVars
                lda PPU_STATUS            ;reset flip-flop
                pla
                ora #%10000000            ;reactivate NMIs
@@ -4197,7 +4198,6 @@ ProcELoop:    stx ObjectOffset           ;put incremented offset in X as enemy o
               jsr ProcessWhirlpools      ;process whirlpools
               jsr FlagpoleRoutine        ;process the flagpole
               jsr RunGameTimer           ;count down the game timer
-              jsr Enter_RedrawPosition
               jsr ColorRotation          ;cycle one of the background colors
               lda Player_Y_HighPos
               cmp #$02                   ;if player is below the screen, don't bother with the music

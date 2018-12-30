@@ -4412,7 +4412,6 @@ ProcELoop:
 		jsr ProcessWhirlpools
 		jsr FlagpoleRoutine
 		jsr RunGameTimer
-		jsr Enter_RedrawPosition
 		jsr ColorRotation
 		lda LoadListIndex
 		beq loc_7A97

@@ -11,6 +11,17 @@ WRAM_PracticeFlags:
 WRAM_Temp:
 	.res $64, $00
 
+; Persistent
+
+WRAM_OrgUser0:
+	.word 0
+WRAM_OrgUser1:
+	.word 0
+WRAM_LostUser0:
+	.word 0
+WRAM_LostUser1:
+	.word 0
+
 WRAM_OrgRules:
 	.word 0, 0, 0, 0 ; World 1
 	.word 0, 0, 0, 0 ; World 2

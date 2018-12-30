@@ -21,7 +21,7 @@ NonMaskableInterrupt: ; Dummy
 	.export PracticeTitleMenu
 	.export SoundEngine
 	.export AdvanceToRule
-	.export RedrawPosition
+	.export RedrawUserVars
 	.export RedrawAll
 	.export UpdateFrameRule
 	.export WritePracticeTop

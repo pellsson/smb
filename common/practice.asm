@@ -326,22 +326,6 @@ SaveFrameCounter:
 
 ;-------------------------------------------------------------------------------------
 
-RedrawPosition:
-		lda VRAM_Buffer1_Offset
-		bne DontRedrawPosition
-		lda Player_Rel_XPos
-		jsr DivByTen
-		sta DisplayDigits+POSITION_OFFSET
-		txa
-		jsr DivByTen
-		sta DisplayDigits+POSITION_OFFSET-1
-		stx DisplayDigits+POSITION_OFFSET-2
-		lda #$a5
-		jsr PrintStatusBarNumbers
-DontRedrawPosition:
-		jmp ReturnBank
-
-
 StatusBarData:
 		.byte $cb, $04 ; top score display on title screen
 		.byte $64, $04 ; player score
@@ -414,7 +398,7 @@ ExitOutputN:
 
 TopText:
 	text_block $2044, "RULE * FRAME"
-	text_block $2051, "USR POS TIME RM"
+	text_block $2051, " A   B  TIME R "
 	.byte $20, $68, $05, $24, $fe, $24, $2e, $29 ; score trailing digit and coin display
 	.byte $23, $c0, $7f, $aa ; attribute table data, clears name table 0 to palette 2
 	.byte $23, $c2, $01, $ea ; attribute table data, used for coin icon in status bar
@@ -1133,3 +1117,40 @@ SaveState:
 		lda #0
 		sta DisableScreenFlag
 		rts
+
+
+.macro RedrawUserVar name, off
+		lda name
+		sta $00
+		lda name+1
+		sta $01
+		lda ($00), y
+		jsr DivByTen
+		sta VRAM_Buffer1+off+2
+		txa
+		jsr DivByTen
+		sta VRAM_Buffer1+off+1
+		stx VRAM_Buffer1+off+0
+.endmacro
+
+RedrawUserVars:
+		ldy VRAM_Buffer1_Offset
+		bne @dont_redraw
+
+		lda #$20
+		sta VRAM_Buffer1
+		lda #$71
+		sta VRAM_Buffer1+1
+		lda #$07
+		sta VRAM_Buffer1+2
+		lda #$24
+		sta VRAM_Buffer1+6
+
+		RedrawUserVar WRAM_OrgUser0, 3
+		RedrawUserVar WRAM_OrgUser1, 7
+
+		sty VRAM_Buffer1+$0A
+@dont_redraw:
+		jmp ReturnBank
+
+

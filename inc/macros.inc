@@ -45,10 +45,10 @@
 		jsr SetBankFromA
 		jmp WritePracticeTop
 
-	Enter_RedrawPosition:
+	Enter_RedrawUserVars:
 		lda #BANK_COMMON
 		jsr SetBankFromA
-		jmp RedrawPosition
+		jmp RedrawUserVars
 
 	Enter_RedrawAll:
 		lda #BANK_COMMON

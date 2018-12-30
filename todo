@@ -10,7 +10,6 @@ TODO:
 -- Add start on second quest (for smborg).
 -- time-up looks like ass
 -- intermedite always shows time-up. I think...
--- User var
 -- jsr HandleRestarts disabled in practiceonframe
 -- Color changes on size if underground (something with AreaType?)
 -- Change hero runtime in LL requires patching
@@ -20,6 +19,7 @@ TODO:
 -- GamePauseStats | 2 hack? Rework? Also, hit sprite0 when pre-save/-load
 -- Make powerup reflect on title screen?
 -- Pause menu: P-UP should also redraw SIZE
+-- Kill PrintStatusBarNumbers
 
 -- Kill 0x80 in pause. Its retarded and does fuck all
 -- Kill demo for LL
@@ -27,6 +27,7 @@ TODO:
 -- Kill GameMenuRoutine_NEW (and friends) PrepareDrawTitleScreen
 
 DONE:
+-- User vars
 -- Only read player 1 joypads (faster).
 -- Everything jitters and spasms the fuck out.
 -- menu @ border fucks up completely.
