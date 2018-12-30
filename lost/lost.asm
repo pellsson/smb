@@ -13,7 +13,7 @@
 		jmp FDS_LoadFiles
 
 WRAM_DefaultState:
-		.incbin "wram/init.bin"
+		;.incbin "wram/init.bin"
 
 Initialize_WRAM:
 		; ldx #Initialize_WRAM-WRAM_DefaultState

@@ -1,6 +1,8 @@
 BANK_SELECTED = $07ff
 
 .define PF_SockMode $01
+.define PF_SaveState $02
+.define PF_LoadState $04
 
 TITLE_INIT		= $01
 
@@ -27,5 +29,13 @@ PowerUps = $07e3 ; Previously unused?
 
 .ifndef RESTART_GAME_BUTTONS
 	.define RESTART_GAME_BUTTONS Select_Button|Down_Dir
+.endif
+
+.ifndef SAVE_STATE_BUTTONS
+	.define SAVE_STATE_BUTTONS Select_Button|Right_Dir
+.endif
+
+.ifndef LOAD_STATE_BUTTONS
+	.define LOAD_STATE_BUTTONS Select_Button|Left_Dir
 .endif
 

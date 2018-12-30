@@ -1,13 +1,45 @@
+ReadJoypads: 
+		lda #$01               ;reset and clear strobe of joypad ports
+		sta JOYPAD_PORT
+		lsr
+		sta JOYPAD_PORT
+		ldy #$08
+PortLoop:
+	pha
+		lda JOYPAD_PORT
+		sta $00                ;check d1 and d0 of port output
+		lsr                    ;this is necessary on the old
+		ora $00                ;famicom systems in japan
+		lsr
+	pla
+		rol                    ;rotate bit from carry flag
+		dey
+		bne PortLoop           ;count down bits left
+		sta SavedJoypadBits
+	pha
+		and #%00110000
+		and JoypadBitMask
+		beq Save8Bits
+	pla
+		and #%11001111
+		sta SavedJoypadBits
+		rts
+Save8Bits:
+	pla
+		sta JoypadBitMask
+		rts
+
+
 mario_colors:
 		.byte $3F, $10, $04, $22, $16, $27, $18, $00 ; mario
 		.byte $3F, $10, $04, $22, $30, $27, $19, $00 ; luigi
 		.byte $3F, $10, $04, $22, $37, $27, $16, $00 ; fiery
 
 mario_gfx:
-		.byte $c4, $32, $00, $90
-		.byte $c4, $33, $00, $98
-		.byte $cc, $4f, $00, $90
-		.byte $cc, $4f, $40, $98
+		.byte $c0, $32, $00, $A0
+		.byte $c0, $33, $00, $A8
+		.byte $c8, $4f, $00, $A0
+		.byte $c8, $4f, $40, $A8
 
 DrawTitleMario:
 		ldx #4*4-1

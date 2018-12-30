@@ -12,6 +12,7 @@ NonMaskableInterrupt: ; Dummy
 	.include "utils.inc"
 	.include "sound.asm"
 	.include "game.asm"
+	.include "pausemenu.asm"
 	.include "practice.asm"
 
 	.export ForceUpdateSockHash

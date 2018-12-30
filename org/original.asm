@@ -86,8 +86,8 @@ InitBuffer:    ldx VRAM_Buffer_Offset,y
                jsr Enter_PracticeOnFrame
 
                lda GamePauseStatus       ;check for pause status
-               lsr
-               bcs PauseSkip
+               and #3
+               bne PauseSkip
                lda TimerControl          ;if master timer control not set, decrement
                beq DecTimers             ;all frame and interval timers
                dec TimerControl
@@ -107,14 +107,17 @@ SkipExpTimer:  dex                       ;move onto next timer
 NoDecTimers:   inc FrameCounter          ;increment frame counter
                jsr AdvanceRandom
 PauseSkip:
+               lda GamePauseStatus
+               and #$02
+               bne SkipSprite0
                lda Sprite0HitDetectFlag  ;check for flag here
                beq SkipSprite0
 Sprite0Clr:    lda PPU_STATUS            ;wait for sprite 0 flag to clear, which will
                and #%01000000            ;not happen until vblank has ended
                bne Sprite0Clr
                lda GamePauseStatus       ;if in pause mode, do not bother with sprites at all
-               lsr
-               bcs Sprite0Hit
+               and #3
+               bne Sprite0Hit
                jsr MoveSpritesOffscreen
                jsr SpriteShuffler
 Sprite0Hit:    lda PPU_STATUS            ;do sprite #0 hit detection
@@ -131,14 +134,17 @@ SkipSprite0:   lda HorizontalScroll      ;set scroll registers from variables
                pha
                sta PPU_CTRL_REG1
                lda GamePauseStatus       ;if in pause mode, do not perform operation mode stuff
-               lsr
-               bcs SkipMainOper
+               and #3
+               bne SkipMainOper
                jsr OperModeExecutionTree ;otherwise do one of many, many possible subroutines
 SkipMainOper:
                lda PPU_STATUS            ;reset flip-flop
                pla
                ora #%10000000            ;reactivate NMIs
                sta PPU_CTRL_REG1
+               lda GamePauseStatus
+               and #$FD
+               sta GamePauseStatus
                rti                       ;we are done until the next frame!
 
 ;-------------------------------------------------------------------------------------

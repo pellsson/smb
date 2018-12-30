@@ -226,3 +226,14 @@ WRAM_PatchMarioName0:
 		.byte $1B
 		.byte $22
 		.byte $FF
+
+WRAM_SaveRAM:
+		.res $800, $00
+
+WRAM_SaveNT:
+		.res $800, $00
+
+WRAM_SavePAL:
+		.res $20, $00
+
+

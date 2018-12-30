@@ -1,27 +1,24 @@
 TODO:
--- Make in-game menu reflect
+-- Menu items reworked + finalized!
 -- Create a common RAM section for all practice stuff
--- Show sockfolder digit thign
--- Enable sockhash
--- Save states
--- Resume in lost levels
 -- Use common digitsmathfuckery
 -- LL Restart level 
 -- LL Restart game
+-- Resume in lost levels
+-- Save-hotkeys seem dead again
 -- Maybe do something about coin-firework-thing in LL
--- Fix intro
 -- Add start on second quest (for smborg).
--- Only read player 1 joypads (faster).
 -- time-up looks like ass
--- Everything jitters and spasms the fuck out.
 -- intermedite always shows time-up. I think...
--- menu @ border fucks up completely.
--- Make start menu reflect
 -- User var
--- Exit to intro @ title
 -- jsr HandleRestarts disabled in practiceonframe
 -- Color changes on size if underground (something with AreaType?)
 -- Change hero runtime in LL requires patching
+-- Select before right doesnt work
+-- Check if save OK & compatible.
+-- Rework .word LoadSelectedWorld - CANT ADD STATES!!!!
+-- GamePauseStats | 2 hack? Rework? Also, hit sprite0 when pre-save/-load
+-- Make powerup reflect on title screen?
 
 -- Kill 0x80 in pause. Its retarded and does fuck all
 -- Kill demo for LL
@@ -29,10 +26,19 @@ TODO:
 -- Kill GameMenuRoutine_NEW (and friends) PrepareDrawTitleScreen
 
 DONE:
+-- Only read player 1 joypads (faster).
+-- Everything jitters and spasms the fuck out.
+-- menu @ border fucks up completely.
 -- Completely freeze state on pause
 -- Common title screen???
 -- Make ingame menu
 -- Temp region in RAM
-
-big: $C8?
-small: b8
+-- Show sockfolder digit thign
+-- Enable sockhash
+-- Save states
+-- Fix intro
+-- Save Palete
+-- Make in-game menu reflect
+-- Make start menu reflect
+-- Exit to intro @ title (nah?)
+-- Menu very broken
