@@ -1,9 +1,6 @@
-	.include "text.inc"
 	.include "org.inc"
 	.include "lost.inc"
 	.include "wram.inc"
-
-	.define UservarIndex WRAM_Temp+4
 
 ;
 ; Practice stuff

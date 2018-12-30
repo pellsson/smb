@@ -1,3 +1,5 @@
+.define UservarIndex WRAM_Temp+4
+
 .define MENU_ROW_LENGTH 16
 .define MENU_ROW_COUNT 12
 
@@ -355,9 +357,6 @@ pm_activation_slots:
 		.word pm_no_activation ; user
 		.word pm_no_activation ; blank
 		.word pm_give_star
-
-
-
 
 pause_run_activation:
 		lda WRAM_MenuIndex

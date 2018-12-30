@@ -2,6 +2,7 @@
 	.include "shared.inc"
 	.include "mario.inc"
 	.include "macros.inc"
+	.include "text.inc"
 
 	.org $8000
 	.segment "bank4"
