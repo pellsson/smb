@@ -4,7 +4,7 @@
 CustomRow = WRAM_Temp+$10
 
 .define MENU_ROW_LENGTH 16
-.define MENU_ROW_COUNT 12
+.define MENU_ROW_COUNT 11
 
 pm_empty_row:
 	.byte "                "
@@ -31,14 +31,14 @@ pm_show_sock_row:
 
 pm_star_row:
 	.byte $24, " GET STAR   ", $24, $24, $24
-pm_save_row:
-	.byte $24, " SAVE STATE ", $24, $24, $24
-pm_load_row:
-	.byte $24, " LOAD STATE ", $24, $24, $24
 pm_restart_row:
 	.byte $24, " RESTART LEV", $24, $24, $24
-pm_reset_row:
+pm_title_row:
 	.byte $24, " EXIT TITLE ", $24, $24, $24
+pm_intro_row:
+	.byte $24, " EXIT INTRO ", $24, $24, $24
+
+
 
 .macro row_dispatch ppu, data
 		lda #<ppu
@@ -151,12 +151,12 @@ _draw_pm_row_6:
 		lda BANK_SELECTED
 		cmp #BANK_ORG
 		beq @is_org
-		lda WRAM_LostUser0
-		ldx WRAM_LostUser0+1
+		lda WRAM_LostUser1
+		ldx WRAM_LostUser1+1
 		jmp @save
 @is_org:
-		lda WRAM_OrgUser0
-		ldx WRAM_OrgUser0+1
+		lda WRAM_OrgUser1
+		ldx WRAM_OrgUser1+1
 @save:
 		sta $00
 		stx $01
@@ -173,16 +173,13 @@ _draw_pm_row_8:
 		row_dispatch $23D8, pm_attr_data
 		inc $07
 		jsr draw_menu_row
-		row_dispatch $2180, pm_save_row
+		row_dispatch $2180, pm_restart_row
 		rts
 _draw_pm_row_9:
-		row_dispatch $21A0, pm_load_row
+		row_dispatch $21A0, pm_title_row
 		rts
 _draw_pm_row_10:
-		row_dispatch $21C0, pm_restart_row
-		rts
-_draw_pm_row_11:
-		row_dispatch $21E0, pm_reset_row
+		row_dispatch $21C0, pm_intro_row
 		rts
 
 pm_row_initializers:
@@ -197,7 +194,6 @@ pm_row_initializers:
 		.word _draw_pm_row_8
 		.word _draw_pm_row_9
 		.word _draw_pm_row_10
-		.word _draw_pm_row_11
 
 prepare_draw_row:
 		asl ; *=2
@@ -397,23 +393,35 @@ pm_toggle_show:
 		jmp ForceUpdateSockHashInner
 
 pm_give_star:
-		lda #$23
+		lda #$FF
 		sta StarInvincibleTimer
 		lda #StarPowerMusic
 		sta AreaMusicQueue
 		rts
 
-pm_low_user0:
-		lda WRAM_OrgUser0
+pm_low_user:
+		jsr get_user_selected
+		lda ($00), y
 		clc
 		adc #1
 		and #$0F
-		sta $00
-		lda WRAM_OrgUser0
+		sta $03
+		lda ($00), y
 		and #$F0
-		ora $00
-		sta WRAM_OrgUser0
+		ora $03
+		sta ($00), y
 		rts
+
+pm_restart_level:
+		jmp RequestRestartLevel
+
+pm_exit_intro:
+		lda #BANK_LOADER
+		jmp StartBank
+
+pm_exit_title:
+		lda BANK_SELECTED
+		jmp StartBank
 
 pm_no_activation:
 		rts
@@ -423,10 +431,13 @@ pm_activation_slots:
 		.word pm_toggle_size
 		.word pm_toggle_hero
 		.word pm_toggle_show
-		.word pm_low_user0 ; user
-		.word pm_no_activation ; blank
+		.word pm_low_user ; user
+		.word pm_low_user ;
 		.word pm_give_star
-
+		.word pm_exit_intro
+		.word pm_exit_title
+		.word pm_restart_level
+		
 pause_run_activation:
 		lda WRAM_MenuIndex
 		asl
@@ -561,11 +572,7 @@ RunPauseMenu:
 @move_cursor_down:
 		ldx WRAM_MenuIndex
 		inx
-		cpx #5
-		bne @not_gap
-		inx
-@not_gap:
-		cpx #$0B
+		cpx #MENU_ROW_COUNT-1
 		bmi @no_wrap_down
 		ldx #0
 @no_wrap_down:
@@ -577,13 +584,9 @@ RunPauseMenu:
 		bne @check_a
 		ldx WRAM_MenuIndex
 		dex
-		cpx #5
-		bne @not_gap_up
-		dex
-@not_gap_up:
 		cpx #0
 		bpl @no_wrap_up
-		ldx #$0A
+		ldx #MENU_ROW_COUNT-2
 @no_wrap_up:
 		jmp @save_exit
 @check_a:
@@ -595,7 +598,9 @@ RunPauseMenu:
 @exit:
 		ldx WRAM_MenuIndex
 		cpx #4
-		bne @doneso
+		bcc @doneso
+		cpx #6
+		bcs @doneso ;4-5
 		jmp do_uservar_input
 @doneso:
 		rts

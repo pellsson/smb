@@ -1,16 +1,18 @@
 TODO:
 -- Menu items reworked + finalized!
+-- Save-hotkeys seem dead again
+
+-- Save areaptr and areatype in LOST
+-- Mushroom gone from title
 -- Create a common RAM section for all practice stuff
 -- Use common digitsmathfuckery
 -- LL Restart level 
 -- LL Restart game
 -- Resume in lost levels
--- Save-hotkeys seem dead again
 -- Maybe do something about coin-firework-thing in LL
 -- Add start on second quest (for smborg).
 -- time-up looks like ass
 -- intermedite always shows time-up. I think...
--- jsr HandleRestarts disabled in practiceonframe
 -- Color changes on size if underground (something with AreaType?)
 -- Change hero runtime in LL requires patching
 -- Select before right doesnt work
@@ -19,14 +21,23 @@ TODO:
 -- GamePauseStats | 2 hack? Rework? Also, hit sprite0 when pre-save/-load
 -- Make powerup reflect on title screen?
 -- Pause menu: P-UP should also redraw SIZE
--- Kill PrintStatusBarNumbers
+-- Predefined rules
 
+-- Kill all old variables
+-- Kill PrintStatusBarNumbers
 -- Kill 0x80 in pause. Its retarded and does fuck all
 -- Kill demo for LL
 -- Kill old menu in ORG
 -- Kill GameMenuRoutine_NEW (and friends) PrepareDrawTitleScreen
+-- Kill EraseStartRule
+
+0x80 & flags == saved
+
 
 DONE:
+-- jsr HandleRestarts disabled in practiceonframe
+-- HandleSaveState & Enter_AdvanceToRule SAME FUNCTION
+-- Uservar + LL uservar
 -- User vars
 -- Only read player 1 joypads (faster).
 -- Everything jitters and spasms the fuck out.
@@ -44,3 +55,4 @@ DONE:
 -- Make start menu reflect
 -- Exit to intro @ title (nah?)
 -- Menu very broken
+

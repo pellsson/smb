@@ -25,14 +25,9 @@ PowerUpFrames				= $04	; Anywhere thats temporary
 LastInputBits				= $075a ; Previously NumberOfLives
 FirstTimeInit				= $075e ; Previously CoinTally
 MenuSelection				= $077a ; Previously NumberOfPlayers
-SaveFrameRuleData			= $07d2 ; Previously unused? :o
-SaveIntervalTimerControl	= $07d7 ; Previously DisplayDigits[0]
 FrameRuleData				= $07df ; Previously in score somewhere
 SaveStateFlags				= $07fc ; Previously WorldSelectEnableFlag
-SaveFrame					= $07fd ; Previously ContinueWorld
-SavedRandomData				= $07ed
 SavedEnterTimer				= $07f7
-PracticeFlags				= $07f6
 
 STATUS_BAR_OFFSET = $02
 RULE_COUNT_OFFSET = $0b

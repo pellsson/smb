@@ -7,6 +7,22 @@ WRAM_MenuIndex:
 
 WRAM_PracticeFlags:
 	.byte $00
+WRAM_LevelAreaPointer:
+	.byte $00
+WRAM_LevelAreaType:
+	.byte $00
+WRAM_LevelIntervalTimerControl:
+	.byte $00
+WRAM_LevelFrameCounter:
+	.byte $00
+WRAM_LevelPlayerStatus:
+	.byte $00
+WRAM_LevelPlayerSize:
+	.byte $00
+WRAM_LevelRandomData:
+	.res $07, $00
+WRAM_LevelFrameRuleData:
+	.res $04, $00
 
 WRAM_Temp:
 	.res $64, $00

@@ -60,10 +60,10 @@
 		jsr SetBankFromA
 		jmp RedrawFrameNumbers
 
-	Enter_AdvanceToRule:
+	Enter_ProcessLevelLoad:
 		lda #BANK_COMMON
 		jsr SetBankFromA
-		jmp AdvanceToRule
+		jmp ProcessLevelLoad
 
 
 .endmacro

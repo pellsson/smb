@@ -236,13 +236,16 @@ TitleScreenMode:
       .word InitializeGame
       .word ScreenRoutines
       .word PrimaryGameSetup
-      .word Enter_PracticeTitleMenu
-      .word LoadSelectedWorld
+      .word RunTitleScreen
 
 IsBigWorld:
   .byte 1, 1, 0, 1, 0, 0, 1, 0
 
-LoadSelectedWorld:
+RunTitleScreen:
+	jsr Enter_PracticeTitleMenu
+	lda OperMode_Task
+	cmp #4
+	bne @not_running:
     ldx LevelNumber
     ldy WorldNumber
     lda IsBigWorld, y
@@ -261,7 +264,8 @@ LoadSelectedWorld:
     inc OperMode
     lda #$00
     sta OperMode_Task
-    rts
+@not_running:
+	rts
 
 ;-------------------------------------------------------------------------------------
 
@@ -347,113 +351,6 @@ DoneShifting:
 	and #$03
 	sta PowerUps
 	jmp DrawPowerUps
-
-;-------
-LoadGameState:
-		lda #$80
-		sta GamePauseStatus
-		ldx #0
-		stx PauseModeFlag
-		inx
-		stx GamePauseTimer
-		inx
-		stx PauseSoundQueue
-		lda SaveStateFlags
-		ora #$40
-		sta SaveStateFlags
-		ldx #$00
-		stx NoteLengthTblAdder ; Less hysterical music
-		stx OperMode_Task
-		stx HalfwayPage
-		inx
-		stx OperMode
-		jsr LoadAreaPointer       ;get new level pointer
-		inc FetchNewGameTimerFlag ;set flag to load new game timer
-		;jsr ChgAreaMode           ;do sub to set secondary mode, disable screen and sprite 0
-		;           ;reset halfway page to 0 (beginning)
-ExitRestarts:
-		rts
-
-HandleRestarts:
-		lda JoypadBitMask
-		ora SavedJoypadBits
-		cmp #LOAD_GAME_BUTTONS
-		beq LoadGameState
-		cmp #RESTART_GAME_BUTTONS
-		bne ExitRestarts
-		jmp Start
-
-LoadSaveState:
-		lda #$0
-		sta PlayerChangeSizeFlag
-		lda SaveIntervalTimerControl
-		sta IntervalTimerControl
-		lda SaveFrame
-		sta FrameCounter
-		lda SaveStateFlags
-		lsr
-		and #3
-		sta PlayerStatus
-		lda SaveStateFlags
-		and #1
-		sta PlayerSize
-		ldx #6
-RestoreMoreRandom:
-		lda SavedRandomData, x
-		sta PseudoRandomBitReg,x
-		dex
-		bpl RestoreMoreRandom
-		ldx #3
-LoadNextRule:
-		lda SaveFrameRuleData, x
-		sta FrameRuleData, x
-		dex
-		bpl LoadNextRule
-
-		lda SaveStateFlags
-		and #$bf ; Nuke load flag :)
-		sta SaveStateFlags
-LuaHackDumpLoad: ; Euw...
-		rts
-
-LoadSaveStateProxy:
-		jmp LoadSaveState
-
-HandleSaveState:
-		lda OperMode
-		beq AlreadyHasSaveState
-		lda SaveStateFlags
-		and #$40
-		bne LoadSaveStateProxy
-		lda SaveStateFlags
-		and #$80
-		bne AlreadyHasSaveState
-SaveCurrentState:
-		lda IntervalTimerControl
-		sta SaveIntervalTimerControl
-		lda FrameCounter
-		sta SaveFrame
-		lda PlayerStatus
-		asl
-		ora PlayerSize
-		ora #$80
-		sta SaveStateFlags
-		ldx #6
-SaveMoreRandom:
-		lda PseudoRandomBitReg,x
-		sta SavedRandomData, x
-		dex
-		bpl SaveMoreRandom
-
-		ldx #$3
-SaveNextRule:
-		lda FrameRuleData, x
-		sta SaveFrameRuleData, x
-		dex
-		bpl SaveNextRule
-
-AlreadyHasSaveState:
-		rts
 
 ;-------------------------------------------------------------------------------------
 
@@ -1817,8 +1714,7 @@ PrimaryGameSetup:
       sta PlayerSize              ;set player's size to small
 
 SecondaryGameSetup:
-			jsr Enter_AdvanceToRule
-			jsr HandleSaveState
+			jsr Enter_ProcessLevelLoad
              lda #$00
              sta DisableScreenFlag     ;enable screen output
              tay
@@ -6767,12 +6663,14 @@ SprInitLoop:  sta Sprite_Y_Position,y ;write 248 into OAM data's Y coordinate
 LoadAreaPointer:
              jsr FindAreaPointer  ;find it and store it here
              sta AreaPointer
+             sta WRAM_LevelAreaPointer
 GetAreaType: and #%01100000       ;mask out all but d6 and d5
              asl
              rol
              rol
              rol                  ;make %0xx00000 into %000000xx
              sta AreaType         ;save 2 MSB as area type
+             sta WRAM_LevelAreaType
              rts
 
 FindAreaPointer:

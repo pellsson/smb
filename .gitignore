@@ -4,3 +4,4 @@ chr/intro.chr
 build
 inc/wram.inc
 wram/init.bin
+test.*

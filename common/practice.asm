@@ -179,10 +179,6 @@ prac_quick_using_64:
 SMALL_FIRE_FRAMES = $1b3
 
 AdvanceToRule:
-		jsr AdvanceToRuleInner
-		jmp ReturnBank
-
-AdvanceToRuleInner:
 		;
 		; Regardless of rule, always honor powerups
 		;
@@ -789,6 +785,7 @@ next_task:
 		inc OperMode_Task
 		jmp ReturnBank
 
+
 PracticeTitleMenu:
 		jsr draw_menu
 		lda JoypadBitMask
@@ -873,8 +870,17 @@ PracticeOnFrame:
 		jmp begin_save
 @no_begin_save:
 		cmp #LOAD_STATE_BUTTONS
-		bne @pause_things
+		bne @no_begin_load
 		jmp begin_load
+@no_begin_load:
+		cmp #RESTART_LEVEL_BUTTONS
+		bne @no_restart_level
+		jmp RequestRestartLevel
+@no_restart_level:
+		cmp #RESTART_GAME_BUTTONS
+		bne @pause_things
+		lda BANK_SELECTED
+		jmp StartBank
 @pause_things:
 		lda OperMode
 		cmp #VictoryModeValue
@@ -1152,5 +1158,97 @@ RedrawUserVars:
 		sty VRAM_Buffer1+$0A
 @dont_redraw:
 		jmp ReturnBank
+
+RequestRestartLevel:
+		lda #$80 ; REMOVE 0x80?
+		sta GamePauseStatus
+		ldx #0
+		stx PauseModeFlag
+		inx
+		stx GamePauseTimer
+		inx
+		stx PauseSoundQueue
+		lda WRAM_PracticeFlags
+		ora #PF_RestartLevel
+		sta WRAM_PracticeFlags
+		ldx #$00
+		stx NoteLengthTblAdder ; Less hysterical music
+		stx OperMode_Task
+		stx HalfwayPage
+		inx
+		stx OperMode
+		lda WRAM_LevelAreaPointer
+		sta AreaPointer
+		lda WRAM_LevelAreaType
+		sta AreaType ; Probably not needed but whatever
+		inc FetchNewGameTimerFlag
+		jmp ReturnBank
+
+RestartLevel:
+		lda #$0
+		sta PlayerChangeSizeFlag
+		lda WRAM_LevelIntervalTimerControl
+		sta IntervalTimerControl
+		lda WRAM_LevelFrameCounter
+		sta FrameCounter
+		lda WRAM_LevelPlayerStatus
+		sta PlayerStatus
+		lda WRAM_LevelPlayerSize
+		sta PlayerSize
+		ldx #6
+@copy_random:
+		lda WRAM_LevelRandomData, x
+		sta PseudoRandomBitReg,x
+		dex
+		bpl @copy_random
+		ldx #3
+@copy_rule:
+		lda WRAM_LevelFrameRuleData, x
+		sta FrameRuleData, x
+		dex
+		bpl @copy_rule
+
+		lda WRAM_PracticeFlags
+		and #PF_RestartLevel^$FF
+		sta WRAM_PracticeFlags
+		jmp ReturnBank
+
+ProcessLevelLoad:
+		jsr AdvanceToRule
+		lda OperMode
+		beq @done
+		lda WRAM_PracticeFlags
+		and #PF_RestartLevel
+		bne RestartLevel
+		lda WRAM_PracticeFlags
+		and #PF_LevelEntrySaved
+		bne @done
+		lda IntervalTimerControl
+		sta WRAM_LevelIntervalTimerControl
+		lda FrameCounter
+		sta WRAM_LevelFrameCounter
+		lda PlayerStatus
+		sta WRAM_LevelPlayerStatus
+		lda PlayerSize
+		sta WRAM_LevelPlayerSize
+		lda WRAM_PracticeFlags
+		ora #PF_LevelEntrySaved
+		sta WRAM_PracticeFlags
+		ldx #6
+@save_random:
+		lda PseudoRandomBitReg,x
+		sta WRAM_LevelRandomData, x
+		dex
+		bpl @save_random
+
+		ldx #$3
+@save_rule:
+		lda FrameRuleData, x
+		sta WRAM_LevelFrameRuleData, x
+		dex
+		bpl @save_rule
+@done:
+		jmp ReturnBank
+
 
 

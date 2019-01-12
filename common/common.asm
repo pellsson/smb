@@ -20,7 +20,7 @@ NonMaskableInterrupt: ; Dummy
 	.export PracticeOnFrame
 	.export PracticeTitleMenu
 	.export SoundEngine
-	.export AdvanceToRule
+	.export ProcessLevelLoad
 	.export RedrawUserVars
 	.export RedrawAll
 	.export UpdateFrameRule
