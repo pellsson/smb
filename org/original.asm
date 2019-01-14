@@ -25,6 +25,8 @@ ColdBoot:    jsr InitializeMemory         ;clear memory using pointer in Y
              lda #$a5                     ;set warm boot flag
              sta PseudoRandomBitReg       ;set seed for pseudorandom register
 
+             jsr Enter_PracticeInit
+
              ldx #CHR_ORG
              jsr Enter_LoadChrFromX
 
@@ -245,7 +247,7 @@ RunTitleScreen:
 	jsr Enter_PracticeTitleMenu
 	lda OperMode_Task
 	cmp #4
-	bne @not_running:
+	bne @not_running
     ldx LevelNumber
     ldy WorldNumber
     lda IsBigWorld, y

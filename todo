@@ -1,13 +1,12 @@
 TODO:
 -- Menu items reworked + finalized!
--- Save-hotkeys seem dead again
-
--- Save areaptr and areatype in LOST
--- Mushroom gone from title
 -- Create a common RAM section for all practice stuff
 -- Use common digitsmathfuckery
+
+-- LL Save areaptr and areatype
 -- LL Restart level 
 -- LL Restart game
+
 -- Resume in lost levels
 -- Maybe do something about coin-firework-thing in LL
 -- Add start on second quest (for smborg).
@@ -20,7 +19,6 @@ TODO:
 -- Rework .word LoadSelectedWorld - CANT ADD STATES!!!!
 -- GamePauseStats | 2 hack? Rework? Also, hit sprite0 when pre-save/-load
 -- Make powerup reflect on title screen?
--- Pause menu: P-UP should also redraw SIZE
 -- Predefined rules
 
 -- Kill all old variables
@@ -35,6 +33,8 @@ TODO:
 
 
 DONE:
+-- Save-hotkeys seem dead again
+-- Pause menu: P-UP should also redraw SIZE
 -- jsr HandleRestarts disabled in practiceonframe
 -- HandleSaveState & Enter_AdvanceToRule SAME FUNCTION
 -- Uservar + LL uservar
@@ -55,4 +55,4 @@ DONE:
 -- Make start menu reflect
 -- Exit to intro @ title (nah?)
 -- Menu very broken
-
+-- Mushroom gone from title

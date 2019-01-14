@@ -16,6 +16,7 @@ NonMaskableInterrupt: ; Dummy
 	.include "pausemenu.asm"
 	.include "practice.asm"
 
+	.export PracticeInit
 	.export ForceUpdateSockHash
 	.export PracticeOnFrame
 	.export PracticeTitleMenu

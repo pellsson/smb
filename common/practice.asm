@@ -849,6 +849,10 @@ run_save_load:
 		jmp LoadState
 
 PracticeOnFrame:
+		jsr PracticeOnFrameInner
+		jmp ReturnBank
+
+PracticeOnFrameInner:
 		lda WRAM_PracticeFlags
 		and #PF_SaveState|PF_LoadState
 		beq @no_queued_commands
@@ -895,7 +899,7 @@ PracticeOnFrame:
 		; jsr HandleRestarts ; Wont return if it did something
 		jsr PauseMenu
 @exit:
-		jmp ReturnBank
+		rts
 
 PrintHexByte:
 		sta $0
@@ -1250,5 +1254,8 @@ ProcessLevelLoad:
 @done:
 		jmp ReturnBank
 
-
+PracticeInit:
+		lda #0
+		sta WRAM_MenuIndex
+		jmp ReturnBank
 

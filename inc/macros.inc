@@ -20,6 +20,11 @@
 .macro practice_callgate
 	.res $FE00 - *, $EA
 
+	Enter_PracticeInit:
+		lda #BANK_COMMON
+		jsr SetBankFromA
+		jmp PracticeInit
+
 	Enter_ForceUpdateSockHash:
 		lda #BANK_COMMON
 		jsr SetBankFromA

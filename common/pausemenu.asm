@@ -40,7 +40,7 @@ pm_intro_row:
 
 
 
-.macro row_dispatch ppu, data
+.macro row_render_data ppu, data
 		lda #<ppu
 		sta $00
 		lda #>ppu
@@ -55,52 +55,52 @@ pm_attr_data:
 		.byte $AA, $AA, $AA, $AA
 
 _draw_pm_row_0:
-		row_dispatch $23C8, pm_attr_data
+		row_render_data $23C8, pm_attr_data
 		inc $07
-		jsr draw_menu_row
-		row_dispatch $2080, pm_empty_row
+		jsr draw_prepared_row
+		row_render_data $2080, pm_empty_row
 		rts
 
 _draw_pm_row_1:
 		lda PlayerStatus
 		bne @check_is_fire
-		row_dispatch $20A0, pm_no_pup_row
+		row_render_data $20A0, pm_no_pup_row
 		rts
 	@check_is_fire:
 		cmp #2
 		beq @is_fire
-		row_dispatch $20A0, pm_super_pup_row
+		row_render_data $20A0, pm_super_pup_row
 		rts
 	@is_fire:
-		row_dispatch $20A0, pm_fire_pup_row
+		row_render_data $20A0, pm_fire_pup_row
 		rts
 
 _draw_pm_row_2:
-		row_dispatch $20C0, pm_big_row
+		row_render_data $20C0, pm_big_row
 		lda PlayerSize
 		beq @is_big
-		row_dispatch $20C0, pm_small_row
+		row_render_data $20C0, pm_small_row
 	@is_big:
 		rts
 
 _draw_pm_row_3:
-		row_dispatch $20E0, pm_hero_mario_row
+		row_render_data $20E0, pm_hero_mario_row
 		lda CurrentPlayer
 		beq @is_mario
-		row_dispatch $20E0, pm_hero_luigi_row
+		row_render_data $20E0, pm_hero_luigi_row
 	@is_mario:
 		rts
 
 _draw_pm_row_4:
-		row_dispatch $23D0, pm_attr_data
+		row_render_data $23D0, pm_attr_data
 		inc $07
-		jsr draw_menu_row
+		jsr draw_prepared_row
 
-		row_dispatch $2100, pm_show_sock_row
+		row_render_data $2100, pm_show_sock_row
 		lda WRAM_PracticeFlags
 		and #PF_SockMode
 		bne @is_sock
-		row_dispatch $2100, pm_show_rule_row
+		row_render_data $2100, pm_show_rule_row
 	@is_sock:
 		rts
 
@@ -144,7 +144,7 @@ _draw_pm_row_5:
 		lda #$0A
 		sta $02
 		jsr copy_user_row
-		row_dispatch $2120, CustomRow
+		row_render_data $2120, CustomRow
 		rts
 
 _draw_pm_row_6:
@@ -163,23 +163,23 @@ _draw_pm_row_6:
 		lda #$0B
 		sta $02
 		jsr copy_user_row
-		row_dispatch $2140, CustomRow
+		row_render_data $2140, CustomRow
 		rts
 
 _draw_pm_row_7:
-		row_dispatch $2160, pm_star_row
+		row_render_data $2160, pm_star_row
 		rts
 _draw_pm_row_8:
-		row_dispatch $23D8, pm_attr_data
+		row_render_data $23D8, pm_attr_data
 		inc $07
-		jsr draw_menu_row
-		row_dispatch $2180, pm_restart_row
+		jsr draw_prepared_row
+		row_render_data $2180, pm_restart_row
 		rts
 _draw_pm_row_9:
-		row_dispatch $21A0, pm_title_row
+		row_render_data $21A0, pm_title_row
 		rts
 _draw_pm_row_10:
-		row_dispatch $21C0, pm_intro_row
+		row_render_data $21C0, pm_intro_row
 		rts
 
 pm_row_initializers:
@@ -204,7 +204,7 @@ prepare_draw_row:
 		sta $01
 		jmp ($0000)
 
-draw_menu_row:
+draw_prepared_row:
 		lda $00
 	pha
 		lda $01
@@ -336,7 +336,7 @@ pm_toggle_powerup:
 		stx PlayerSize
 		dex
 		stx PlayerStatus
-		jmp RedrawMario
+		jmp @redraw_and_save
 @solve_state:
 		ldx #0
 		ldy #1
@@ -346,6 +346,9 @@ pm_toggle_powerup:
 @fire_or_big:
 		stx PlayerSize
 		sty PlayerStatus
+@redraw_and_save:
+		lda #2
+		jsr draw_menu_row_from_a
 		jsr RedrawMario
 		jmp playerstatus_to_savestate
 
@@ -448,15 +451,18 @@ pause_run_activation:
 		sta $01
 		jmp ($0000)
 
+draw_menu_row_from_a:
+		jsr prepare_draw_row
+		lda #0
+		sta $07
+		jmp draw_prepared_row
+
 pause_menu_activate:
 		jsr pause_run_activation
 		ldx WRAM_MenuIndex
 		inx
 		txa
-		jsr prepare_draw_row
-		lda #0
-		sta $07
-		jmp draw_menu_row
+		jmp draw_menu_row_from_a
 
 get_user_selected:
 		ldx WRAM_MenuIndex
@@ -517,10 +523,7 @@ do_uservar_input:
 		ldx WRAM_MenuIndex
 		inx
 		txa
-		jsr prepare_draw_row
-		lda #0
-		sta $07
-		jmp draw_menu_row
+		jmp draw_menu_row_from_a
 @exit:
 		rts
 
@@ -536,7 +539,7 @@ RunPauseMenu:
 		jsr prepare_draw_row
 		lda #0
 		sta $07
-		jsr draw_menu_row
+		jsr draw_prepared_row
 	pla
 		sec
 		sbc #1
