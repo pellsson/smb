@@ -12,12 +12,12 @@ OBJECTS = $(OUT)/intro.o \
           $(OUT)/lost.o \
           $(OUT)/dummy.o
 
-WRAM = inc/wram.inc \
-		wram/init.bin
-
 SCENARIOS = scen/templates/1-2g_hi.json \
 			scen/templates/1-2g_lo.json \
 			scen/templates/1-1_d70.json
+
+WRAM = inc/wram.inc \
+		wram/init.bin
 
 INCS = inc/macros.inc \
        inc/org.inc \
@@ -31,9 +31,12 @@ all: test.bin
 inc/wram.inc: wram/ram_layout.asm $(OUT)/ram_layout.map
 	python scripts/genram.py $(OUT)/ram_layout.map inc/wram.inc
 
-wram/init.bin $(OUT)/ram_layout.map: wram/ram_layout.asm
+lost/init.bin: wram/full.bin $(OUT)/ram_layout.map
+	python scripgs/segram.py $(OUT)/ram_layout.map wram/full.bin WRAM_LostStart WRAM_LostEnd lost/wram-init.bin
+
+wram/full.bin $(OUT)/ram_layout.map: wram/ram_layout.asm
 	$(AS) $(AFLAGS) -l $(OUT)/ram_layout.map wram/ram_layout.asm -o build/ram_layout.o
-	$(LD) -C scripts/ram-link.cfg build/ram_layout.o -o wram/init.bin
+	$(LD) -C scripts/ram-link.cfg build/ram_layout.o -o wram/full.bin
 
 $(GEN_SCENARIOS): scripts/genscenarios.py $(SCENARIOS)
 	python scripts/genscenarios.py $(SCENARIOS) > $(GEN_SCENARIOS)

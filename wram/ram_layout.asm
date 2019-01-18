@@ -66,6 +66,7 @@ WRAM_LostRules:
 ;
 ; Number of stars collected
 ;
+WRAM_LostStart:
 WRAM_NumberOfStars:
 		.byte $08
 
@@ -253,6 +254,8 @@ WRAM_PatchMarioName0:
 		.byte $1B
 		.byte $22
 		.byte $FF
+
+WRAM_LostEnd:
 
 WRAM_SaveRAM:
 		.res $800, $00

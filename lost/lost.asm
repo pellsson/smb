@@ -13,10 +13,10 @@
 		jmp FDS_LoadFiles
 
 WRAM_DefaultState:
-		;.incbin "wram/init.bin"
+		.incbin "wram-init.bin"
 
 Initialize_WRAM:
-		; ldx #Initialize_WRAM-WRAM_DefaultState
+		ldx #Initialize_WRAM-WRAM_DefaultState
 InitMoreWRAM:
 		lda WRAM_DefaultState - 1, x
 		sta WRAM_StartAddress - 1, x
@@ -31,6 +31,8 @@ Start:
 		lda WorldNumber
 		pha
 
+
+		jsr Enter_PracticeInit
 		ldx #CHR_LOST
 		jsr Enter_LoadChrFromX
 		jsr Initialize_WRAM

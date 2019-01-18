@@ -3,5 +3,6 @@ chr/lost.chr
 chr/intro.chr
 build
 inc/wram.inc
-wram/init.bin
+wram/full.bin
+lost/wram-init.bin
 test.*

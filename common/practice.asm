@@ -1186,7 +1186,7 @@ RequestRestartLevel:
 		lda WRAM_LevelAreaType
 		sta AreaType ; Probably not needed but whatever
 		inc FetchNewGameTimerFlag
-		jmp ReturnBank
+		rts
 
 RestartLevel:
 		lda #$0

@@ -4,7 +4,7 @@
 CustomRow = WRAM_Temp+$10
 
 .define MENU_ROW_LENGTH 16
-.define MENU_ROW_COUNT 11
+.define MENU_ROW_COUNT 13
 
 pm_empty_row:
 	.byte "                "
@@ -33,6 +33,12 @@ pm_star_row:
 	.byte $24, " GET STAR   ", $24, $24, $24
 pm_restart_row:
 	.byte $24, " RESTART LEV", $24, $24, $24
+
+pm_save_row:
+	.byte $24, " SAVE STATE", $24, $24, $24
+pm_load_row:
+	.byte $24, " LOAD STATE", $24, $24, $24
+
 pm_title_row:
 	.byte $24, " EXIT TITLE ", $24, $24, $24
 pm_intro_row:
@@ -175,11 +181,23 @@ _draw_pm_row_8:
 		jsr draw_prepared_row
 		row_render_data $2180, pm_restart_row
 		rts
+
 _draw_pm_row_9:
-		row_render_data $21A0, pm_title_row
+		row_render_data $21A0, pm_save_row
 		rts
+
 _draw_pm_row_10:
-		row_render_data $21C0, pm_intro_row
+		row_render_data $21C0, pm_load_row
+		rts
+
+_draw_pm_row_11:
+		row_render_data $21E0, pm_title_row
+		rts
+_draw_pm_row_12:
+		row_render_data $23E0, pm_attr_data
+		inc $07
+		jsr draw_prepared_row
+		row_render_data $2200, pm_intro_row
 		rts
 
 pm_row_initializers:
@@ -194,6 +212,8 @@ pm_row_initializers:
 		.word _draw_pm_row_8
 		.word _draw_pm_row_9
 		.word _draw_pm_row_10
+		.word _draw_pm_row_11
+		.word _draw_pm_row_12
 
 prepare_draw_row:
 		asl ; *=2
@@ -429,6 +449,12 @@ pm_exit_title:
 pm_no_activation:
 		rts
 
+pm_save_state:
+		jmp begin_save
+
+pm_load_state:
+		jmp begin_load
+
 pm_activation_slots:
 		.word pm_toggle_powerup
 		.word pm_toggle_size
@@ -437,9 +463,11 @@ pm_activation_slots:
 		.word pm_low_user ; user
 		.word pm_low_user ;
 		.word pm_give_star
-		.word pm_exit_intro
-		.word pm_exit_title
 		.word pm_restart_level
+		.word pm_save_state
+		.word pm_load_state
+		.word pm_exit_title
+		.word pm_exit_intro
 		
 pause_run_activation:
 		lda WRAM_MenuIndex
@@ -663,3 +691,7 @@ PauseMenu:
 		sta GamePauseStatus
 @exit:
 		rts
+
+
+
+

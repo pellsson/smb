@@ -1,22 +1,20 @@
 TODO:
--- Menu items reworked + finalized!
 -- Create a common RAM section for all practice stuff
 -- Use common digitsmathfuckery
+-- Rules not saved? Load works?
+-- Set SockTimer
 
 -- LL Save areaptr and areatype
 -- LL Restart level 
 -- LL Restart game
+-- LL Resume
+-- LL Maybe do something about coin-firework-thing
+-- LL Change hero runtime requires patching
 
--- Resume in lost levels
--- Maybe do something about coin-firework-thing in LL
 -- Add start on second quest (for smborg).
--- time-up looks like ass
--- intermedite always shows time-up. I think...
--- Color changes on size if underground (something with AreaType?)
--- Change hero runtime in LL requires patching
--- Select before right doesnt work
+-- Time-up looks like ass
+-- Intermedite always shows time-up. I think...
 -- Check if save OK & compatible.
--- Rework .word LoadSelectedWorld - CANT ADD STATES!!!!
 -- GamePauseStats | 2 hack? Rework? Also, hit sprite0 when pre-save/-load
 -- Make powerup reflect on title screen?
 -- Predefined rules
@@ -29,10 +27,11 @@ TODO:
 -- Kill GameMenuRoutine_NEW (and friends) PrepareDrawTitleScreen
 -- Kill EraseStartRule
 
-0x80 & flags == saved
-
-
 DONE:
+-- Menu items reworked + finalized!
+-- Select before right doesnt work
+-- Rework .word LoadSelectedWorld - CANT ADD STATES!!!!
+-- Color changes on size if underground (something with AreaType?)
 -- Save-hotkeys seem dead again
 -- Pause menu: P-UP should also redraw SIZE
 -- jsr HandleRestarts disabled in practiceonframe
