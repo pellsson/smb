@@ -4,7 +4,7 @@
 CustomRow = WRAM_Temp+$10
 
 .define MENU_ROW_LENGTH 16
-.define MENU_ROW_COUNT 13
+.define MENU_ROW_COUNT 16
 
 pm_empty_row:
 	.byte "                "
@@ -200,6 +200,19 @@ _draw_pm_row_12:
 		row_render_data $2200, pm_intro_row
 		rts
 
+_draw_pm_row_13:
+		row_render_data $2220, pm_empty_row
+		rts
+
+_draw_pm_row_14:
+		row_render_data $2240, pm_empty_row
+		rts
+
+_draw_pm_row_15:
+		row_render_data $2260, pm_empty_row
+		rts
+
+
 pm_row_initializers:
 		.word _draw_pm_row_0
 		.word _draw_pm_row_1
@@ -214,6 +227,9 @@ pm_row_initializers:
 		.word _draw_pm_row_10
 		.word _draw_pm_row_11
 		.word _draw_pm_row_12
+		.word _draw_pm_row_13
+		.word _draw_pm_row_14
+		.word _draw_pm_row_15
 
 prepare_draw_row:
 		asl ; *=2
@@ -227,8 +243,12 @@ prepare_draw_row:
 draw_prepared_row:
 		lda $00
 	pha
-		lda $01
 		lda Mirror_PPU_CTRL_REG1
+		ldx BANK_SELECTED
+		cpx #BANK_ORG
+		beq @okok
+        lda UseNtBase2400
+@okok:
 		and #3
 		beq @ntbase_selected
 		lda $01
@@ -557,7 +577,7 @@ do_uservar_input:
 
 
 RunPauseMenu:
-		and #$F
+		and #$1F
 		beq @draw_cursor
 	pha
 		sta $0

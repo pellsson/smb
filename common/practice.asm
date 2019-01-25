@@ -893,7 +893,7 @@ PracticeOnFrameInner:
 		bne @exit
 		lda OperMode_Task
 		cmp #$03
-		bne @exit
+		bmi @exit
 @check_pause:
 		; TODO RENABLE
 		; jsr HandleRestarts ; Wont return if it did something

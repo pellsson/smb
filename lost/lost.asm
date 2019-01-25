@@ -16,10 +16,10 @@ WRAM_DefaultState:
 		.incbin "wram-init.bin"
 
 Initialize_WRAM:
-		ldx #Initialize_WRAM-WRAM_DefaultState
+		ldx #(Initialize_WRAM-WRAM_DefaultState)
 InitMoreWRAM:
 		lda WRAM_DefaultState - 1, x
-		sta WRAM_StartAddress - 1, x
+		sta WRAM_LostStart - 1, x
 		dex
 		bne InitMoreWRAM
 		rts
@@ -147,7 +147,7 @@ InitBuffer:
 
 		jsr Enter_PracticeOnFrame
 
-		jsr UpdateTopScore
+		;jsr UpdateTopScore
 		lda GamePauseStatus
 		lsr
 		bcs PauseSkip

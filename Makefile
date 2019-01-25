@@ -17,7 +17,7 @@ SCENARIOS = scen/templates/1-2g_hi.json \
 			scen/templates/1-1_d70.json
 
 WRAM = inc/wram.inc \
-		wram/init.bin
+		wram/full.bin
 
 INCS = inc/macros.inc \
        inc/org.inc \
