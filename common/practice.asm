@@ -748,7 +748,13 @@ menu_input:
 		lda WorldNumber
 		clc
 		adc $00
+		ldx BANK_SELECTED
+		cpx #BANK_ORG
+		bne @world_lost
 		and #$07
+		jmp @save_world
+@world_lost:
+@save_world:
 		sta WorldNumber
 		rts
 @check_pups:

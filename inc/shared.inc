@@ -6,6 +6,12 @@ BANK_SELECTED = $07ff
 .define PF_RestartLevel $08
 .define PF_LevelEntrySaved $10
 
+.macro PF_SetToLevelEnd_A
+	lda WRAM_PracticeFlags
+	and #(PF_LevelEntrySaved^$FF)
+	sta WRAM_PracticeFlags
+.endmacro
+
 TITLE_INIT		= $01
 
 BANK_LOADER		= 0

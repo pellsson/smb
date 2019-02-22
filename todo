@@ -1,17 +1,22 @@
-TODO:
--- Rule on title doesnt seem to do anything
--- Changing Rule-mode doesnt always work?
--- Create a common RAM section for all practice stuff
--- Use common digitsmathfuckery
--- Rules not saved? Load works?
--- Set SockTimer
+EXTRAS:
+-- Time all worlds in frames
+-- Settings on loader screen:
+	-- "Factory Reset"-WRAM @ launcher
+	-- Redraw user-vars timer
+	-- Sleep before Save & Load
+-- Contra Code
 
--- LL Save areaptr and areatype
--- LL Restart level 
--- LL Restart game
--- LL Resume
+TODO:
+-- Create a common RAM section for all practice stuff << what does this mean...?
+
+-- Set SockTimer
+-- Savestate & load waaay too fast.
+-- IMPORTANT kill: SaveStateFlags
+
+-- LL timer fucky AF
 -- LL Maybe do something about coin-firework-thing
 -- LL Change hero runtime requires patching
+-- LL worlds beyond 4
 
 -- Add start on second quest (for smborg).
 -- Time-up looks like ass
@@ -21,6 +26,7 @@ TODO:
 -- Make powerup reflect on title screen?
 -- Predefined rules
 
+-- Use common digitsmathfuckery
 -- Kill all old variables
 -- Kill PrintStatusBarNumbers
 -- Kill 0x80 in pause. Its retarded and does fuck all
@@ -30,6 +36,13 @@ TODO:
 -- Kill EraseStartRule
 
 DONE:
+-- LL Resume
+-- LL Restart level
+-- LL Restart game
+-- LL Save areaptr and areatype
+
+-- Rules & shit not saved between levels! << this is the actual bug.
+-- Rules not saved? Load works?
 -- Menu items reworked + finalized!
 -- Select before right doesnt work
 -- Rework .word LoadSelectedWorld - CANT ADD STATES!!!!
@@ -57,3 +70,5 @@ DONE:
 -- Exit to intro @ title (nah?)
 -- Menu very broken
 -- Mushroom gone from title
+-- Rule on title doesnt seem to do anything
+-- Changing Rule-mode doesnt always work?

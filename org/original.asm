@@ -677,10 +677,12 @@ PlayerEndWorld:
                cpy #World8                ;if on world 8, player is done with game, 
                bcs EndChkBButton          ;thus branch to read controller
                lda #$00
-               sta SaveStateFlags
                sta AreaNumber             ;otherwise initialize area number used as offset
                sta LevelNumber            ;and level number control to start at area 1
                sta OperMode_Task          ;initialize secondary mode of operation
+
+               PF_SetToLevelEnd_A
+
                inc WorldNumber            ;increment world number to move onto the next world
                jsr LoadAreaPointer        ;get area address offset for the next area
                inc FetchNewGameTimerFlag  ;set flag to load game timer from header
@@ -4619,7 +4621,7 @@ NextArea: inc AreaNumber            ;increment area number used for address load
           inc FetchNewGameTimerFlag ;set flag to load new game timer
           jsr ChgAreaMode           ;do sub to set secondary mode, disable screen and sprite 0
           sta HalfwayPage           ;reset halfway page to 0 (beginning)
-          sta SaveStateFlags
+          PF_SetToLevelEnd_A
           lda #Silence
           sta EventMusicQueue       ;silence music and leave
 ExitNA:   rts

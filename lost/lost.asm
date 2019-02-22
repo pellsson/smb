@@ -16112,21 +16112,22 @@ byte_C27D:
 		.byte $6D
 		.byte $C5
 		.byte $FD
-LoadAreaPointer:
 
+LoadAreaPointer:
 		jsr FindAreaPointer
 		sta AreaPointer
+		sta WRAM_LevelAreaPointer
 GetAreaType:
-
 		and #$60
 		asl
 		rol
 		rol
 		rol
 		sta AreaType
+		sta WRAM_LevelAreaType
 		rts
-FindAreaPointer:
 
+FindAreaPointer:
 		ldy WorldNumber
 		lda WorldAddrOffsets,y
 		clc
@@ -16134,8 +16135,8 @@ FindAreaPointer:
 		tay
 		lda AreaAddrOffsets,y
 		rts
-GetAreaDataAddrs_NEW:
 
+GetAreaDataAddrs_NEW:
 		lda AreaPointer
 		jsr GetAreaType
 		tay
