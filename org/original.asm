@@ -842,7 +842,7 @@ SetupIntermediate:
 ;-------------------------------------------------------------------------------------
 
 WriteBottomStatusLine:
-      jsr Enter_RedrawFrameNumbers
+      ;jsr Enter_RedrawFrameNumbers
       jmp IncSubtask
 
 ;-------------------------------------------------------------------------------------
