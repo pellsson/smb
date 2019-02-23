@@ -4,27 +4,32 @@ EXTRAS:
 	-- "Factory Reset"-WRAM @ launcher
 	-- Redraw user-vars timer
 	-- Sleep before Save & Load
+	-- Charset / Game.
 -- Contra Code
+-- Add start on second quest (for smborg).
+-- Keybindings.
+-- Make powerup reflect on title screen?
+-- LL Maybe do something about coin-firework-thing?
+
+
+STUPID?:
+-- Predefined rules
 
 TODO:
+-- LL left on world select kills it :)
+
 -- Create a common RAM section for all practice stuff << what does this mean...?
-
--- Set SockTimer
--- Savestate & load waaay too fast.
 -- IMPORTANT kill: SaveStateFlags
-
 -- LL timer fucky AF
--- LL Maybe do something about coin-firework-thing
 -- LL Change hero runtime requires patching
 -- LL worlds beyond 4
+-- Completely freeze state on pause (LL too?)
 
--- Add start on second quest (for smborg).
 -- Time-up looks like ass
 -- Intermedite always shows time-up. I think...
--- Check if save OK & compatible.
 -- GamePauseStats | 2 hack? Rework? Also, hit sprite0 when pre-save/-load
--- Make powerup reflect on title screen?
--- Predefined rules
+-- Load state puts player on bad places sometimes (and doesnt always show intermediate)
+-- During delay disable sound
 
 -- Use common digitsmathfuckery
 -- Kill all old variables
@@ -56,7 +61,7 @@ DONE:
 -- Only read player 1 joypads (faster).
 -- Everything jitters and spasms the fuck out.
 -- menu @ border fucks up completely.
--- Completely freeze state on pause
+-- Completely freeze state on pause (LL too)
 -- Common title screen???
 -- Make ingame menu
 -- Temp region in RAM
@@ -72,3 +77,6 @@ DONE:
 -- Mushroom gone from title
 -- Rule on title doesnt seem to do anything
 -- Changing Rule-mode doesnt always work?
+-- Set SockTimer
+-- Savestate & load waaay too fast.
+-- Check if save OK & compatible.

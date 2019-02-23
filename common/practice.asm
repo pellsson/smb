@@ -828,6 +828,8 @@ PracticeTitleMenu:
 		jmp ReturnBank
 
 begin_save:
+		lda BANK_SELECTED
+		sta WRAM_SaveStateBank
 		lda GamePauseStatus
 		ora #02
 		sta GamePauseStatus
@@ -835,9 +837,15 @@ begin_save:
 		ora #PF_SaveState
 		sta WRAM_PracticeFlags
 		inc DisableScreenFlag
+		; todo dynamic
+		lda #30
+		sta WRAM_DelayFrames
 		rts
 
 begin_load:
+		lda WRAM_SaveStateBank
+		cmp BANK_SELECTED
+		bne @invalid_save
 		lda GamePauseStatus
 		ora #02
 		sta GamePauseStatus
@@ -845,6 +853,10 @@ begin_load:
 		ora #PF_LoadState
 		sta WRAM_PracticeFlags
 		inc DisableScreenFlag
+		; todo dynamic
+		lda #30
+		sta WRAM_DelayFrames
+@invalid_save:
 		rts
 
 run_save_load:
@@ -985,6 +997,13 @@ ForceUpdateSockHash:
 		jmp ReturnBank
 
 LoadState:
+		dec WRAM_DelayFrames
+		beq @do_loadstate
+		lda GamePauseStatus
+		ora #02
+		sta GamePauseStatus
+		rts
+@do_loadstate:
 		ldx #0
 @copy_ram:
 		lda WRAM_SaveRAM, x
@@ -1060,6 +1079,13 @@ LoadState:
 		rts
 
 SaveState:
+		dec WRAM_DelayFrames
+		beq @do_savestate
+		lda GamePauseStatus
+		ora #02
+		sta GamePauseStatus
+		rts
+@do_savestate:
 		ldx #0
 @copy_ram:
 		lda $000, x
@@ -1263,5 +1289,39 @@ ProcessLevelLoad:
 PracticeInit:
 		lda #0
 		sta WRAM_MenuIndex
+		sta WRAM_SaveStateBank
 		jmp ReturnBank
+
+RedrawSockTimer:
+		ldx VRAM_Buffer1_Offset
+		lda #$20
+		sta VRAM_Buffer1,x
+		lda #$69
+      	sta VRAM_Buffer1+1,x
+      	lda #$01
+      	sta VRAM_Buffer1+2,x
+      	lda WRAM_PracticeFlags
+      	and #PF_LevelEntrySaved
+      	bne @already_saved
+      	lda IntervalTimerControl
+      	sta WRAM_EntrySockTimer
+      	jmp @write_it
+@already_saved:
+		lda WRAM_PracticeFlags
+      	and #PF_RestartLevel
+      	beq @use_as_is
+      	lda WRAM_EntrySockTimer
+      	jmp @write_it
+@use_as_is:
+		lda IntervalTimerControl
+@write_it:
+		sta VRAM_Buffer1+3,x
+		lda #0
+		sta VRAM_Buffer1+4,x
+		inx
+		inx
+		inx
+		inx
+		stx VRAM_Buffer1_Offset
+		jmp RedrawFrameNumbers
 

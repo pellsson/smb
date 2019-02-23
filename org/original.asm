@@ -842,7 +842,7 @@ SetupIntermediate:
 ;-------------------------------------------------------------------------------------
 
 WriteBottomStatusLine:
-      ;jsr Enter_RedrawFrameNumbers
+      jsr Enter_RedrawSockTimer
       jmp IncSubtask
 
 ;-------------------------------------------------------------------------------------
@@ -961,10 +961,8 @@ WorldLivesDisplay:
 
 TwoPlayerTimeUp:
 OnePlayerTimeUp:
-  .byte $22, $0c, $01, $1d
-
-TwoPlayerGameOver:
-OnePlayerGameOver:
+  .byte $22, $0c, $07, $1d, $12, $16, $0e, $24, $1e, $19 ; "TIME UP"
+  .byte $ff
 
 WarpZoneWelcome:
   .byte $25, $84, $15, $20, $0e, $15, $0c, $18, $16 ; "WELCOME TO WARP ZONE!"
@@ -986,7 +984,7 @@ WarpZoneNumbers:
 GameTextOffsets:
   .byte WorldLivesDisplay-GameText
   .byte TwoPlayerTimeUp-GameText
-  .byte TwoPlayerGameOver-GameText
+  .byte 0
   .byte WarpZoneWelcome-GameText
 
 WriteGameText:
@@ -1007,25 +1005,6 @@ GameTextLoop:  lda GameText,x           ;load message data
                ;
                ; Are we loading state?
                ;
-               lda SaveStateFlags
-               and #$40
-               beq UseCurrentTimer
-               lda SavedEnterTimer
-               jmp WriteTextByte
-UseCurrentTimer:
-               lda IntervalTimerControl
-               sbc #1
-               bpl SetEnterTimer
-               lda #$14
-SetEnterTimer:
-               sta $0
-               lda SaveStateFlags
-               and #$80
-               bne TimerSavedAlready
-               lda $0
-               sta SavedEnterTimer
-TimerSavedAlready:
-               lda $0
 WriteTextByte:
                sta VRAM_Buffer1,y       ;otherwise write data to buffer
                inx

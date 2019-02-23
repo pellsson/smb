@@ -27,7 +27,7 @@ NonMaskableInterrupt: ; Dummy
 	.export UpdateFrameRule
 	.export WritePracticeTop
 	.export RedrawFrameNumbers
-
+	.export RedrawSockTimer
 
 practice_callgate
 control_bank

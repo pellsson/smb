@@ -19,10 +19,16 @@ WRAM_LevelPlayerStatus:
 	.byte $00
 WRAM_LevelPlayerSize:
 	.byte $00
+WRAM_EntrySockTimer:
+	.byte $00
 WRAM_LevelRandomData:
 	.res $07, $00
 WRAM_LevelFrameRuleData:
 	.res $04, $00
+WRAM_DelayFrames:
+	.byte $00
+WRAM_SaveStateBank:
+	.byte $00
 
 WRAM_Temp:
 	.res $64, $00

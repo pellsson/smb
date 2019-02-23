@@ -20,6 +20,11 @@
 .macro practice_callgate
 	.res $FE00 - *, $EA
 
+	Enter_RedrawSockTimer:
+		lda #BANK_COMMON
+		jsr SetBankFromA
+		jmp RedrawSockTimer
+
 	Enter_PracticeInit:
 		lda #BANK_COMMON
 		jsr SetBankFromA
