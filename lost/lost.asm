@@ -147,7 +147,6 @@ InitBuffer:
 
 		jsr Enter_PracticeOnFrame
 
-		;jsr UpdateTopScore
 		lda GamePauseStatus
 		lsr
 		bcs PauseSkip
@@ -221,7 +220,7 @@ SkipSprite0:
 		lda WorldNumber
 		cmp #9
 		bcc NotWorld9Something
-		jsr sub_708D
+		jsr TerminateGame
 NotWorld9Something:
 
 		lda GamePauseStatus
@@ -294,7 +293,7 @@ OperModeExecutionTree:
 		.word TitleScreenMode
 		.word GameMode
 		.word VictoryMode
-		.word GameOverMode
+		; .word GameOverMode
 
 MoveAllSpritesOffscreen:
 		ldy #0
@@ -366,24 +365,12 @@ VictoryOnWorld8_NEW:
 		.word XXX_CopySomethingAndReset
 		.word XXX_SomethingOrOther
 		.word FdsWriteFile_SM2SAVE
-ConvertIndexToBit:
-		.byte 1
-		.byte 2
-		.byte 4
-		.byte 8
-		.byte $10
-		.byte $20
-		.byte $40
-		.byte $80
 
 SetupVictoryMode:
 		ldx ScreenRight_PageLoc
 		inx
 		stx FirebarSpinDirection
 		ldy WorldNumber
-		lda ConvertIndexToBit,y
-		ora byte_7FA
-		sta byte_7FA
 		lda IsPlayingExtendedWorlds
 		beq loc_6322
 		lda WorldNumber
@@ -482,9 +469,9 @@ PlayerEndWorld_MAYBE_NEW:
 		cmp #6
 		bcs locret_63D1
 		jsr sub_9F57
-		lda byte_7EC
-		ora byte_7ED
-		ora byte_7EE
+		lda GameTimerDisplay
+		ora GameTimerDisplay+1
+		ora GameTimerDisplay+2
 		bne locret_63D1
 		lda #$30
 		sta SelectTimer
@@ -576,7 +563,6 @@ loc_6439:
 		bne ChkTallEnemy
 		cpy #$B
 		bne LoadNumTiles
-		inc NumberofLives
 		lda #$40
 		sta Square2SoundQueue
 LoadNumTiles:
@@ -763,7 +749,7 @@ WriteTopStatusLine:
 		jmp IncSubtask
 
 WriteBottomStatusLine:
-		jsr Enter_RedrawFrameNumbers
+		jsr Enter_RedrawSockTimer
 		jmp IncSubtask
 
 GetWorldNumber:
@@ -2115,144 +2101,9 @@ WritePPUReg1:
 		sta Mirror_PPU_CTRL_REG1
 		rts
 
-StatusBarData:
-		.byte $EF
-unk_6D6E:
-		.byte 6
-		.byte $62
-		.byte 6
-		.byte $6D
-		.byte 2
-		.byte $7A
-		.byte 3
-unk_6D75:
-		.byte 6
-		.byte $C
-		.byte $12
-		.byte $18
-PrintStatusBarNumbers:
 
-		sta TMP_0
-		jsr OutputNumbers
-		lda TMP_0
-		lsr
-		lsr
-		lsr
-		lsr
-OutputNumbers:
+; TODO probably garbagE?
 
-		clc
-		adc #1
-		and #$F
-		cmp #6
-		bcs locret_6DD1
-		pha
-		asl
-		tay
-		ldx VRAM_Buffer1_Offset
-		lda #$20
-		cpy #0
-		bne loc_6D9B
-		lda #$22
-loc_6D9B:
-
-		sta VRAM_Buffer1,x
-		lda StatusBarData,y
-		sta VRAM_Buffer1+1,x
-		lda unk_6D6E,y
-		sta $303,x
-		sta byte_3
-		stx byte_2
-		pla
-		tax
-		lda unk_6D75,x
-		sec
-		sbc unk_6D6E,y
-		tay
-		ldx byte_2
-loc_6DBA:
-
-		lda $7D7,y
-		sta $304,x
-		inx
-		iny
-		dec byte_3
-		bne loc_6DBA
-		lda #0
-		sta $304,x
-		inx
-		inx
-		inx
-		stx VRAM_Buffer1_Offset
-locret_6DD1:
-
-		rts
-DigitsMathRoutine:
-
-		lda OperMode
-		beq loc_6DED
-		ldx #5
-loc_6DD9:
-
-		lda DigitModifier,x
-		clc
-		adc TopScoreDisplay,y
-		bmi loc_6DF8
-		cmp #$A
-		bcs loc_6DFF
-loc_6DE6:
-
-		sta TopScoreDisplay,y
-		dey
-		dex
-		bpl loc_6DD9
-loc_6DED:
-
-		lda #0
-		ldx #6
-loc_6DF1:
-
-		sta $133,x
-		dex
-		bpl loc_6DF1
-		rts
-loc_6DF8:
-
-		dec $133,x
-		lda #9
-		bne loc_6DE6
-loc_6DFF:
-
-		sec
-		sbc #$A
-		inc $133,x
-		jmp loc_6DE6
-UpdateTopScore:
-
-		ldx #5
-		ldy #5
-		sec
-loc_6E0D:
-
-		lda $7DD,x
-		sbc $7D7,y
-		dex
-		dey
-		bpl loc_6E0D
-		bcc locret_6E27
-		inx
-		iny
-loc_6E1B:
-
-		lda $7DD,x
-		sta $7D7,y
-		inx
-		iny
-		cpy #6
-		bcc loc_6E1B
-locret_6E27:
-
-		rts
 		.byte $FF
 		.byte $FF
 unk_6E2A:
@@ -2271,8 +2122,8 @@ unk_6E2A:
 		.byte $FC
 		.byte $28
 		.byte $2C
-InitializeArea:
 
+InitializeArea:
 		ldy #$4B
 		jsr InitializeMemory
 		ldx #$21
@@ -2332,14 +2183,14 @@ loc_6EA9:
 		sta AreaMusicQueue
 		lda #1
 		sta DisableScreenFlag
-		jsr PatchLuigiOrMarioPhysics_NEW
+		jsr Enter_LL_WritePlayerPhysics
 		inc OperMode_Task
 		rts
 
 SecondaryGameSetup:
+		jsr Enter_ProcessLevelLoad
 		lda #0
 		sta DisableScreenFlag
-		sta byte_7F9
 		sta byte_7F6
 		tay
 loc_6EC5:
@@ -2512,11 +2363,11 @@ loc_6FA5:
 		lda FetchNewGameTimerFlag
 		beq loc_6FD7
 		lda unk_6F6D,y
-		sta byte_7EC
+		sta GameTimerDisplay
 		lda #1
-		sta byte_7EE
+		sta GameTimerDisplay+2
 		lsr
-		sta byte_7ED
+		sta GameTimerDisplay+1
 		sta FetchNewGameTimerFlag
 		sta StarInvincibleTimer
 loc_6FD7:
@@ -2548,15 +2399,7 @@ PlayerLoseLife:
 		sta Sprite0HitDetectFlag
 		lda #$80
 		sta EventMusicQueue
-		dec NumberofLives
-		bpl StillInGame
-		lda #0
-		sta OperMode_Task
-		lda #3
-		sta OperMode
-		rts
 StillInGame:
-
 		lda WorldNumber
 		asl
 		tax
@@ -2565,7 +2408,6 @@ StillInGame:
 		beq loc_7038
 		inx
 loc_7038:
-
 		ldy WRAM_HalfwayPageNybbles,x
 		lda LevelNumber
 		lsr
@@ -2587,48 +2429,16 @@ loc_7051:
 		sta HalfwayPage
 		jmp loc_709D
 
-GameOverMode:
-		lda OperMode_Task
-		jsr JumpEngine
-		.word SetupGameOver
-		.word ScreenRoutines
-		.word RunGameOver
-
-SetupGameOver:
-		lda #0
-		sta ScreenRoutineTask
-		sta Sprite0HitDetectFlag
-		sta GameTimerDisplay_OBSOLETE
-		lda #2
-		sta EventMusicQueue
-		inc DisableScreenFlag
-		inc OperMode_Task
-		rts
-RunGameOver:
-
-		lda #0
-		sta DisableScreenFlag
-		lda WorldNumber
-		cmp #8
-		beq loc_7088
-		jmp loc_C1C2
-loc_7088:
-
-		lda ScreenTimer
-		bne locret_709C
-sub_708D:
-
+TerminateGame:
 		lda #$80
 		sta EventMusicQueue
 		lda #0
 		sta OperMode_Task
 		sta ScreenTimer
 		sta OperMode
-locret_709C:
-
 		rts
-loc_709D:
 
+loc_709D:
 		jsr LoadAreaPointer
 		lda #1
 		sta PlayerSize
@@ -4463,7 +4273,7 @@ locret_7AEE:
 
 		rts
 ScrollHandler:
-
+		DoUpdateSockHash
 		lda Player_X_Scroll
 		clc
 		adc Platform_X_Scroll
@@ -4489,9 +4299,6 @@ loc_7B16:
 		bcc loc_7B20
 		ldy Player_X_Scroll
 loc_7B20:
-
-		lda WaitForIRQ
-		bne loc_7B20
 		tya
 		sta ScrollAmount
 		clc
@@ -5685,27 +5492,22 @@ RunGameTimer:
 		bpl locret_830F
 		lda GameTimerCtrlTimer
 		bne locret_830F
-		lda byte_7EC
-		ora byte_7ED
-		ora byte_7EE
+		lda GameTimerDisplay
+		ora GameTimerDisplay+1
+		ora GameTimerDisplay+2
 		beq loc_8306
-		ldy byte_7EC
+		ldy GameTimerDisplay
 		dey
 		bne loc_82F2
-		lda byte_7ED
-		ora byte_7EE
+		lda GameTimerDisplay+1
+		ora GameTimerDisplay+2
 		bne loc_82F2
 		lda #$40
 		sta EventMusicQueue
 loc_82F2:
 		lda #$18
 		sta GameTimerCtrlTimer
-		ldy #$17
-		lda #$FF
-		sta byte_139
-		jsr DigitsMathRoutine
-		lda #$A2
-		jmp PrintStatusBarNumbers
+		jmp Enter_UpdateGameTimer
 loc_8306:
 		sta PlayerStatus
 		jsr loc_A58F
@@ -5831,16 +5633,16 @@ FlagpoleRoutine:
 		bne locret_842C
 		lda GameEngineSubroutine
 		cmp #4
-		bne loc_83FF
+		bne SkipScore
 		lda Player_State
 		cmp #3
-		bne loc_83FF
+		bne SkipScore
 		lda $CF,x
 		cmp #$AA
-		bcs loc_8402
+		bcs GiveFPScr
 		lda SprObject_Y_Position
 		cmp #$A2
-		bcs loc_8402
+		bcs GiveFPScr
 		lda $417,x
 		adc #$FF
 		sta $417,x
@@ -5854,36 +5656,18 @@ FlagpoleRoutine:
 		lda FlagpoleFNum_Y_Pos
 		sbc #1
 		sta FlagpoleFNum_Y_Pos
-loc_83FF:
-
-		jmp loc_8423
-loc_8402:
-
-		ldy FlagpoleScore
-		cpy #5
-		bne loc_8413
-		inc NumberofLives
-		lda #$40
-		sta Square2SoundQueue
-		jmp loc_841F
-loc_8413:
-
-		lda FlagpoleScoreMods,y
-		ldx FlagpoleScoreDigits,y
-		sta $134,x
-		jsr AddToScore
-loc_841F:
-
+SkipScore:
+		jmp FPGfx
+GiveFPScr:
 		lda #5
 		sta GameEngineSubroutine
-loc_8423:
-
+FPGfx:
 		jsr GetEnemyOffscreenBits
 		jsr RelativeEnemyPosition
 		jsr FlagpoleGfxHandler
 locret_842C:
-
 		rts
+
 Jumpspring_Y_PosData:
 		.byte 8
 		.byte $10
@@ -6440,17 +6224,6 @@ GiveOneCoin:
 AddToScore:
 GetSBNybbles_RW:
 		jmp Enter_RedrawFrameNumbers
-
-UpdateNumber:
-		jsr PrintStatusBarNumbers
-		ldy VRAM_Buffer1_Offset
-		lda $2FB,y
-		bne loc_87FF
-		lda #$24
-		sta $2FB,y
-loc_87FF:
-		ldx ObjectOffset
-		rts
 
 SetupPowerUp:
 		lda #$2E
@@ -8318,13 +8091,10 @@ loc_934B:
 		bcc loc_935E
 		iny
 loc_935E:
-
 		sty NumberofGroupEnemies
 loc_9361:
-
 		ldx #$FF
 loc_9363:
-
 		inx
 		cpx #5
 		bcs loc_9395
@@ -10213,7 +9983,7 @@ RunFireworks:
 		inc Enemy_X_Speed,x
 		lda Enemy_X_Speed,x
 		cmp #3
-		bcs loc_9EF2
+		bcs FireworksSoundScore
 loc_9EDA:
 		jsr RelativeEnemyPosition
 		lda Enemy_Rel_YPos
@@ -10224,14 +9994,12 @@ loc_9EDA:
 		lda $58,x
 		jsr DrawExplosion_Fireworks
 		rts
-loc_9EF2:
+FireworksSoundScore:
 		lda #0
 		sta $F,x
 		lda #8
 		sta Square2SoundQueue
-		lda #5
-		sta byte_138
-		jmp EndAreaPoints_MAYBE
+		rts
 
 StarFlagYPosAdder:
 		.byte 0
@@ -10258,12 +10026,12 @@ RunStarFlagObj:
 		jsr JumpEngine
 		.word StarFlagExit
 		.word GameTimerFireworks_NEW
-		.word GameTimerFireworks
+		.word AwardGameTimerPoints
 		.word RaiseFlagSetoffFWorks
 		.word DelayToAreaEnd
 
 GameTimerFireworks_NEW:
-		lda byte_7EE
+		lda GameTimerDisplay+2
 		cmp byte_7E8
 		bne loc_9F3F
 		and #1
@@ -10286,10 +10054,10 @@ loc_9F48:
 StarFlagExit:
 		rts
 
-GameTimerFireworks:
-		lda byte_7EC
-		ora byte_7ED
-		ora byte_7EE
+AwardGameTimerPoints:
+		lda GameTimerDisplay
+		ora GameTimerDisplay+1
+		ora GameTimerDisplay+2
 		beq loc_9F48
 sub_9F57:
 		lda FrameCounter
@@ -10298,18 +10066,7 @@ sub_9F57:
 		lda #$10
 		sta Square2SoundQueue
 loc_9F61:
-		ldy #$17
-		lda #$FF
-		sta byte_139
-		jsr DigitsMathRoutine
-		lda #5
-		sta byte_139
-
-EndAreaPoints_MAYBE:
-		ldy #$B
-		jsr DigitsMathRoutine
-		lda #2
-		jmp UpdateNumber
+		jmp Enter_UpdateGameTimer
 
 RaiseFlagSetoffFWorks:
 		lda Enemy_Y_Position,x
@@ -10975,7 +10732,6 @@ loc_A393:
 		cmp #$2D
 		bne loc_A3CA
 loc_A39D:
-
 		dec BowserHitPoints
 		bne locret_A40F
 		jsr InitVStf
@@ -10991,7 +10747,6 @@ loc_A39D:
 		bcs loc_A3BE
 		ora #3
 loc_A3BE:
-
 		sta $1E,x
 		lda #$80
 		sta Square2SoundQueue
@@ -12042,9 +11797,11 @@ loc_AA7C:
 
 		lda #0
 		sta OperMode_Task
+		sta CurrentPlayer
+		; TODO hackyfucky
+		jsr Enter_LL_WritePlayerPhysics
 		lda #2
 		sta OperMode
-		jsr PlayerIsMarioPatch
 		lda #$18
 		sta Player_X_Speed
 sub_AA8D:
@@ -12113,7 +11870,7 @@ loc_AAE1:
 		lda byte_7E7
 		cmp byte_7E8
 		bne loc_AAF6
-		cmp byte_7EE
+		cmp GameTimerDisplay+2
 		bne loc_AAF6
 		lda #5
 		sta FlagpoleScore
@@ -15943,90 +15700,7 @@ byte_C1C0:
 		.byte $77
 		.byte $8F
 
-loc_C1C2:
-		lda SavedJoypad1Bits
-		and #$10
-		bne loc_C1F6
-		lda SavedJoypad1Bits
-		and #$20
-		beq loc_C1E1
-		ldx SelectTimer
-		bne loc_C1E1
-		lsr
-		sta SelectTimer
-		lda GameTimerDisplay_OBSOLETE
-		eor #1
-		sta GameTimerDisplay_OBSOLETE
-loc_C1E1:
-		ldy #2
-loc_C1E3:
-		lda byte_C1BD,y
-		sta $201,y
-		dey
-		bpl loc_C1E3
-		ldy GameTimerDisplay_OBSOLETE
-		lda byte_C1C0,y
-		sta Sprite_Y_Position
-		rts
-loc_C1F6:
-
-		lda GameTimerDisplay_OBSOLETE
-		beq loc_C203
-		lda #0
-		sta byte_7FA
-		jmp sub_708D
-loc_C203:
-
-		ldy #2
-		sty NumberofLives
-		sta LevelNumber
-		sta AreaNumber
-		sta CoinTally
-		ldy #$B
-loc_C213:
-
-		sta $7DD,y
-		dey
-		bpl loc_C213
-		inc Hidden1UpFlag
-		jmp loc_709D
-
-MarioOrLuigiPhysics:
-		;
-		; Mario Physics
-		;
-		.byte $20, $20, $1E, $28
-		.byte $28, $0D, $04, $70
-		.byte $70, $60, $90, $90
-		.byte $0A, $09, $E4, $98
-		.byte $D0
-		;
-		; Luigi Physics
-		;
-		.byte $18, $18, $18, $22
-		.byte $22, $0D, $04, $42
-		.byte $42, $3E, $5D, $5D
-		.byte $0A, $09, $B4, $68
-		.byte $A0
-
-PatchLuigiOrMarioPhysics_NEW:
-		; ldx #$60
-		ldy #$21
-		lda IsPlayingLuigi
-		bne PlayerIsLuigiPath
-PlayerIsMarioPatch:
-		; ldx #$E
-		ldy #$10
-PlayerIsLuigiPath:
-		; stx VOLDST_PatchMovementFriction
-		ldx #$10
-loc_C253:
-		lda MarioOrLuigiPhysics,y
-		sta WRAM_JumpMForceData,x
-		dey
-		dex
-		bpl loc_C253
-		rts
+; Unused garbage:
 		.byte $FF
 		.byte $FF
 unk_C260:
@@ -16436,7 +16110,6 @@ WriteTopScore:
 
 PrepareDrawTitleScreen:
 		lda #0
-		sta byte_7FA
 		sta IsPlayingExtendedWorlds
 		sta IsPlayingLuigi
 		jsr PatchToMarioOrLuigi
@@ -16459,8 +16132,6 @@ PrimaryGameSetup:
 		lda #1
 		sta FetchNewGameTimerFlag
 		sta PlayerSize
-		lda #2
-		sta NumberofLives
 		jmp SecondaryGameSetup
 
 MarioOrLuigiNames:

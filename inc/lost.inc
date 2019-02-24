@@ -6,14 +6,22 @@ FDS_DISK_STATUS = $4030
 FDS_DRIVE_STATUS = $4032
 
 FdsOperTask = $07FC				; SMB2J
-WaitForIRQ = $077B				; SMB2J
+; WaitForIRQ = $077B				; SMB2J ; KILLED.
 LoadListIndex = $07f7			; SMB2J
 FdsBiosIrqAction = $101			; SMB2J
 FdsLastWrite4025 = $fa			; SMB2J
 UseNtBase2400 = $77a			; SMB2J
 IsPlayingExtendedWorlds = $7FB	; SMB2J
 
-GameTimerDisplay_OBSOLETE = $07f8
+; Old LOST timer:
+; byte_7EC = $7ec ; KILLED
+; byte_7ED = $7ed ; KILLED
+; byte_7EE = $7ee ; KILLED
+; </timer> 
+
+; byte_7FA = $7fa; KILLED.
+; byte_7F9 = $7f9; KILLED
+; GameTimerDisplay_OBSOLETE = $07f8 ; KILLED.
 
 byte_2 = $2
 byte_3 = $3
@@ -65,13 +73,8 @@ byte_731 = $731
 byte_732 = $732
 byte_7A9 = $7a9
 byte_7F6 = $7f6
-byte_7F9 = $7f9
-byte_7FA = $7fa
 byte_7E7 = $7e7
 byte_7E8 = $7e8
-byte_7EC = $7ec
-byte_7ED = $7ed
-byte_7EE = $7ee
 
 
 TMP_0 = $0

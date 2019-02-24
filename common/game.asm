@@ -269,3 +269,108 @@ RedrawMario:
 		jsr PlayerGfxProcessing
 		jmp SetMarioPalette
 
+
+MarioOrLuigiPhysics:
+		;
+		; Mario Physics
+		;
+		.byte $20, $20, $1E, $28
+		.byte $28, $0D, $04, $70
+		.byte $70, $60, $90, $90
+		.byte $0A, $09, $E4, $98
+		.byte $D0
+		;
+		; Luigi Physics
+		;
+		.byte $18, $18, $18, $22
+		.byte $22, $0D, $04, $42
+		.byte $42, $3E, $5D, $5D
+		.byte $0A, $09, $B4, $68
+		.byte $A0
+
+LL_WritePlayerPhysicsInner:
+		; ldx #$60
+		ldy #$21
+		lda IsPlayingLuigi
+		bne PlayerIsLuigiPath
+PlayerIsMarioPatch:
+		; ldx #$E
+		ldy #$10
+PlayerIsLuigiPath:
+		; stx VOLDST_PatchMovementFriction
+		ldx #$10
+@copy_more:
+		lda MarioOrLuigiPhysics,y
+		sta WRAM_JumpMForceData,x
+		dey
+		dex
+		bpl @copy_more
+		rts
+
+LL_WritePlayerPhysics:
+		jsr LL_WritePlayerPhysicsInner
+		jmp ReturnBank
+
+DigitsMathRoutine3:
+		ldx #3
+DigitsMathRoutineN:
+		stx $00
+		ldx #$05
+AddModLoop3:
+		lda DigitModifier,x       ;load digit amount to increment
+		clc
+		adc DisplayDigits,y       ;add to current digit
+		bmi BorrowOne3             ;if result is a negative number, branch to subtract
+		cmp #10
+		bcs CarryOne3              ;if digit greater than $09, branch to add
+StoreNewD3:
+		sta DisplayDigits,y       ;store as new score or game timer digit
+		dey                       ;move onto next digits in score or game timer
+		dex                       ;and digit amounts to increment
+		cpx $00
+		bpl AddModLoop3            ;loop back if we're not done yet
+		lda #$00                  ;store zero here
+		ldx #$06                  ;start with the last digit
+EraseMLoop3:
+		sta DigitModifier-1,x     ;initialize the digit amounts to increment
+		dex
+		bpl EraseMLoop3            ;do this until they're all reset, then leave
+		rts
+BorrowOne3:
+		dec DigitModifier-1,x     ;decrement the previous digit, then put $09 in
+		lda #$09                  ;the game timer digit we're currently on to "borrow
+		bne StoreNewD3             ;the one", then do an unconditional branch back
+CarryOne3:
+		sec                       ;subtract ten from our digit to make it a
+		sbc #10                   ;proper BCD number, then increment the digit
+		inc DigitModifier-1,x     ;preceding current digit to "carry the one" properly
+		jmp StoreNewD3             ;go back to just after we branched here
+
+
+UpdateGameTimer:
+		ldy #$23
+		lda #$ff
+		sta DigitModifier+5
+		jsr DigitsMathRoutine3
+		ldx VRAM_Buffer1_Offset
+		lda #$20
+		sta VRAM_Buffer1,x
+		lda #$7A
+		sta VRAM_Buffer1+1,x
+		lda #$03
+		sta VRAM_Buffer1+2,x
+		lda GameTimerDisplay
+		sta VRAM_Buffer1+3,x
+		lda GameTimerDisplay+1
+		sta VRAM_Buffer1+4,x
+		lda GameTimerDisplay+2
+		sta VRAM_Buffer1+5,x
+		lda #0
+		sta VRAM_Buffer1+6,x
+		lda VRAM_Buffer1_Offset
+		clc
+		adc #6
+		sta VRAM_Buffer1_Offset
+		jmp ReturnBank
+
+

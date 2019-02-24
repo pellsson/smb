@@ -454,68 +454,6 @@ UpdateFrameRule:
 NotEvenFrameRule:
 		jmp ReturnBank
 
-DigitsMathRoutine3:
-			ldx #3
-DigitsMathRoutineN:
-			stx $00
-            ldx #$05
-AddModLoop3:
-            lda DigitModifier,x       ;load digit amount to increment
-            clc
-            adc DisplayDigits,y       ;add to current digit
-            bmi BorrowOne3             ;if result is a negative number, branch to subtract
-            cmp #10
-            bcs CarryOne3              ;if digit greater than $09, branch to add
-StoreNewD3:
-            sta DisplayDigits,y       ;store as new score or game timer digit
-            dey                       ;move onto next digits in score or game timer
-            dex                       ;and digit amounts to increment
-            cpx $00
-            bpl AddModLoop3            ;loop back if we're not done yet
-            lda #$00                  ;store zero here
-            ldx #$06                  ;start with the last digit
-EraseMLoop3:
-            sta DigitModifier-1,x     ;initialize the digit amounts to increment
-            dex
-            bpl EraseMLoop3            ;do this until they're all reset, then leave
-            rts
-BorrowOne3:
-            dec DigitModifier-1,x     ;decrement the previous digit, then put $09 in
-            lda #$09                  ;the game timer digit we're currently on to "borrow
-            bne StoreNewD3             ;the one", then do an unconditional branch back
-CarryOne3:
-            sec                       ;subtract ten from our digit to make it a
-            sbc #10                   ;proper BCD number, then increment the digit
-            inc DigitModifier-1,x     ;preceding current digit to "carry the one" properly
-            jmp StoreNewD3             ;go back to just after we branched here
-
-DigitsMathRoutine:
-            ldx #$05
-AddModLoop: lda DigitModifier,x       ;load digit amount to increment
-            clc
-            adc DisplayDigits,y       ;add to current digit
-            bmi BorrowOne             ;if result is a negative number, branch to subtract
-            cmp #10
-            bcs CarryOne              ;if digit greater than $09, branch to add
-StoreNewD:  sta DisplayDigits,y       ;store as new score or game timer digit
-            dey                       ;move onto next digits in score or game timer
-            dex                       ;and digit amounts to increment
-            bpl AddModLoop            ;loop back if we're not done yet
-            lda #$00                  ;store zero here
-            ldx #$06                  ;start with the last digit
-EraseMLoop: sta DigitModifier-1,x     ;initialize the digit amounts to increment
-            dex
-            bpl EraseMLoop            ;do this until they're all reset, then leave
-            rts
-BorrowOne:  dec DigitModifier-1,x     ;decrement the previous digit, then put $09 in
-            lda #$09                  ;the game timer digit we're currently on to "borrow
-            bne StoreNewD             ;the one", then do an unconditional branch back
-CarryOne:   sec                       ;subtract ten from our digit to make it a
-            sbc #10                   ;proper BCD number, then increment the digit
-            inc DigitModifier-1,x     ;preceding current digit to "carry the one" properly
-            jmp StoreNewD             ;go back to just after we branched here
-
-
 PrintableWorldNumber:
 		lda BANK_SELECTED
 		cmp BANK_ORG
@@ -627,6 +565,11 @@ RuleCursorData:
 	.byte $22, $ca, $06, $24, $24, $24, $24, $24, $24, $00
 
 DrawRuleCursor:
+		lda RuleIndex
+		bne @initialized
+		lda #4
+		sta RuleIndex
+@initialized:
 		ldy #9
 		lda VRAM_Buffer1_Offset
 		clc
@@ -1380,3 +1323,4 @@ FactoryResetWRAM:
 		inx
 		bpl @copy_page
 		jmp SetDefaultWRAM
+

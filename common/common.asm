@@ -30,6 +30,8 @@ NonMaskableInterrupt: ; Dummy
 	.export RedrawSockTimer
 	.export SetDefaultWRAM
 	.export FactoryResetWRAM
+	.export LL_WritePlayerPhysics
+	.export UpdateGameTimer
 
 practice_callgate
 control_bank

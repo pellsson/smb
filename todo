@@ -16,24 +16,28 @@ STUPID?:
 -- Predefined rules
 
 TODO:
--- Load state puts player on bad places sometimes (and doesnt always show intermediate)
+-- Sockhash wont render in LL
+-- During delay disable sound
 -- LL left on world select kills it :)
 -- IMPORTANT kill: SaveStateFlags
--- LL timer fucky AF
--- LL Change hero runtime requires patching
 -- LL worlds beyond 4
--- During delay disable sound
--- Kill PrintStatusBarNumbers
--- Kill GameMenuRoutine_NEW (and friends) PrepareDrawTitleScreen
--- LL save offset after writing intermediate too!
+-- Firepallet shit in LL & Cant change pup @ start?
+-- LL name shit doesnt need to exist. Probably just buggy.
 
-POST:
+MINOR:
+-- Kill GameMenuRoutine_NEW (and friends) PrepareDrawTitleScreen
+-- Player palette fucks around in LL (after death f.ex). Could be org too.
 -- Use common digitsmathfuckery
 -- GamePauseStats | 2 hack? Rework? Also, hit sprite0 when pre-save/-load
 -- Highbit in pause required? Remove for some cycles...
 -- Kill all old variables
 
 DONE:
+-- Kill PrintStatusBarNumbers
+-- LL timer fucky AF
+-- LL title looks fucky
+-- LL Draw sock timer
+-- LL Change hero runtime requires patching
 -- Create a common RAM section for all practice stuff << what does this mean...?
 -- Time-up looks like ass
 -- Intermedite always shows time-up. I think...
@@ -80,3 +84,5 @@ DONE:
 -- Check if save OK & compatible.
 -- Menu has more items than advertised
 -- Completely freeze state on pause (LL too?)
+-- LL save offset after writing intermediate too!
+-- Load state puts player on bad places sometimes (and doesnt always show intermediate)

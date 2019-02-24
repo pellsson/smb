@@ -403,7 +403,7 @@ pm_toggle_hero:
 		lda CurrentPlayer
 		eor #1
 		sta CurrentPlayer
-		; TODO - More to be done for SMBLL
+		jsr LL_WritePlayerPhysicsInner
 		jmp RedrawMario
 
 pm_toggle_show:

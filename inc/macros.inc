@@ -20,6 +20,16 @@
 .macro practice_callgate
 	.res $FE00 - *, $EA
 
+	Enter_UpdateGameTimer:
+		lda #BANK_COMMON
+		jsr SetBankFromA
+		jmp UpdateGameTimer
+
+	Enter_LL_WritePlayerPhysics:
+		lda #BANK_COMMON
+		jsr SetBankFromA
+		jmp LL_WritePlayerPhysics
+
 	Enter_SetDefaultWRAM:
 		lda #BANK_COMMON
 		jsr SetBankFromA
