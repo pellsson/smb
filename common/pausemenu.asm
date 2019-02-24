@@ -359,13 +359,9 @@ draw_prepared_row:
 
 playerstatus_to_savestate:
 		lda PlayerStatus
-		asl
-		sta $0
-		lda SaveStateFlags
-		and #$F8
-		ora PlayerSize
-		ora $0
-		sta SaveStateFlags
+		sta WRAM_LevelPlayerStatus
+		lda PlayerSize
+		sta WRAM_LevelPlayerSize
 		rts
 
 pm_toggle_powerup:

@@ -26,7 +26,7 @@ LastInputBits				= $075a ; Previously NumberOfLives
 FirstTimeInit				= $075e ; Previously CoinTally
 MenuSelection				= $077a ; Previously NumberOfPlayers
 FrameRuleData				= $07df ; Previously in score somewhere
-SaveStateFlags				= $07fc ; Previously WorldSelectEnableFlag
+;SaveStateFlags				= $07fc ; Previously WorldSelectEnableFlag
 SavedEnterTimer				= $07f7
 
 STATUS_BAR_OFFSET = $02

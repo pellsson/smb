@@ -244,10 +244,10 @@ IsBigWorld:
   .byte 1, 1, 0, 1, 0, 0, 1, 0
 
 RunTitleScreen:
-	jsr Enter_PracticeTitleMenu
-	lda OperMode_Task
-	cmp #4
-	bne @not_running
+    jsr Enter_PracticeTitleMenu
+    lda OperMode_Task
+    cmp #4
+    bne @not_running
     ldx LevelNumber
     ldy WorldNumber
     lda IsBigWorld, y
@@ -267,7 +267,7 @@ RunTitleScreen:
     lda #$00
     sta OperMode_Task
 @not_running:
-	rts
+    rts
 
 ;-------------------------------------------------------------------------------------
 

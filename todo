@@ -16,10 +16,9 @@ STUPID?:
 -- Predefined rules
 
 TODO:
--- During delay disable sound
 -- LL left on world select kills it :)
--- IMPORTANT kill: SaveStateFlags
 -- LL worlds beyond 4
+-- During delay disable sound
 -- Firepallet shit in LL & Cant change pup @ start?
 -- LL name shit doesnt need to exist. Probably just buggy.
 
@@ -31,6 +30,7 @@ MINOR:
 -- Kill all old variables
 
 DONE:
+-- IMPORTANT kill: SaveStateFlags
 -- LL cant pick world/level.
 -- LL custom values render incorrectly in pause menu
 -- Use common digitsmathfuckery
