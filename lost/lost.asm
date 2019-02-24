@@ -845,7 +845,22 @@ loc_666C:
 		sta VRAM_Buffer_AddrCtrl
 		rts
 
-unk_66E7:
+GameText:
+WorldLivesDisplay:
+		;
+		; Display lifes left and mario screen
+		;
+		.byte $21, $CD, $07, $24, $24
+		.byte $29, $24, $24, $24, $24
+		.byte $21, $4B, $09, $20, $18
+		.byte $1B, $15, $0D, $24, $24, $28, $24
+		.byte $22, $0C, $47, $24
+		.byte $23, $DC, $01, $BA
+		.byte $FF
+OnePlayerTimeUp:
+		.byte $22, $0C, $07, $1D, $12, $16, $0E, $24, $1E, $19
+		.byte $FF
+WarpZoneWelcome:
 		.byte $25
 		.byte $84
 		.byte $15
@@ -883,7 +898,8 @@ unk_66E7:
 		.byte $45
 		.byte $AA
 		.byte 0
-NEW_WarpZoneNumbers_MAYBE:
+
+WarpZoneNumbers:
 		.byte 2
 		.byte 3
 		.byte 4
@@ -895,11 +911,12 @@ NEW_WarpZoneNumbers_MAYBE:
 		.byte $B
 		.byte $C
 		.byte $D
+
 GameTextOffsets:
 		.byte 0
-		.byte $27
-		.byte $46
-		.byte $51
+		.byte WorldLivesDisplay-GameText
+		.byte OnePlayerTimeUp-GameText
+		.byte 0 ;??
 
 WriteGameText_NEW:
 		pha
@@ -907,7 +924,7 @@ WriteGameText_NEW:
 		ldx GameTextOffsets,y
 		ldy #0
 loc_6722:
-		lda WRAM_GameText,x
+		lda GameText,x
 		cmp #$FF
 		beq loc_6730
 		sta $301,y
@@ -922,15 +939,7 @@ loc_6730:
 		tax
 		dex
 		bne EndOfWriteGameText
-		lda NumberofLives
-		clc
-		adc #1
-		cmp #$A
-		bcc LessThan10Lives
-		sbc #$A
-		ldy #$9F
-		sty byte_308
-LessThan10Lives:
+		lda #$CE
 		sta byte_309
 		jsr GetWorldNumber
 		sta byte_314
@@ -938,22 +947,23 @@ LessThan10Lives:
 		iny
 		sty byte_316
 EndOfWriteGameText:
+		; TODO VERY INCORRECT. BUT OK ;)
+		sty VRAM_Buffer1_Offset
 		rts
 
 sub_675E:
 		pha
 		ldy #$FF
 loc_6761:
-
 		iny
-		lda unk_66E7,y
+		lda WarpZoneWelcome,y
 		sta $301,y
 		bne loc_6761
 		pla
 		sec
 		sbc #$80
 		tax
-		lda NEW_WarpZoneNumbers_MAYBE,x
+		lda WarpZoneNumbers,x
 		sta byte_31C
 		lda #$24
 		jmp SetVRAMOffset
@@ -2576,15 +2586,15 @@ loc_7051:
 
 		sta HalfwayPage
 		jmp loc_709D
-GameOverMode:
 
+GameOverMode:
 		lda OperMode_Task
 		jsr JumpEngine
 		.word SetupGameOver
 		.word ScreenRoutines
 		.word RunGameOver
-SetupGameOver:
 
+SetupGameOver:
 		lda #0
 		sta ScreenRoutineTask
 		sta Sprite0HitDetectFlag
@@ -5870,7 +5880,7 @@ loc_8423:
 
 		jsr GetEnemyOffscreenBits
 		jsr RelativeEnemyPosition
-		jsr sub_B1F1
+		jsr FlagpoleGfxHandler
 locret_842C:
 
 		rts
@@ -12218,7 +12228,7 @@ HandlePipeEntry:
 		beq locret_ABD3
 		and #$F
 		tax
-		lda NEW_WarpZoneNumbers_MAYBE,x
+		lda WarpZoneNumbers,x
 		ldy IsPlayingExtendedWorlds
 		beq loc_ABAD
 		sec
@@ -13349,7 +13359,7 @@ FlagpoleScoreNumTiles:
 		.byte $FB
 		.byte $FD
 		.byte $FE
-sub_B1F1:
+FlagpoleGfxHandler:
 
 		ldy $6E5,x
 		lda Enemy_Rel_XPos
