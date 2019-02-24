@@ -23,18 +23,17 @@ TODO:
 -- LL worlds beyond 4
 -- Firepallet shit in LL & Cant change pup @ start?
 -- LL name shit doesnt need to exist. Probably just buggy.
+-- LL cant pick world/level.
 
 MINOR:
 -- Kill GameMenuRoutine_NEW (and friends) PrepareDrawTitleScreen
 -- Player palette fucks around in LL (after death f.ex). Could be org too.
--- Use common digitsmathfuckery
 -- GamePauseStats | 2 hack? Rework? Also, hit sprite0 when pre-save/-load
 -- Highbit in pause required? Remove for some cycles...
 -- Kill all old variables
 
-
-
 DONE:
+-- Use common digitsmathfuckery
 -- Custom values wont update in LL
 -- Sockhash wont render in LL
 -- Kill PrintStatusBarNumbers
