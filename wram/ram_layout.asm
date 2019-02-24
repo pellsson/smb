@@ -2,6 +2,9 @@
 		.include "text.inc"
 
 WRAM_StartAddress:
+WRAM_Magic:
+	.res $04, $00
+
 WRAM_MenuIndex:
 	.byte $00
 

@@ -103,6 +103,10 @@ next_palette_entry:
 		cpx #$20
 		bne next_palette_entry
 		;
+		; Init WRAM
+		;
+		jsr Enter_SetDefaultWRAM
+		;
 		; Enable sound
 		;
 		lda #$01
@@ -496,4 +500,5 @@ palette_star_shuffle:
 bank_table:
 		.byte BANK_ORG, BANK_SMBLL, BANK_SCEN
 
+practice_callgate
 control_bank

@@ -1211,6 +1211,7 @@ RequestRestartLevel:
 		stx OperMode_Task
 		stx ScreenRoutineTask
 		stx DisableIntermediate
+		stx AltEntranceControl
 		stx HalfwayPage
 		inx
 		stx OperMode
@@ -1326,3 +1327,56 @@ RedrawSockTimer:
 		stx VRAM_Buffer1_Offset
 		jmp RedrawFrameNumbers
 
+SetDefaultWRAM:
+		lda WRAM_Magic+0
+		cmp #$70 ; P
+		bne @run_init
+		lda WRAM_Magic+1
+		cmp #$65 ; E
+		bne @run_init
+		lda WRAM_Magic+2
+		cmp #$6C ; L
+		bne @run_init
+		lda WRAM_Magic+3
+		cmp #$6C ; L
+		bne @run_init
+		jmp ReturnBank
+@run_init:
+		lda #$70 ; P
+		sta WRAM_Magic+0
+		lda #$65 ; E
+		sta WRAM_Magic+1
+		lda #$6C ; L
+		sta WRAM_Magic+2
+		lda #$6C ; L
+		sta WRAM_Magic+3
+		lda #<Player_Rel_XPos
+		sta WRAM_OrgUser0
+		sta WRAM_LostUser0
+		lda #>Player_Rel_XPos
+		sta WRAM_OrgUser0+1
+		sta WRAM_LostUser0+1
+		lda #<SprObject_X_MoveForce
+		sta WRAM_OrgUser1
+		sta WRAM_LostUser1
+		lda #>SprObject_X_MoveForce
+		sta WRAM_OrgUser1+1
+		sta WRAM_LostUser1+1
+		;
+		; TODO : Sane init values
+		;
+		jmp ReturnBank
+
+FactoryResetWRAM:
+		ldx #$60
+@copy_page:
+		ldy #00
+		stx $00
+		lda #00
+@copy_byte:
+		sta ($00), Y
+		iny
+		bne @copy_byte
+		inx
+		bpl @copy_page
+		jmp SetDefaultWRAM

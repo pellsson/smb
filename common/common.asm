@@ -28,6 +28,8 @@ NonMaskableInterrupt: ; Dummy
 	.export WritePracticeTop
 	.export RedrawFrameNumbers
 	.export RedrawSockTimer
+	.export SetDefaultWRAM
+	.export FactoryResetWRAM
 
 practice_callgate
 control_bank

@@ -20,6 +20,16 @@
 .macro practice_callgate
 	.res $FE00 - *, $EA
 
+	Enter_SetDefaultWRAM:
+		lda #BANK_COMMON
+		jsr SetBankFromA
+		jmp SetDefaultWRAM
+
+	Enter_FactoryResetWRAM:
+		lda #BANK_COMMON
+		jsr SetBankFromA
+		jmp FactoryResetWRAM
+
 	Enter_RedrawSockTimer:
 		lda #BANK_COMMON
 		jsr SetBankFromA

@@ -16,23 +16,25 @@ STUPID?:
 -- Predefined rules
 
 TODO:
+-- Load state puts player on bad places sometimes (and doesnt always show intermediate)
 -- LL left on world select kills it :)
--- Create a common RAM section for all practice stuff << what does this mean...?
 -- IMPORTANT kill: SaveStateFlags
 -- LL timer fucky AF
 -- LL Change hero runtime requires patching
 -- LL worlds beyond 4
--- GamePauseStats | 2 hack? Rework? Also, hit sprite0 when pre-save/-load
--- Load state puts player on bad places sometimes (and doesnt always show intermediate)
 -- During delay disable sound
--- Use common digitsmathfuckery
--- Kill all old variables
 -- Kill PrintStatusBarNumbers
--- Kill 0x80 in pause. Its retarded and does fuck all
 -- Kill GameMenuRoutine_NEW (and friends) PrepareDrawTitleScreen
 -- LL save offset after writing intermediate too!
 
+POST:
+-- Use common digitsmathfuckery
+-- GamePauseStats | 2 hack? Rework? Also, hit sprite0 when pre-save/-load
+-- Highbit in pause required? Remove for some cycles...
+-- Kill all old variables
+
 DONE:
+-- Create a common RAM section for all practice stuff << what does this mean...?
 -- Time-up looks like ass
 -- Intermedite always shows time-up. I think...
 -- LL Resume
