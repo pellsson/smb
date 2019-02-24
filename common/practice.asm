@@ -881,7 +881,6 @@ PracticeOnFrameInner:
 		lda SavedJoypad1Bits
 		ora JoypadBitMask
 		sta LastInputBits
-
 		jsr ReadJoypads
 		lda JoypadBitMask
 		ora SavedJoypadBits
@@ -1210,6 +1209,8 @@ RequestRestartLevel:
 		ldx #$00
 		stx NoteLengthTblAdder ; Less hysterical music
 		stx OperMode_Task
+		stx ScreenRoutineTask
+		stx DisableIntermediate
 		stx HalfwayPage
 		inx
 		stx OperMode

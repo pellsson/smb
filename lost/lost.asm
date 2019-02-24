@@ -173,25 +173,8 @@ SkipExpTimer:
 		jsr Enter_UpdateFrameRule
 NoDecTimers:
 		inc FrameCounter
+		jsr AdvanceRandom
 PauseSkip:
-
-		ldx #0
-		ldy #7
-		lda PseudoRandomBitReg
-		and #2
-		sta TMP_0
-		lda PseudoRandomBitReg+1
-		and #2
-		eor TMP_0
-		clc
-		beq RotPRandomBit
-		sec
-RotPRandomBit:
-
-		ror PseudoRandomBitReg,x
-		inx
-		dey
-		bne RotPRandomBit
 		;
 		; hack begins
 		;
@@ -4415,11 +4398,7 @@ ProcELoop:
 		jsr FlagpoleRoutine
 		jsr RunGameTimer
 		jsr ColorRotation
-		lda LoadListIndex
-		beq loc_7A97
-		jsr func_C550_DATA2
 loc_7A97:
-
 		lda Player_Y_HighPos
 		cmp #2
 		bpl loc_7AAE
@@ -5073,14 +5052,9 @@ sub_7ECD:
 
 		jsr MovePlayerHorizontally
 		sta Player_X_Scroll
-		lda LoadListIndex
-		beq locret_7EDB
-		jsr FinalizePlayerMovement
-locret_7EDB:
-
 		rts
-FallingSub:
 
+FallingSub:
 		lda VerticalForceDown
 		sta VerticalForce
 		jmp LRAir
@@ -8662,9 +8636,15 @@ EnemyMovementSubs:
 		.word MoveNormalEnemy
 		.word NoMoveCode
 		.word MoveFlyingCheepCheep
-NoMoveCode:
 
+loc_C4BF:
+	; TODO Kill me 
+	rts
+	rts
+
+NoMoveCode:
 		rts
+
 RunBowserFlame:
 
 		jsr ProcBowserFlame
@@ -15775,7 +15755,6 @@ loc_BFF1:
 		lda #0
 		sta FdsOperTask
 		sta OperMode_Task
-		sta DemoTimer
 		rts
 
 TitleInitializeFdsLoads:
@@ -16406,90 +16385,7 @@ AreaDataAddrLow:
 		.word $FFFF
 
 GameMenuRoutine_NEW:
-		lda SavedJoypad1Bits
-		and #$10
-		beq loc_C494
 GameMenuRoutineInner_NEW:
-		lda #0
-		sta byte_7FA
-		sta FdsOperTask
-		sta IsPlayingExtendedWorlds
-		lda WRAM_NumberOfStars
-		cmp #8
-		bcc loc_C491
-		lda SavedJoypad1Bits
-		and #$80
-		beq loc_C491
-		inc IsPlayingExtendedWorlds
-loc_C491:
-		jmp loc_C4EC
-loc_C494:
-		lda SavedJoypad1Bits
-		cmp #$20
-		beq loc_C4AA
-		ldx DemoTimer
-		bne loc_C4CF
-		sta SelectTimer
-		jsr loc_C553
-		bcs loc_C4DD
-		bcc loc_C4D4
-loc_C4AA:
-
-		lda DemoTimer
-		beq loc_C4DD
-		lda #$18
-		sta DemoTimer
-		lda FrameCounter
-		and #$FE
-		sta FrameCounter
-		lda SelectTimer
-		bne loc_C4CF
-loc_C4BF:
-
-		lda #$10
-		sta SelectTimer
-		lda IsPlayingLuigi
-		eor #1
-		sta IsPlayingLuigi
-		jsr MoveTitlescreenMushroom_NEW
-loc_C4CF:
-
-		lda #0
-		sta SavedJoypad1Bits
-loc_C4D4:
-
-		jsr GameCoreRoutine_RW
-		lda GameEngineSubroutine
-		cmp #6
-		bne locret_C510
-loc_C4DD:
-
-		lda #0
-		sta OperMode
-		sta OperMode_Task
-		sta Sprite0HitDetectFlag
-		inc DisableScreenFlag
-		rts
-
-loc_C4EC:
-		lda DemoTimer
-		beq loc_C4DD
-		inc OperMode_Task
-		jsr PatchToMarioOrLuigi
-		lda #0
-		sta WorldNumber
-		lda #0
-FinalizePlayerMovement:
-		sta LevelNumber
-		lda #0
-		sta AreaNumber
-		ldx #$B
-		lda #0
-loc_C50A:
-		sta PlayerScoreDisplay,x
-		dex
-		bpl loc_C50A
-locret_C510:
 		rts
 
 NothingOrMushroomTile:
@@ -16507,64 +16403,6 @@ loc_C523:
 		sta WRAM_SelectMario
 		lda NothingOrMushroomTile+1,y
 		sta WRAM_SelectLuigi
-		rts
-
-DemoActionData:
-		.byte 1
-		.byte $81
-		.byte 1
-		.byte $81
-		.byte 1
-		.byte $81
-		.byte 2
-		.byte 1
-		.byte $81
-		.byte 0
-		.byte $81
-		.byte 0
-		.byte $80
-		.byte 1
-		.byte $81
-		.byte 1
-		.byte 0
-DemoTimingData:
-		.byte $B0
-		.byte $10
-		.byte $10
-		.byte $10
-		.byte $28
-		.byte $10
-		.byte $28
-		.byte 6
-		.byte $10
-		.byte $10
-		.byte $C
-		.byte $80
-		.byte $10
-		.byte $28
-		.byte 8
-func_C550_DATA2:
-		.byte $90
-		.byte $FF
-		.byte 0
-loc_C553:
-
-		ldx DemoAction
-		lda DemoActionTimer
-		bne loc_C568
-		inx
-		inc DemoAction
-		sec
-		lda DemoTimingData-1,x
-		sta DemoActionTimer
-		beq locret_C572
-loc_C568:
-
-		lda DemoActionData-1,x
-		sta SavedJoypad1Bits
-		dec DemoActionTimer
-		clc
-locret_C572:
 		rts
 
 ShortNextOprTask:
@@ -19548,6 +19386,7 @@ unk_D242:
 		.byte $FF
 		.byte $FF
 
+.include "utils.inc"
 
 practice_callgate
 control_bank

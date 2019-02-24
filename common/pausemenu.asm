@@ -4,7 +4,7 @@
 CustomRow = WRAM_Temp+$10
 
 .define MENU_ROW_LENGTH 16
-.define MENU_ROW_COUNT 16
+.define MENU_ROW_COUNT 12
 
 pm_empty_row:
 	.byte "                "

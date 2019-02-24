@@ -271,285 +271,6 @@ RunTitleScreen:
 
 ;-------------------------------------------------------------------------------------
 
-EraseStartRule:
-		ldx #5
-		lda #0
-EraseStartRuleLoop:
-		sta TopScoreDisplay+1,x
-		dex
-		bne EraseStartRuleLoop
-		rts
-
-;-------------------------------------------------------------------------------------
-
-DrawPowerUps:
-	ldy PowerUps
-	lda #$6b
-	jmp DrawSelectedNumber
-
-;-------------------------------------------------------------------------------------
-
-WarplessRules:
-	;<BUILD_PATCH_LEVELS>
-	.word 0, 0, 0, 0 ; World 1
-	.word 0, 0, 0, 0 ; World 2
-	.word 0, 0, 0, 0 ; World 3
-	.word 0, 0, 0, 0 ; World 4
-	.word 0, 0, 0, 0 ; World 5
-	.word 0, 0, 0, 0 ; World 6
-	.word 0, 0, 0, 0 ; World 7
-	.word 0, 0, 0, 0 ; World 8
-	;</BUILD_PATCH_LEVELS>
-
-PupsCollected:
-	;<BUILD_PATCH_PUPS>
-	.byte 0, 0, 0, 0, 0, 0, 0, 0
-	;</BUILD_PATCH_PUPS>
-
-ByteToRule:
-	pha
-	and #$0f
-	sta TopScoreDisplay+3,y
-	pla
-	and #$f0
-	ror
-	ror
-	ror
-	ror
-	sta TopScoreDisplay+2,y
-	rts
-
-SetPerfectLevelRule:
-	lda WorldNumber
-	asl
-	asl
-	asl
-	sta $0
-	lda LevelNumber
-	asl
-	clc
-	adc $0
-	tax
-	lda WarplessRules, x
-	ldy #2
-	jsr ByteToRule
-	inx
-	ldy #0
-	lda WarplessRules, x
-	jsr ByteToRule
-	;
-	; Solve number of powerups
-	;
-	ldx WorldNumber
-	lda PupsCollected, x
-	ldy LevelNumber
-	beq DoneShifting
-MoreShifting:
-	ror
-	ror
-	dey
-	bne MoreShifting
-DoneShifting:
-	and #$03
-	sta PowerUps
-	jmp DrawPowerUps
-
-;-------------------------------------------------------------------------------------
-
-DrawSelectedNumber:
-		pha
-		ldx VRAM_Buffer1_Offset
-		lda #$22                ;write address for world-area number on screen
-		sta VRAM_Buffer1,x
-		pla
-		sta VRAM_Buffer1+1,x
-		lda #$01
-		sta VRAM_Buffer1+2,x
-		tya
-		sta VRAM_Buffer1+3,x
-		lda #0
-		sta VRAM_Buffer1+4,x
-		txa
-		clc
-		adc #4
-		sta VRAM_Buffer1_Offset
-		rts
-
-;-------------------------------------------------------------------------------------
-
-NukeTimer:
-		lda #0
-		sta SelectTimer
-		jmp MenuDone
-
-ChangeSelection:
-		ldx MenuSelection
-		inx
-		cpx #4
-		bne SaveSelection
-		ldx #0
-SaveSelection:
-		stx MenuSelection
-		jmp MenuDone
-
-GameMenuRoutine:
-		lda FirstTimeInit
-		bne MenuInitialized
-		jsr SetPerfectLevelRule
-		lda #$01
-		sta FirstTimeInit
-MenuInitialized:
-		jsr GetPlayerColors
-		ldy #$58
-		jsr DrawPlayer_Intermediate
-		lda JoypadBitMask
-		ora SavedJoypadBits
-		beq NukeTimer
-		ldx SelectTimer
-		bne CantMove
-		ldx #32
-		stx SelectTimer
-		cmp #B_Button
-		bne IsSelectPressed
-		jsr EraseStartRule
-		jmp MenuDone
-IsSelectPressed:
-		cmp #Select_Button
-		beq ChangeSelection
-		cmp #Start_Button|A_Button
-		beq LetsPlayMarioSecondQuest
-		cmp #Start_Button
-		beq LetsPlayMario
-		jmp SelectionInput
-LetsPlayMarioSecondQuest:
-		inc PrimaryHardMode
-LetsPlayMario:
-CantMove:
-		lda SelectTimer
-		beq MenuDone
-		dec SelectTimer
-MenuDone:
-		lda #$fa
-		jsr UpdateNumber
-		sta SavedJoypad1Bits
-		jsr Enter_RedrawFrameNumbers
-		rts
-
-;-------------------------------------------------------------------------------------
-
-RuleInput:
-		ldx RuleIndex
-		cmp #Left_Dir
-		bne RTestRight
-		dex
-		jmp RuleHori
-RTestRight:
-		cmp #Right_Dir
-		bne RTestDown
-		inx
-RuleHori:
-		cpx #1
-		bpl RuleTestHigh
-		ldx #4
-RuleTestHigh:
-		cpx #5
-		bne SaveRuleIndex
-		ldx #1
-SaveRuleIndex:
-		stx RuleIndex
-		rts
-RTestDown:
-		cmp #Down_Dir
-		bne RTestUp
-		lda #$ff
-		jmp RUpdate
-RTestUp:
-		cmp #Up_Dir
-		bne RuleUpdated
-		lda #$01
-RUpdate:
-		ldx RuleIndex
-		clc
-		adc TopScoreDisplay+1,x
-		bmi IsNegative
-		cmp #10
-		bmi SaveRuleDigit
-		lda #0
-		jmp SaveRuleDigit
-IsNegative:
-		lda #9
-SaveRuleDigit:
-		sta TopScoreDisplay+1,x
-RuleUpdated:
-		rts
-
-;-------------------------------------------------------------------------------------
-
-SelectionInput:
-		ldy WorldNumber
-		ldx MenuSelection
-		beq ValueSelected
-		cpx #1
-		beq LevelInput
-		cpx #2
-		bne RuleInput
-		ldy PowerUps
-		jmp ValueSelected
-LevelInput:
-		ldy LevelNumber
-ValueSelected:
-		cmp #Left_Dir
-		beq DecreaseLevel
-		cmp #Right_Dir
-		beq IncreaseLevel
-		cmp #Up_Dir
-		bne WorldSelectionDone
-		lda #1
-		eor CurrentPlayer
-		sta CurrentPlayer
-		rts
-IncreaseLevel:
-		iny
-		bne SaveNewLevel ; Cant be zero, short jmp
-DecreaseLevel:
-		dey
-SaveNewLevel:
-		tya
-		cpx #0
-		bne SaveLevelNotWorld
-		and #$07
-		sta WorldNumber
-		ldx #$2b ; offset
-		bne RedrawIt ; Cant be zero, short jump
-SaveLevelNotWorld:
-		cpx #2
-		beq SavePowerUps
-		and #$03
-		sta LevelNumber
-		ldx #$4b ; offset
-		bne RedrawIt
-SavePowerUps:
-		cmp #4
-		bne NotThreeLol
-		lda #0
-NotThreeLol:
-		cmp #$ff
-		bne NotNegative
-		lda #3
-NotNegative:
-		sta PowerUps
-		jmp DrawPowerUps
-RedrawIt:
-		tay
-		iny
-		txa
-		jsr DrawSelectedNumber
-		jsr SetPerfectLevelRule
-WorldSelectionDone:
-		rts
-
-;-------------------------------------------------------------------------------------
-
 VictoryMode:
             jsr VictoryModeSubroutines  ;run victory mode subroutines
             lda OperMode_Task           ;get current task of victory mode
@@ -959,7 +680,6 @@ WorldLivesDisplay:
   .byte $23, $dc, $01, $ba ; attribute table data for crown if more than 9 lives
   .byte $ff
 
-TwoPlayerTimeUp:
 OnePlayerTimeUp:
   .byte $22, $0c, $07, $1d, $12, $16, $0e, $24, $1e, $19 ; "TIME UP"
   .byte $ff
@@ -982,15 +702,16 @@ WarpZoneNumbers:
   .byte $08, $07, $06, $00         ; the minus world
 
 GameTextOffsets:
+  .byte 0
   .byte WorldLivesDisplay-GameText
-  .byte TwoPlayerTimeUp-GameText
+  .byte OnePlayerTimeUp-GameText
   .byte 0
   .byte WarpZoneWelcome-GameText
 
 WriteGameText:
                pha                      ;save text number to stack
                tay
-               cpy #$02                 ;if set to do top status bar or world/lives display,
+               cpy #$01                 ;if set to do top status bar or world/lives display,
                bcc LdGameText           ;branch to use current offset as-is
                cpy #$04                 ;if set to do time-up or game over,
                bcc LdGameText           ;branch to check players
@@ -1000,11 +721,6 @@ LdGameText:    ldx GameTextOffsets,y    ;get offset to message we want to print
 GameTextLoop:  lda GameText,x           ;load message data
                cmp #$ff                 ;check for terminator
                beq EndGameText          ;branch to end text if found
-               cmp #$fe
-               bne WriteTextByte
-               ;
-               ; Are we loading state?
-               ;
 WriteTextByte:
                sta VRAM_Buffer1,y       ;otherwise write data to buffer
                inx
@@ -1014,7 +730,7 @@ EndGameText:   lda #$00                 ;put null terminator at end
                sta VRAM_Buffer1,y
                pla                      ;pull original text number from stack
                tax
-               cmp #$04                 ;are we printing warp zone?
+               cmp #$02                 ;are we printing warp zone?
                bcs PrintWarpZoneNumbers
                dex                      ;are we printing the world/lives display?
                bne WriteTextDone      ;if not, branch to check player's name
@@ -1027,6 +743,8 @@ PutLives:      sta VRAM_Buffer1+7
                iny
                sty VRAM_Buffer1+21      ;we're done here
 WriteTextDone:
+               ; TODO : Strictly wrong, but hinders rendering....
+			   sty VRAM_Buffer1_Offset
                rts
 
 PrintWarpZoneNumbers:
