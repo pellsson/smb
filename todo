@@ -16,7 +16,7 @@ STUPID?:
 -- Predefined rules
 
 TODO:
--- Sockhash wont render in LL
+-- LL custom values render incorrectly in pause menu
 -- During delay disable sound
 -- LL left on world select kills it :)
 -- IMPORTANT kill: SaveStateFlags
@@ -32,7 +32,11 @@ MINOR:
 -- Highbit in pause required? Remove for some cycles...
 -- Kill all old variables
 
+
+
 DONE:
+-- Custom values wont update in LL
+-- Sockhash wont render in LL
 -- Kill PrintStatusBarNumbers
 -- LL timer fucky AF
 -- LL title looks fucky

@@ -221,20 +221,23 @@ SkipSprite0:
 		cmp #9
 		bcc NotWorld9Something
 		jsr TerminateGame
-NotWorld9Something:
 
+NotWorld9Something:
 		lda GamePauseStatus
 		lsr
 		bcs SkipMainOper
-
 		jsr OperModeExecutionTree
 SkipMainOper:
+		jsr Enter_RedrawUserVars
 		lda PPU_STATUS
 		lda Mirror_PPU_CTRL_REG1
 		ora #$80
 		sta Mirror_PPU_CTRL_REG1
 		sta PPU_CTRL_REG1
 OnIRQ:
+		lda GamePauseStatus
+		and #$FD
+		sta GamePauseStatus
 		rti
 
 SpriteShuffler:
