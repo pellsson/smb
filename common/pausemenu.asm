@@ -519,12 +519,12 @@ get_user_selected:
 		beq @is_org
 		cpx #4
 		bne @is_0
-		lda #<WRAM_LostUser1
-		ldx #>WRAM_LostUser1
-		jmp @save
-@is_0:
 		lda #<WRAM_LostUser0
 		ldx #>WRAM_LostUser0
+		jmp @save
+@is_0:
+		lda #<WRAM_LostUser1
+		ldx #>WRAM_LostUser1
 		jmp @save
 @is_org:
 		cpx #4

@@ -15490,8 +15490,37 @@ TitleScreenMode:
 		.word PrepareDrawTitleScreen
 		.word ScreenRoutines
 		.word PrimaryGameSetup
-		.word Enter_PracticeTitleMenu
+		.word RunTitleScreen
 		.word FinalizeTitleScreen
+
+IsBigWorld:
+  .byte 1, 0, 1, 0, 0, 0, 1, 0
+
+RunTitleScreen:
+		jsr Enter_PracticeTitleMenu
+		lda OperMode_Task
+		cmp #5
+		bne @not_running
+		ldx LevelNumber
+		ldy WorldNumber
+		lda IsBigWorld, y
+		beq @save_area
+		cpx #2
+		bmi @save_area
+		inx
+@save_area:
+		stx AreaNumber
+		;
+		; Start it...
+		;
+		jsr LoadAreaPointer
+		inc Hidden1UpFlag
+		inc FetchNewGameTimerFlag
+		inc OperMode
+		lda #$00
+		sta OperMode_Task
+@not_running:
+		rts
 
 FinalizeTitleScreen:
 		lda FdsOperTask

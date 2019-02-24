@@ -16,14 +16,12 @@ STUPID?:
 -- Predefined rules
 
 TODO:
--- LL custom values render incorrectly in pause menu
 -- During delay disable sound
 -- LL left on world select kills it :)
 -- IMPORTANT kill: SaveStateFlags
 -- LL worlds beyond 4
 -- Firepallet shit in LL & Cant change pup @ start?
 -- LL name shit doesnt need to exist. Probably just buggy.
--- LL cant pick world/level.
 
 MINOR:
 -- Kill GameMenuRoutine_NEW (and friends) PrepareDrawTitleScreen
@@ -33,6 +31,8 @@ MINOR:
 -- Kill all old variables
 
 DONE:
+-- LL cant pick world/level.
+-- LL custom values render incorrectly in pause menu
 -- Use common digitsmathfuckery
 -- Custom values wont update in LL
 -- Sockhash wont render in LL

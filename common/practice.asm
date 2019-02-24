@@ -1119,8 +1119,9 @@ SaveState:
 
 RedrawUserVars:
 		ldy VRAM_Buffer1_Offset
-		bne @dont_redraw
-
+		beq @do_redraw
+		jmp ReturnBank
+@do_redraw:
 		lda #$20
 		sta VRAM_Buffer1
 		lda #$71
@@ -1130,11 +1131,17 @@ RedrawUserVars:
 		lda #$24
 		sta VRAM_Buffer1+6
 
+		lda BANK_SELECTED
+		cmp #BANK_ORG
+		beq @is_org
+		RedrawUserVar WRAM_LostUser0, 3
+		RedrawUserVar WRAM_LostUser1, 7
+		jmp @terminate
+@is_org:
 		RedrawUserVar WRAM_OrgUser0, 3
 		RedrawUserVar WRAM_OrgUser1, 7
-
+@terminate:
 		sty VRAM_Buffer1+$0A
-@dont_redraw:
 		jmp ReturnBank
 
 RequestRestartLevel:
