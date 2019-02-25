@@ -31,9 +31,9 @@ Save8Bits:
 
 
 mario_colors:
-		.byte $3F, $10, $04, $22, $16, $27, $18, $00 ; mario
-		.byte $3F, $10, $04, $22, $30, $27, $19, $00 ; luigi
-		.byte $3F, $10, $04, $22, $37, $27, $16, $00 ; fiery
+		.byte $3F, $11, $03, $16, $27, $18, $00 ; mario
+		.byte $3F, $11, $03, $30, $27, $19, $00 ; luigi
+		.byte $3F, $11, $03, $37, $27, $16, $00 ; fiery
 
 mario_gfx:
 		.byte $c0, $32, $00, $A0
@@ -54,12 +54,12 @@ SetMarioPalette:
 		ldy VRAM_Buffer1_Offset
 		ldx CurrentPlayer
 		beq @mario_pal
-		ldx #$08
+		ldx #$07
 @mario_pal:
 		lda PlayerStatus
 		cmp #$02
 		bne @draw_pal
-		ldx #$10
+		ldx #$0E
 @draw_pal:
 		lda mario_colors, x
 		sta VRAM_Buffer1, y
@@ -288,7 +288,11 @@ MarioOrLuigiPhysics:
 		.byte $0A, $09, $B4, $68
 		.byte $A0
 
-LL_WritePlayerPhysicsInner:
+MarioOrLuigiColors:
+		.byte $22, $16, $27, $18 ; Mario
+		.byte $22, $30, $27, $19 ; Luigi
+
+LL_UpdatePlayerChange:
 		; ldx #$60
 		ldy #$21
 		lda IsPlayingLuigi
@@ -305,11 +309,19 @@ PlayerIsLuigiPath:
 		dey
 		dex
 		bpl @copy_more
+		ldy #7
+		lda IsPlayingLuigi
+		bne @is_luigi
+		ldy #3
+@is_luigi:
+		ldx #3
+@copy_pal:
+		lda MarioOrLuigiColors, y
+		sta WRAM_PlayerColors, x
+		dey
+		dex
+		bpl @copy_pal
 		rts
-
-LL_WritePlayerPhysics:
-		jsr LL_WritePlayerPhysicsInner
-		jmp ReturnBank
 
 DigitsMathRoutine3:
 		ldx #3

@@ -84,7 +84,7 @@ WRAM_NumberOfStars:
 ;
 WRAM_PlayerColors:
 		.byte $22, $16, $27, $18 ; Mario
-		.byte $22, $37, $27, $16 ; Luigi
+		.byte $22, $37, $27, $16 ; Luigi (REMOVE ME)
 
 WRAM_JumpMForceData:
 		.byte $20, $20, $1E, $28, $28, $0D, $04

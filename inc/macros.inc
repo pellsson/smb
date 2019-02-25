@@ -25,11 +25,6 @@
 		jsr SetBankFromA
 		jmp UpdateGameTimer
 
-	Enter_LL_WritePlayerPhysics:
-		lda #BANK_COMMON
-		jsr SetBankFromA
-		jmp LL_WritePlayerPhysics
-
 	Enter_SetDefaultWRAM:
 		lda #BANK_COMMON
 		jsr SetBankFromA

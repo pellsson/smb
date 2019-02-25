@@ -68,7 +68,7 @@ VRAM_AddrTable_DW_NEW:
 		.word $301
 		.word unk_6B8D
 		.word unk_6BB1
-		.word unk_6BD5
+		.word GroundPaletteData
 		.word unk_6BF9
 		.word SWAPDATA_C62B
 		.word VRAM_Buffer2
@@ -148,8 +148,8 @@ InitBuffer:
 		jsr Enter_PracticeOnFrame
 
 		lda GamePauseStatus
-		lsr
-		bcs PauseSkip
+		and #3
+		bne PauseSkip
 		lda TimerControl
 		beq DecTimers
 		dec TimerControl
@@ -174,6 +174,9 @@ NoDecTimers:
 		inc FrameCounter
 		jsr AdvanceRandom
 PauseSkip:
+		lda GamePauseStatus
+		and #$02
+		bne SkipSprite0
 		;
 		; hack begins
 		;
@@ -186,8 +189,8 @@ Sprite0Clr:
 		bne Sprite0Clr
 
 		lda GamePauseStatus
-		lsr
-		bcs Sprite0Hit
+		and #3
+		bne Sprite0Hit
 
 		jsr MoveSpritesOffscreen
 		jsr SpriteShuffler
@@ -216,16 +219,15 @@ SkipSprite0:
 		sta PPU_SCROLL_REG
 		lda VerticalScroll
 		sta PPU_SCROLL_REG
-
-		lda WorldNumber
-		cmp #9
-		bcc NotWorld9Something
-		jsr TerminateGame
-
-NotWorld9Something:
+		; todo xxx is this retarded?
+		;lda WorldNumber
+		;cmp #9
+		;bcc NotWorld9Something
+		;jsr TerminateGame
+;NotWorld9Something:
 		lda GamePauseStatus
-		lsr
-		bcs SkipMainOper
+		and #3
+		bne SkipMainOper
 		jsr OperModeExecutionTree
 SkipMainOper:
 		jsr Enter_RedrawUserVars
@@ -1837,7 +1839,7 @@ unk_6BB1:
 		.byte $36
 		.byte $17
 		.byte 0
-unk_6BD5:
+GroundPaletteData:
 		.byte $3F
 		.byte 0
 		.byte $20
@@ -2186,7 +2188,6 @@ loc_6EA9:
 		sta AreaMusicQueue
 		lda #1
 		sta DisableScreenFlag
-		jsr Enter_LL_WritePlayerPhysics
 		inc OperMode_Task
 		rts
 
@@ -11802,7 +11803,6 @@ loc_AA7C:
 		sta OperMode_Task
 		sta CurrentPlayer
 		; TODO hackyfucky
-		jsr Enter_LL_WritePlayerPhysics
 		lda #2
 		sta OperMode
 		lda #$18

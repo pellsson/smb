@@ -16,13 +16,12 @@ STUPID?:
 -- Predefined rules
 
 TODO:
--- LL left on world select kills it :)
 -- LL worlds beyond 4
 -- During delay disable sound
--- Firepallet shit in LL & Cant change pup @ start?
 -- LL name shit doesnt need to exist. Probably just buggy.
 
 MINOR:
+-- Save rules in ram :(
 -- Kill GameMenuRoutine_NEW (and friends) PrepareDrawTitleScreen
 -- Player palette fucks around in LL (after death f.ex). Could be org too.
 -- GamePauseStats | 2 hack? Rework? Also, hit sprite0 when pre-save/-load
@@ -30,6 +29,13 @@ MINOR:
 -- Kill all old variables
 
 DONE:
+-- Restart level doesnt work? Or at least doesnt render ok.
+-- Kill jsr Enter_LL_WritePlayerPhysics (lost)
+-- LL Palette seems to change on level completion & when you go luigi underground
+-- LL Save-states broken
+-- LL doesnt honor pause-state fuckery
+-- Firepallet shit in LL & Cant change pup @ start?
+-- LL left on world select kills it :)
 -- IMPORTANT kill: SaveStateFlags
 -- LL cant pick world/level.
 -- LL custom values render incorrectly in pause menu

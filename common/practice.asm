@@ -697,6 +697,15 @@ menu_input:
 		and #$07
 		jmp @save_world
 @world_lost:
+		cmp #$0D
+		bcc @save_world
+		lda $0
+		cmp #1 ; going right
+		beq @going_left
+		lda #$0C
+		bne @save_world
+@going_left:
+		lda #$00
 @save_world:
 		sta WorldNumber
 		rts
@@ -715,7 +724,7 @@ menu_input:
 		adc $01
 		and #$01
 		sta CurrentPlayer
-		rts
+		jmp LL_UpdatePlayerChange
 
 nuke_timer:
 		lda #0
@@ -1242,6 +1251,9 @@ PracticeInit:
 		lda #0
 		sta WRAM_MenuIndex
 		sta WRAM_SaveStateBank
+		lda WRAM_PracticeFlags
+		and #((PF_SaveState|PF_LoadState|PF_RestartLevel|PF_LevelEntrySaved)^$ff)
+		sta WRAM_PracticeFlags
 		jmp ReturnBank
 
 RedrawSockTimer:

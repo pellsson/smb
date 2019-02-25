@@ -1,6 +1,6 @@
 BANK_SELECTED = $07ff
 
-.define PF_SockMode $01
+.define PF_SockMode $01 ; Todo move elsewhere...
 .define PF_SaveState $02
 .define PF_LoadState $04
 .define PF_RestartLevel $08

@@ -399,7 +399,7 @@ pm_toggle_hero:
 		lda CurrentPlayer
 		eor #1
 		sta CurrentPlayer
-		jsr LL_WritePlayerPhysicsInner
+		jsr LL_UpdatePlayerChange
 		jmp RedrawMario
 
 pm_toggle_show:
