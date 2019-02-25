@@ -10035,25 +10035,11 @@ RunStarFlagObj:
 		.word DelayToAreaEnd
 
 GameTimerFireworks_NEW:
-		lda GameTimerDisplay+2
-		cmp byte_7E8
-		bne loc_9F3F
-		and #1
-		beq loc_9F39
-		ldy #3
-		lda #3
-		bne loc_9F43
-loc_9F39:
-		ldy #0
-		lda #6
-		bne loc_9F43
-loc_9F3F:
 		ldy #0
 		lda #$FF
-loc_9F43:
 		sta FireworksCounter
 		sty $1E,x
-loc_9F48:
+NextStarFlagControl:
 		inc StarFlagTaskControl
 StarFlagExit:
 		rts
@@ -10062,7 +10048,7 @@ AwardGameTimerPoints:
 		lda GameTimerDisplay
 		ora GameTimerDisplay+1
 		ora GameTimerDisplay+2
-		beq loc_9F48
+		beq NextStarFlagControl
 sub_9F57:
 		lda FrameCounter
 		and #4
