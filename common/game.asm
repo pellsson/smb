@@ -383,6 +383,7 @@ UpdateGameTimer:
 		clc
 		adc #6
 		sta VRAM_Buffer1_Offset
+		ldx ObjectOffset
 		jmp ReturnBank
 
 

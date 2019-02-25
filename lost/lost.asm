@@ -13991,12 +13991,10 @@ CheckToAnimateEnemy:
 		ldx #$A2
 		bne loc_B701
 CheckForSecondFrame:
-
 		lda FrameCounter
 		and EnemyAnimTimingBMask,y
 		bne loc_B701
 CheckAnimationStop:
-
 		lda byte_ED
 		and #$A0
 		ora TimerControl
@@ -14006,7 +14004,6 @@ CheckAnimationStop:
 		adc #6
 		tax
 loc_B701:
-
 		lda byte_EF
 		cmp #4
 		beq loc_B713
@@ -14017,13 +14014,11 @@ loc_B701:
 		cmp #4
 		bcc loc_B71B
 loc_B713:
-
 		ldy #1
 		sty VerticalFlipFlag
 		dey
 		sty byte_EC
 loc_B71B:
-
 		ldy byte_EB
 		jsr DrawEnemyObjRow
 		jsr DrawEnemyObjRow
@@ -14034,10 +14029,8 @@ loc_B71B:
 		cmp #8
 		bne loc_B734
 loc_B731:
-
 		jmp loc_B83F
 loc_B734:
-
 		lda VerticalFlipFlag
 		beq loc_B77A
 		lda $202,y
