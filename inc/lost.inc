@@ -75,7 +75,7 @@ byte_7A9 = $7a9
 byte_7F6 = $7f6
 byte_7E7 = $7e7
 byte_7E8 = $7e8
-
+byte_6EB = $6eb
 
 TMP_0 = $0
 TMP_1 = $1

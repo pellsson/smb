@@ -2166,7 +2166,7 @@ loc_6E67:
 		dec byte_732
 		lda #$B
 		sta ColumnSets
-		jsr GetAreaDataAddrs_NEW
+		jsr GetAreaDataAddrs
 		lda IsPlayingExtendedWorlds
 		bne loc_6E9C
 		lda WorldNumber
@@ -15511,22 +15511,10 @@ FinalizeTitleScreen:
 		.word FDSResetZero
 
 SwapToGameData:
-		lda IsPlayingExtendedWorlds
-		beq loc_BFE6
-		lda #3 ; SM2DATA4
-		sta LoadListIndex
-		jsr LoadFilesFromFDS
-		bne loc_C038
-		jsr sub_C0CA
-		bne loc_C036
-loc_BFE6:
-
+		;
+		; Unresolved : This does bank shit based on isextended
+		;
 		jsr LoadAreaPointer
-		lda IsPlayingExtendedWorlds
-		beq loc_BFF1
-		jsr XXX_PatchSomeData
-loc_BFF1:
-
 		inc Hidden1UpFlag
 		inc FetchNewGameTimerFlag
 		inc OperMode
@@ -15577,8 +15565,8 @@ loc_C03E:
 		sta WorldNumber
 		sta IsPlayingExtendedWorlds
 		jmp FdsOperationDone
-LoadCorrectData:
 
+LoadCorrectData:
 		lda FdsOperTask
 		jsr JumpEngine
 		.word PrepareFdsLoad
@@ -15586,8 +15574,8 @@ LoadCorrectData:
 		.word WaitFDSReady
 		.word MoreFDSStuff
 		.word FDSResetZero
-LoadBaseOnWorld:
 
+LoadBaseOnWorld:
 		lda WorldNumber
 		cmp #4
 		bcc FdsOperationDone
@@ -15654,7 +15642,7 @@ sub_C0CA:
 		cmp word_C0F0,y
 		rts
 
-word_C0F0:
+word_C0F0: ; remove me
 		.word $103
 		.word $103
 LoadFilesFromFDS:
@@ -15810,7 +15798,7 @@ FindAreaPointer:
 		lda AreaAddrOffsets,y
 		rts
 
-GetAreaDataAddrs_NEW:
+GetAreaDataAddrs:
 		lda AreaPointer
 		jsr GetAreaType
 		tay
@@ -15947,19 +15935,6 @@ World1Areas:
 		.byte 6
 		.byte $68
 		.byte 7
-SWAPDATA_AreaDataOfsLoopback:
-		.byte $C
-		.byte $C
-		.byte $42
-		.byte $42
-		.byte $10
-		.byte $10
-		.byte $30
-		.byte $30
-		.byte 6
-		.byte $C
-		.byte $54
-		.byte 6
 EnemyAddrHOffsets:
 		.byte $2C
 		.byte $A
@@ -15997,7 +15972,6 @@ EnemyDataAddrLow:
 		.word unk_C7BF
 		.word unk_C988
 		.word unk_C260
-XXX_PatchSomeData:
 		.word unk_C7E7
 		.word unk_C80A
 		.word unk_C831
@@ -16079,6 +16053,21 @@ AreaDataAddrLow:
 		.word unk_CBDA
 		.word $FFFF
 
+SWAPDATA_AreaDataOfsLoopback:
+		.byte $C
+		.byte $C
+		.byte $42
+		.byte $42
+		.byte $10
+		.byte $10
+		.byte $30
+		.byte $30
+		.byte 6
+		.byte $C
+		.byte $54
+		.byte 6
+
+
 GameMenuRoutine_NEW:
 GameMenuRoutineInner_NEW:
 		rts
@@ -16088,31 +16077,12 @@ NothingOrMushroomTile:
 		.byte $24
 		.byte $CE
 
-MoveTitlescreenMushroom_NEW:
-		lda #$1C
-		sta VRAM_Buffer_AddrCtrl
-MoveTitlescreenMushroomCurrAddr_NEW:
-		ldy IsPlayingLuigi
-loc_C523:
-		lda NothingOrMushroomTile,y
-		sta WRAM_SelectMario
-		lda NothingOrMushroomTile+1,y
-		sta WRAM_SelectLuigi
-		rts
-
 ShortNextOprTask:
 		jmp Next_OperMode_Task
 
 ClearBuffersDrawIcon:
 		lda OperMode
 		bne ShortNextOprTask
-		ldx #0
-loc_C57A:
-		sta $300,x
-		sta $400,x
-		dex
-		bne loc_C57A
-		jsr MoveTitlescreenMushroom_NEW
 		inc ScreenRoutineTask
 		rts
 
@@ -16123,8 +16093,6 @@ PrepareDrawTitleScreen:
 		lda #0
 		sta IsPlayingExtendedWorlds
 		sta IsPlayingLuigi
-		jsr PatchToMarioOrLuigi
-		jsr MoveTitlescreenMushroomCurrAddr_NEW
 		ldy #$6F
 		jsr InitializeMemory
 		ldy #$1F
@@ -16134,8 +16102,6 @@ loc_C5CA:
 		bpl loc_C5CA
 
 PrepareInitializeArea:
-		lda #$18
-		sta DemoTimer
 		jsr LoadAreaPointer
 		jmp InitializeArea
 
