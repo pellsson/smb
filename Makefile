@@ -10,14 +10,15 @@ OBJECTS = $(OUT)/intro.o \
           $(OUT)/scenarios.o \
           $(OUT)/scenario_data.o \
           $(OUT)/lost.o \
-          $(OUT)/dummy.o
+          $(OUT)/leveldata.o
 
 SCENARIOS = scen/templates/1-2g_hi.json \
 			scen/templates/1-2g_lo.json \
 			scen/templates/1-1_d70.json
 
 WRAM = inc/wram.inc \
-		wram/full.bin
+		wram/full.bin \
+		lost/wram-init.bin
 
 INCS = inc/macros.inc \
        inc/org.inc \
@@ -31,8 +32,8 @@ all: test.bin
 inc/wram.inc: wram/ram_layout.asm $(OUT)/ram_layout.map
 	python scripts/genram.py $(OUT)/ram_layout.map inc/wram.inc
 
-lost/init.bin: wram/full.bin $(OUT)/ram_layout.map
-	python scripgs/segram.py $(OUT)/ram_layout.map wram/full.bin WRAM_LostStart WRAM_LostEnd lost/wram-init.bin
+lost/wram-init.bin: wram/full.bin $(OUT)/ram_layout.map
+	python scripts/segram.py $(OUT)/ram_layout.map wram/full.bin WRAM_LostStart WRAM_LostEnd lost/wram-init.bin
 
 wram/full.bin $(OUT)/ram_layout.map: wram/ram_layout.asm
 	$(AS) $(AFLAGS) -l $(OUT)/ram_layout.map wram/ram_layout.asm -o build/ram_layout.o
@@ -65,8 +66,8 @@ $(OUT)/scenarios.o: $(INCS) scen/scenarios.asm
 $(OUT)/lost.o: $(INCS) $(WRAM) lost/lost.asm
 	$(AS) $(AFLAGS) -l $(OUT)/lost.map lost/lost.asm -o $@
 
-$(OUT)/dummy.o: dummy.asm
-	$(AS) $(AFLAGS) -l $(OUT)/dummy.map dummy.asm -o $@
+$(OUT)/leveldata.o: lost/leveldata.asm
+	$(AS) $(AFLAGS) -l $(OUT)/leveldata.map lost/leveldata.asm -o $@
 
 test.bin: $(OBJECTS)
 	$(LD) -C scripts/link.cfg \
@@ -77,7 +78,7 @@ test.bin: $(OBJECTS)
 		$(OUT)/scenarios.o \
 		$(OUT)/scenario_data.o \
 		$(OUT)/lost.o \
-		$(OUT)/dummy.o \
+		$(OUT)/leveldata.o \
 		-o $@
 
 .PHONY: clean

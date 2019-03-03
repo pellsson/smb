@@ -90,6 +90,20 @@
 		jsr SetBankFromA
 		jmp ProcessLevelLoad
 
+	Enter_LL_LoadWarpzone:
+		lda #BANK_LLDATA
+		jsr SetBankFromA
+		jmp LoadWarpzone
+
+	Enter_LL_GetAreaDataAddrs:
+		lda #BANK_LLDATA
+		jsr SetBankFromA
+		jmp GetAreaDataAddrs
+
+	Enter_LL_LoadAreaPointer:
+		lda #BANK_LLDATA
+		jsr SetBankFromA
+		jmp LoadAreaPointer
 
 .endmacro
 

@@ -72,12 +72,44 @@ WRAM_LostRules:
 	.word 0, 0, 0, 0 ; World C
 	.word 0, 0, 0, 0 ; World D
 
+WRAM_EnemyData:
+		.res $80, $00
+WRAM_LevelData:
+		.res $100, $00
+
 ;
 ; Number of stars collected
 ;
 WRAM_LostStart:
 WRAM_NumberOfStars:
 		.byte $08
+
+WRAM_LeafY:
+		.byte $30
+		.byte $70
+		.byte $B8
+		.byte $50
+		.byte $98
+		.byte $30
+		.byte $70
+		.byte $B8
+		.byte $50
+		.byte $98
+		.byte $30
+		.byte $70
+WRAM_LeafX:
+		.byte $30
+		.byte $30
+		.byte $30
+		.byte $60
+		.byte $60
+		.byte $A0
+		.byte $A0
+		.byte $A0
+		.byte $D0
+		.byte $D0
+		.byte $D0
+		.byte $60
 
 ;
 ; Player palette colors
@@ -109,7 +141,6 @@ WRAM_UnknownAttributeData1:
 		.byte $02
 WRAM_UnknownAttributeData2:
 		.byte $02
-
 ;
 ; Draw buffer for title screen with mushroom
 ;

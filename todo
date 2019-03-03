@@ -16,10 +16,15 @@ STUPID?:
 -- Predefined rules
 
 TODO:
+-- AreaAddrsLOffset still referenced outside of leveldata
+-- WarpZone load thing (also pipe 4 leads to w2 :))
 -- LL jitters at end of castles (likely due to THANK YOU ___)
 -- LL worlds beyond 4
 -- During delay disable sound
 -- LL name shit doesnt need to exist. Probably just buggy.
+-- The buggy THANK YOU ___ write nukes pattern tables.
+-- Menus dont work if you hold dirs
+
 
 MINOR:
 -- Save rules in ram :(

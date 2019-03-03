@@ -70,7 +70,7 @@ VRAM_AddrTable_DW_NEW:
 		.word unk_6BB1
 		.word GroundPaletteData
 		.word unk_6BF9
-		.word SWAPDATA_C62B
+		.word TitleScreenData
 		.word VRAM_Buffer2
 		.word VRAM_Buffer2
 		.word unk_6C35
@@ -79,23 +79,23 @@ VRAM_AddrTable_DW_NEW:
 		.word unk_6C2D
 		.word WRAM_ThankYouMario
 		.word unk_6C51
-		.word SWAPDATA_C876
-		.word SWAPDATA_C87F
-		.word SWAPDATA_C893
-		.word SWAPDATA_C8AB
-		.word SWAPDATA_C8C1
-		.word SWAPDATA_C8D7
-		.word SWAPDATA_C8EB
-		.word SWAPDATA_C8FC
-		.word SWAPDATA_C913
-		.word SWAPDATA_C92B
-		.word SWAPDATA_C943
+		.word TitleScreenData ; TODO : SWAPDATA_C876
+		.word TitleScreenData ; TODO : SWAPDATA_C87F
+		.word TitleScreenData ; TODO : SWAPDATA_C893
+		.word TitleScreenData ; TODO : SWAPDATA_C8AB
+		.word TitleScreenData ; TODO : SWAPDATA_C8C1
+		.word TitleScreenData ; TODO : SWAPDATA_C8D7
+		.word TitleScreenData ; TODO : SWAPDATA_C8EB
+		.word TitleScreenData ; TODO : SWAPDATA_C8FC
+		.word TitleScreenData ; TODO : SWAPDATA_C913
+		.word TitleScreenData ; TODO : SWAPDATA_C92B
+		.word TitleScreenData ; TODO : SWAPDATA_C943
 		.word $FFFF
 		.word byte_C10B
-		.word SWAPDATA_C95C
+		.word TitleScreenData ; TODO : SWAPDATA_C95C
 		.word WRAM_MushroomSelection
-		.word SWAPDATA_C97D
-		.word SWAPDATA_C9C0
+		.word TitleScreenData ; TODO : SWAPDATA_C97D
+		.word TitleScreenData ; TODO : SWAPDATA_C9C0
 VRAM_Buffer_Offset:
 		.byte 0
 		.byte $40
@@ -502,7 +502,7 @@ PlayerEndWorld_2_MAYBE_NEW:
 loc_63EE:
 
 		sta WorldNumber
-		jsr LoadAreaPointer
+		jsr Enter_LL_LoadAreaPointer
 		inc FetchNewGameTimerFlag
 		lda #1
 		sta OperMode
@@ -2166,7 +2166,7 @@ loc_6E67:
 		dec byte_732
 		lda #$B
 		sta ColumnSets
-		jsr GetAreaDataAddrs
+		jsr Enter_LL_GetAreaDataAddrs
 		lda IsPlayingExtendedWorlds
 		bne loc_6E9C
 		lda WorldNumber
@@ -2195,6 +2195,7 @@ SecondaryGameSetup:
 		jsr Enter_ProcessLevelLoad
 		lda #0
 		sta DisableScreenFlag
+		sta IsWindy
 		sta byte_7F6
 		tay
 loc_6EC5:
@@ -2443,7 +2444,7 @@ TerminateGame:
 		rts
 
 loc_709D:
-		jsr LoadAreaPointer
+		jsr Enter_LL_LoadAreaPointer
 		lda #1
 		sta PlayerSize
 		inc FetchNewGameTimerFlag
@@ -3196,8 +3197,8 @@ loc_7470:
 		.word StaircaseObject
 		.word ExitPipe
 		.word FlagBalls_Residual
-		.word GameMenuRoutine_NEW+2 ; SM2DATA2 VerticalPipeUpsideDown
-		.word GameMenuRoutineInner_NEW
+		.word VerticalPipeUpsideDown
+		.word VerticalPipeUpsideDown_4
 		.word QuestionBlock
 		.word QuestionBlock
 		.word QuestionBlock
@@ -3226,13 +3227,9 @@ loc_7470:
 		.word AreaFrenzy
 		.word AreaFrenzy
 		.word LoopCmdE
-		.word UNBANKED_FIX_ME_0
-		.word UNBANKED_FIX_ME_1
+		.word MakeItWindy
+		.word MakeItNotWindy
 		.word AlterAreaAttributes
-
-UNBANKED_FIX_ME_0:
-UNBANKED_FIX_ME_1:
-		jmp UNBANKED_FIX_ME_0
 
 AlterAreaAttributes:
 
@@ -4222,7 +4219,10 @@ ProcELoop:
 		jsr FlagpoleRoutine
 		jsr RunGameTimer
 		jsr ColorRotation
-loc_7A97:
+		;
+		; TODO XXX ONLY IF >= world 5
+		;
+		jsr RunWindStuff
 		lda Player_Y_HighPos
 		cmp #2
 		bpl loc_7AAE
@@ -4819,7 +4819,7 @@ loc_7E66:
 		sta AreaNumber
 loc_7E7F:
 
-		jsr LoadAreaPointer
+		jsr Enter_LL_LoadAreaPointer
 		inc FetchNewGameTimerFlag
 		jsr sub_7D6B
 		sta HalfwayPage
@@ -4857,30 +4857,53 @@ MoveSubs:
 		.word JumpSwimSub
 		.word FallingSub
 		.word ClimbingSub
+
 NoMoveSub:
-
 		rts
-OnGroundStateSub:
 
+OnGroundStateSub:
 		jsr GetPlayerAnimSpeed
 		lda Left_Right_Buttons
 		beq loc_7ECA
 		sta PlayerFacingDir
 loc_7ECA:
-
 		jsr ImposeFriction
 sub_7ECD:
-
 		jsr MovePlayerHorizontally
 		sta Player_X_Scroll
+
+		lda IsWindy
+		beq @no_wind
+		lda AreaType
+		cmp #1
+		bne @no_wind
+		ldy #1
+		lda FrameCounter
+		asl
+		bcs @lowprob
+		ldy #3
+@lowprob:
+		sty $00
+		lda FrameCounter
+		and $00
+		bne @no_wind
+		lda Player_X_Position
+		clc
+		adc #1
+		sta Player_X_Position
+		lda Player_PageLoc
+		adc #0
+		sta Player_PageLoc
+		inc Player_X_Scroll
+@no_wind:
 		rts
 
 FallingSub:
 		lda VerticalForceDown
 		sta VerticalForce
 		jmp LRAir
-JumpSwimSub:
 
+JumpSwimSub:
 		ldy Player_Y_Speed
 		bpl loc_7EFC
 		lda A_B_Buttons
@@ -8403,7 +8426,7 @@ EnemyMovementSubs:
 		.word MoveNormalEnemy
 		.word MoveNormalEnemy
 		.word MoveNormalEnemy
-		.word loc_C4BF+1
+		.word MoveUpsideDownPiranhaPlant
 		.word ProcHammerBro
 		.word MoveNormalEnemy
 		.word MoveBloober
@@ -8420,11 +8443,6 @@ EnemyMovementSubs:
 		.word MoveNormalEnemy
 		.word NoMoveCode
 		.word MoveFlyingCheepCheep
-
-loc_C4BF:
-	; TODO Kill me 
-	rts
-	rts
 
 NoMoveCode:
 		rts
@@ -11972,35 +11990,11 @@ HandlePipeEntry:
 		sta Player_SprAttrib
 		lda WarpZoneControl
 		beq locret_ABD3
-		and #$F
-		tax
-		lda WarpZoneNumbers,x
-		ldy IsPlayingExtendedWorlds
-		beq loc_ABAD
-		sec
-		sbc #9
-loc_ABAD:
-
-		tay
-		dey
-		sty WorldNumber
-		ldx WorldAddrOffsets,y
-		lda AreaAddrOffsets,x
-		sta AreaPointer
-		lda #$80
-		sta EventMusicQueue
-		lda #0
-		sta EntrancePage
-		sta AreaNumber
-		sta LevelNumber
-		sta AltEntranceControl
-		inc Hidden1UpFlag
-		inc FetchNewGameTimerFlag
+		jsr Enter_LL_LoadWarpzone
 locret_ABD3:
-
 		rts
-sub_ABD4:
 
+sub_ABD4:
 		lda #0
 		ldy Player_X_Speed
 		ldx TMP_0
@@ -15492,7 +15486,7 @@ RunTitleScreen:
 		;
 		; Start it...
 		;
-		jsr LoadAreaPointer
+		jsr Enter_LL_LoadAreaPointer
 		inc Hidden1UpFlag
 		inc FetchNewGameTimerFlag
 		inc OperMode
@@ -15514,7 +15508,7 @@ SwapToGameData:
 		;
 		; Unresolved : This does bank shit based on isextended
 		;
-		jsr LoadAreaPointer
+		jsr Enter_LL_LoadAreaPointer
 		inc Hidden1UpFlag
 		inc FetchNewGameTimerFlag
 		inc OperMode
@@ -15576,27 +15570,14 @@ LoadCorrectData:
 		.word FDSResetZero
 
 LoadBaseOnWorld:
-		lda WorldNumber
-		cmp #4
-		bcc FdsOperationDone
-		lda LoadListIndex
-		bne FdsOperationDone
-		lda #1
-		sta LoadListIndex
-		jsr LoadFilesFromFDS
-		bne loc_C038
-		jsr sub_C0CA
-		bne loc_C036
 FdsOperationDone:
-
 		lda #0
 		sta FdsOperTask
 Increase_OperMode_Task:
-
 		inc OperMode_Task
 		rts
-InitializeWorldEndTimer:
 
+InitializeWorldEndTimer:
 		lda #$10
 		sta WorldEndTimer
 		bne Increase_OperMode_Task
@@ -15635,7 +15616,10 @@ loc_C0BE:
 		sta WRAM_NumberOfStars
 		jsr InitializeNameTables
 		jsr FdsOperationDone
-		jmp byte_C858
+		; jmp byte_C858
+xxx_todo_fix_me: ; ^^^ 
+		jmp xxx_todo_fix_me
+
 sub_C0CA:
 		tya
 		ldy LoadListIndex
@@ -15690,369 +15674,6 @@ FDSResetZero:
 		sta LoadListIndex
 		rts
 
-
-byte_C1BD:
-		.byte $5B
-		.byte 2
-		.byte $48
-byte_C1C0:
-		.byte $77
-		.byte $8F
-
-; Unused garbage:
-		.byte $FF
-		.byte $FF
-unk_C260:
-		.byte $FF
-unk_C261:
-		.byte $90
-		.byte $31
-		.byte $39
-		.byte $F1
-		.byte $BF
-		.byte $37
-		.byte $33
-		.byte $E7
-		.byte $A3
-		.byte 3
-		.byte $A7
-		.byte 3
-		.byte $CD
-		.byte $41
-		.byte $F
-		.byte $A6
-		.byte $ED
-		.byte $47
-		.byte $FD
-byte_C274:
-		.byte $38
-		.byte $11
-		.byte $F
-		.byte $26
-		.byte $AD
-		.byte $40
-		.byte $3D
-		.byte $C7
-		.byte $FD
-byte_C27D:
-		.byte $10
-		.byte 0
-		.byte $B
-		.byte $13
-		.byte $5B
-		.byte $14
-		.byte $6A
-		.byte $42
-		.byte $C7
-		.byte $12
-		.byte $C6
-		.byte $42
-		.byte $1B
-		.byte $94
-		.byte $2A
-		.byte $42
-		.byte $53
-		.byte $13
-		.byte $62
-		.byte $41
-		.byte $97
-		.byte $17
-		.byte $A6
-		.byte $45
-		.byte $6E
-		.byte $81
-		.byte $8F
-		.byte $37
-		.byte 2
-		.byte $E8
-		.byte $12
-		.byte $3A
-		.byte $68
-		.byte $7A
-		.byte $DE
-		.byte $F
-		.byte $6D
-		.byte $C5
-		.byte $FD
-
-LoadAreaPointer:
-		jsr FindAreaPointer
-		sta AreaPointer
-		sta WRAM_LevelAreaPointer
-GetAreaType:
-		and #$60
-		asl
-		rol
-		rol
-		rol
-		sta AreaType
-		sta WRAM_LevelAreaType
-		rts
-
-FindAreaPointer:
-		ldy WorldNumber
-		lda WorldAddrOffsets,y
-		clc
-		adc AreaNumber
-		tay
-		lda AreaAddrOffsets,y
-		rts
-
-GetAreaDataAddrs:
-		lda AreaPointer
-		jsr GetAreaType
-		tay
-		lda AreaPointer
-		and #$1F
-		sta AreaAddrsLOffset
-		lda EnemyAddrHOffsets,y
-		clc
-		adc AreaAddrsLOffset
-		asl
-		tay
-		lda EnemyDataAddrLow+1,y
-		sta EnemyDataHigh
-		lda EnemyDataAddrLow,y
-		sta EnemyDataLow
-		ldy AreaType
-		lda AreaDataHOffsets,y
-		clc
-		adc AreaAddrsLOffset
-		asl
-		tay
-		lda AreaDataAddrLow+1,y
-		sta AreaDataHigh
-		lda AreaDataAddrLow,y
-		sta AreaDataLow
-		ldy #0
-		lda ($E7),y
-		pha
-		and #7
-		cmp #4
-		bcc loc_C30B
-		sta BackgroundColorCtrl
-		lda #0
-loc_C30B:
-
-		sta ForegroundScenery
-		pla
-		pha
-		and #$38
-		lsr
-		lsr
-		lsr
-		sta PlayerEntranceCtrl
-		pla
-		and #$C0
-		clc
-		rol
-		rol
-		rol
-		sta GameTimerSetting
-		iny
-		lda ($E7),y
-		pha
-		and #$F
-		sta TerrainControl
-		pla
-		pha
-		and #$30
-		lsr
-		lsr
-		lsr
-		lsr
-		sta BackgroundScenery
-		pla
-		and #$C0
-		clc
-		rol
-		rol
-		rol
-		cmp #3
-		bne loc_C346
-		sta CloudTypeOverride
-		lda #0
-loc_C346:
-
-		sta AreaStyle
-		lda AreaDataLow
-		clc
-		adc #2
-		sta AreaDataLow
-		lda AreaDataHigh
-		adc #0
-		sta AreaDataHigh
-		rts
-WorldAddrOffsets:
-		.byte 0
-		.byte 5
-		.byte 9
-		.byte $E
-		.byte $12
-		.byte $17
-		.byte $1C
-		.byte $20
-		.byte $24
-AreaAddrOffsets:
-		.byte $20
-		.byte $29
-		.byte $40
-		.byte $21
-		.byte $60
-World1Areas:
-		.byte $22
-		.byte $23
-		.byte $24
-		.byte $61
-		.byte $25
-		.byte $29
-		.byte 0
-		.byte $26
-		.byte $62
-		.byte $27
-		.byte $28
-		.byte $2A
-		.byte $63
-		.byte $2B
-		.byte $29
-		.byte $43
-		.byte $2C
-		.byte $64
-		.byte $2D
-		.byte $29
-		.byte 1
-		.byte $2E
-		.byte $65
-		.byte $2F
-		.byte $30
-		.byte $31
-		.byte $66
-		.byte $32
-		.byte $35
-		.byte $36
-		.byte $67
-		.byte $38
-		.byte 6
-		.byte $68
-		.byte 7
-EnemyAddrHOffsets:
-		.byte $2C
-		.byte $A
-		.byte $27
-		.byte 0
-EnemyDataAddrLow:
-		.word unk_C790
-		.word byte_C7AF
-		.word byte_C7D6
-		.word unk_C7E9
-		.word PrepareInitializeArea
-		.word loc_C609
-		.word unk_C630
-		.word unk_C66F
-		.word unk_CA80
-		.word unk_CA8A
-		.word unk_C81E
-		.word byte_C844
-		.word byte_C867
-		.word unk_C890
-		.word unk_C8C6
-		.word unk_C8DD
-		.word unk_C907
-		.word unk_C92C
-		.word SWAPDATA_C943
-		.word unk_C260
-		.word unk_C965
-		.word unk_C6AF
-		.word unk_C6E0
-		.word unk_C708
-		.word unk_C72C
-		.word unk_C749
-		.word unk_C77A
-		.word unk_C7A6
-		.word unk_C7BF
-		.word unk_C988
-		.word unk_C260
-		.word unk_C7E7
-		.word unk_C80A
-		.word unk_C831
-		.word unk_CA90
-		.word unk_CA94
-		.word unk_CA94
-		.word unk_C260
-		.word byte_C832
-		.word unk_C994
-		.word unk_C9BA
-		.word unk_C9C4
-		.word byte_C83B
-		.word byte_C85C
-		.word unk_C9DE
-		.word SWAPDATA_C876
-		.word unk_CA04
-		.word unk_C8A6
-		.word unk_C8B4
-		.word unk_CA94
-		.word unk_CAB5
-		.word unk_CABA
-AreaDataHOffsets:
-		.byte $2C
-		.byte $A
-		.byte $27
-		.byte 0
-AreaDataAddrLow:
-		.word unk_CA14
-		.word unk_CA73
-		.word unk_CAFE
-		.word unk_CB95
-		.word unk_C8C9
-		.word unk_C996
-		.word unk_CA25
-		.word unk_CAB8
-		.word unk_CACB
-		.word unk_CB2E
-		.word unk_CC0A
-		.word byte_CC65
-		.word byte_CCB4
-		.word byte_CD2D
-		.word byte_CDAA
-		.word byte_CE09
-		.word byte_CE88
-		.word byte_CEE7
-		.word byte_CF5E
-		.word byte_C274
-		.word unk_CFBF
-		.word byte_CB8F
-		.word unk_CC30
-		.word byte_CC8F
-		.word unk_CD0E
-		.word byte_CD7B
-		.word byte_CDFE
-		.word unk_CE5B
-		.word byte_CED6
-		.word byte_D008
-		.word byte_C27D
-		.word unk_CF4B
-		.word byte_CFB6
-		.word unk_D01A
-		.word unk_CB3F
-		.word unk_CB4E
-		.word unk_CB4F
-		.word unk_C261
-		.word unk_D01B
-		.word unk_D021
-		.word unk_D0E2
-		.word unk_D11D
-		.word unk_D052
-		.word unk_D11F
-		.word unk_D168
-		.word unk_D160
-		.word unk_D21B
-		.word unk_D229
-		.word unk_D242
-		.word unk_CB50
-		.word unk_CB97
-		.word unk_CBDA
-		.word $FFFF
-
 SWAPDATA_AreaDataOfsLoopback:
 		.byte $C
 		.byte $C
@@ -16066,7 +15687,6 @@ SWAPDATA_AreaDataOfsLoopback:
 		.byte $C
 		.byte $54
 		.byte 6
-
 
 GameMenuRoutine_NEW:
 GameMenuRoutineInner_NEW:
@@ -16102,7 +15722,7 @@ loc_C5CA:
 		bpl loc_C5CA
 
 PrepareInitializeArea:
-		jsr LoadAreaPointer
+		jsr Enter_LL_LoadAreaPointer
 		jmp InitializeArea
 
 PrimaryGameSetup:
@@ -16155,21 +15775,13 @@ loc_C620:
 
 AlternatePrintVictoryMessages:
 AlternatePlayerEndWorld:
-unk_C66F:
-unk_C630:
-unk_C6AF:
 UNK_C6CA:
-unk_C6E0:
-unk_C708:
 XXX_CopySomethingAndReset:
 XXX_SomethingOrOther:
-unk_C72C:
 FdsWriteFile_SM2SAVE:
-unk_C749:
-unk_C77A:
 		; MOVED.
 
-SWAPDATA_C62B:
+TitleScreenData:
 		.byte $20, $84
 		.byte $01
 		.byte $44
@@ -16304,2745 +15916,186 @@ SWAPDATA_C62B:
 		.byte 0
 		.byte $FF
 		.byte $FF
-unk_C790:
-		.byte $35
-		.byte $9D
-		.byte $55
-		.byte $9B
-		.byte $C9
-		.byte $1B
-		.byte $59
-		.byte $9D
-		.byte $45
-		.byte $9B
-		.byte $C5
-		.byte $1B
-		.byte $26
-		.byte $80
-		.byte $45
-		.byte $1B
-		.byte $B9
-		.byte $1D
-		.byte $F0
-		.byte $15
-		.byte $59
-		.byte $9D
-unk_C7A6:
-		.byte $F
-		.byte 8
-		.byte $78
-		.byte $2D
-		.byte $96
-		.byte $28
-		.byte $90
-		.byte $B5
-		.byte $FF
-byte_C7AF:
-		.byte $74
-		.byte $80
-		.byte $F0
-		.byte $38
-		.byte $A0
-		.byte $BB
-		.byte $40
-		.byte $BC
-		.byte $8C
-		.byte $1D
-		.byte $C9
-		.byte $9D
-		.byte 5
-		.byte $9B
-		.byte $1C
-		.byte $C
-unk_C7BF:
-		.byte $59
-		.byte $1B
-		.byte $B5
-		.byte $1D
-		.byte $2C
-		.byte $8C
-		.byte $40
-		.byte $15
-		.byte $7C
-		.byte $1B
-		.byte $DC
-		.byte $1D
-		.byte $6C
-		.byte $8C
-		.byte $BC
-		.byte $C
-		.byte $78
-		.byte $AD
-		.byte $A5
-		.byte $28
-		.byte $90
-		.byte $B5
-		.byte $FF
-byte_C7D6:
-		.byte $F
-		.byte 4
-		.byte $9C
-		.byte $C
-		.byte $F
-		.byte 7
-		.byte $C5
-		.byte $1B
-		.byte $65
-		.byte $9D
-		.byte $49
-		.byte $9D
-		.byte $5C
-		.byte $8C
-		.byte $78
-		.byte $2D
-		.byte $90
-unk_C7E7:
-		.byte $B5
-		.byte $FF
-unk_C7E9:
-		.byte $49
-		.byte $9F
-		.byte $67
-		.byte 3
-		.byte $79
-		.byte $9D
-		.byte $A0
-		.byte $3A
+
+VerticalPipeUpsideDown:
+		lda #1
+		pha
+		bne do_create_it_or_something
+VerticalPipeUpsideDown_4:
+		lda #4
+		pha
+do_create_it_or_something:
+		jsr GetPipeHeight
+		pla
+		sta $07
+		tya
+		pha
+		ldy AreaObjectLength,x
+		beq loc_C4A8
+		jsr FindEmptyEnemySlot
+		bcs loc_C4A8
+		lda #4
+		jsr InitPiranhaPlant
+		lda byte_6
+		asl
+		asl
+		asl
+		asl
+		clc
+		adc Enemy_Y_Position,x
+		sec
+		sbc #$A
+		sta Enemy_Y_Position,x
+		sta PiranhaPlantDownYPos,x
+		clc
+		adc #$18
+		sta PiranhaPlantUpYPos,x
+		inc ExplosionTimerCounter,x
+loc_C4A8:
+		pla
+		tay
+		pha
+		ldx $07
+		lda VerticalPipeDataOff2,y
+		ldy byte_6
+		dey
+		jsr RenderUnderPart
+		pla
+		tay
+		lda VerticalPipeData,y
+		sta MetatileBuffer,x
+		rts
+
+MoveUpsideDownPiranhaPlant:
+		lda Enemy_State,x
+		bne locret_C4FD
+		lda EnemyFrameTimer,x
+		bne locret_C4FD
+		lda ExplosionTimerCounter,x
+		bne loc_C4D8
+loc_C4CD:
+		lda ExplosionGfxCounter,x
+		eor #$FF
+		clc
+		adc #1
+		sta ExplosionGfxCounter,x
+		inc ExplosionTimerCounter,x
+loc_C4D8:
+		lda PiranhaPlantUpYPos,x
+		ldy ExplosionGfxCounter,x
+		bpl loc_C4E2
+		lda PiranhaPlantDownYPos,x
+loc_C4E2:
+		sta $00
+		lda TimerControl
+		bne locret_C4FD
+		lda Enemy_Y_Position,x
+		clc
+		adc ExplosionGfxCounter,x
+		sta Enemy_Y_Position,x
+		cmp $00
+		bne locret_C4FD
+		lda #0
+		sta ExplosionTimerCounter,x
+		lda #$20
+		sta EnemyFrameTimer,x
+locret_C4FD:
+		rts
+
+LeafSprites:
+		.byte $7B
+		.byte $7B
+		.byte $7B
+		.byte $7B
+		.byte $7A
+		.byte $7A
+		.byte $7B
+		.byte $7B
+		.byte $7B
+		.byte $7A
+		.byte $7B
+		.byte $7A
+
+MakeItWindy:
+		lda #1
+		bne MakeItNotWindy
+		lda #0
+MakeItNotWindy:
+		sta IsWindy
+		rts
+
+RunWindStuff:
+		lda IsWindy
+		beq @nothingtodo
+		lda #4
+		sta NoiseSoundQueue
+		jsr UpdateLeafPositions
+		ldx #0
+		ldy byte_6EB ; Leaf sprite offset or something...?
+@update_leaf:
+		lda WRAM_LeafY,x
+		sta $200,y
+		lda LeafSprites,x
+		sta $201,y
+		lda #$41
+		sta $202,y
+		lda WRAM_LeafX,x
+		sta $203,y
+		iny
+		iny
+		iny
+		iny
+		inx
+		cpx #6
+		bne @xnotsix
+		ldy Alt_SprDataOffset
+@xnotsix:
+		cpx #$C
+		bne @update_leaf
+@nothingtodo:
+		rts
+
+LeafSpeed: ; TODO : This is longer than the game uses...?
 		.byte $57
-		.byte $9F
-		.byte $BB
-		.byte $1D
-		.byte $D5
-		.byte $25
-		.byte $F
-		.byte 5
-		.byte $18
-		.byte $1D
-		.byte $74
-		.byte 0
-		.byte $84
-		.byte 0
-		.byte $94
-		.byte 0
-		.byte $C6
-		.byte $29
-		.byte $49
-		.byte $9D
-		.byte $DB
-		.byte 5
-		.byte $F
-		.byte 8
-		.byte 5
-unk_C80A:
-		.byte $9B
-		.byte 9
-		.byte $1D
-		.byte $B0
-		.byte $38
-		.byte $80
-		.byte $95
-		.byte $C0
-		.byte $3C
-		.byte $EC
-		.byte $A8
-		.byte $CC
-		.byte $8C
-		.byte $4A
-		.byte $9B
-		.byte $78
-		.byte $2D
-		.byte $90
-		.byte $B5
-		.byte $FF
-unk_C81E:
-		.byte 7
-		.byte $8E
-		.byte $47
-		.byte 3
-		.byte $F
-		.byte 3
-		.byte $10
-		.byte $38
-		.byte $1B
-		.byte $80
-		.byte $53
-		.byte 6
-		.byte $77
-		.byte $E
-		.byte $83
-		.byte $83
-		.byte $A0
-		.byte $3D
-		.byte $90
-unk_C831:
-		.byte $3B
-byte_C832:
-		.byte $90
-		.byte $B7
-		.byte $60
-		.byte $BC
-		.byte $B7
-		.byte $E
-		.byte $EE
-		.byte $42
-		.byte 0
-byte_C83B:
-		.byte $F7
-		.byte $80
-		.byte $6B
-		.byte $83
-		.byte $1B
-		.byte $83
-		.byte $AB
-		.byte 6
-		.byte $FF
-byte_C844:
-		.byte $96
-		.byte $A4
-		.byte $F9
-		.byte $24
-		.byte $D3
-		.byte $83
-		.byte $3A
-		.byte $83
-		.byte $5A
-		.byte 3
-		.byte $95
-		.byte 7
-		.byte $F4
-		.byte $F
-		.byte $69
-		.byte $A8
-		.byte $33
-		.byte $87
-		.byte $86
-		.byte $24
-byte_C858:
-		.byte $C9
-		.byte $24
-		.byte $4B
-		.byte $83
-byte_C85C:
-		.byte $67
-		.byte $83
-		.byte $17
-		.byte $83
+		.byte $57
 		.byte $56
-		.byte $28
-		.byte $95
-		.byte $24
-		.byte $A
-		.byte $A4
-		.byte $FF
-byte_C867:
-		.byte $F
-		.byte 2
-		.byte $47
-		.byte $E
-		.byte $87
-		.byte $E
-		.byte $C7
-		.byte $E
-		.byte $F7
-		.byte $E
-		.byte $27
-		.byte $8E
-		.byte $EE
-		.byte $42
-		.byte $25
-SWAPDATA_C876:
-		.byte $F
-		.byte 6
-		.byte $AC
-		.byte $28
-		.byte $8C
-		.byte $A8
-		.byte $4E
-		.byte $B3
-		.byte $20
-SWAPDATA_C87F:
-		.byte $8B
-		.byte $8E
-		.byte $F7
-		.byte $90
-		.byte $36
-		.byte $90
-		.byte $E5
-		.byte $8E
-byte_C887:
-		.byte $32
-		.byte $8E
-		.byte $C2
-		.byte 6
-		.byte $D2
-		.byte 6
-		.byte $E2
-		.byte 6
-		.byte $FF
-unk_C890:
-		.byte $15
-		.byte $8E
-		.byte $9B
-SWAPDATA_C893:
-		.byte 6
-		.byte $E0
-		.byte $37
-		.byte $80
-		.byte $BC
-		.byte $F
-		.byte 4
-		.byte $2B
-		.byte $3B
-		.byte $AB
-		.byte $E
-		.byte $EB
-		.byte $E
-		.byte $F
-		.byte 6
-		.byte $F0
-		.byte $37
-		.byte $4B
-		.byte $8E
-unk_C8A6:
-		.byte $6B
-		.byte $80
-		.byte $BB
-		.byte $3C
-		.byte $4B
-SWAPDATA_C8AB:
-		.byte $BB
-		.byte $EE
-		.byte $42
-		.byte $20
-		.byte $1B
-		.byte $BC
-		.byte $CB
-		.byte 0
-		.byte $AB
-unk_C8B4:
-		.byte $83
-		.byte $EB
-		.byte $BB
-		.byte $F
-		.byte $E
-		.byte $1B
-		.byte 3
-		.byte $9B
-		.byte $37
-		.byte $D4
-		.byte $E
-		.byte $A3
-		.byte $86
-SWAPDATA_C8C1:
-		.byte $B3
-		.byte 6
-		.byte $C3
-		.byte 6
-		.byte $FF
-unk_C8C6:
-		.byte $C0
-		.byte $BE
-		.byte $F
-unk_C8C9:
-		.byte 3
-		.byte $38
-		.byte $E
-		.byte $15
-		.byte $8F
-		.byte $AA
-		.byte $83
-		.byte $F8
-		.byte 7
-		.byte $F
-		.byte 7
-		.byte $96
-		.byte $10
-		.byte $F
-SWAPDATA_C8D7:
-		.byte 9
-		.byte $48
-		.byte $10
-		.byte $BA
-		.byte 3
-		.byte $FF
-unk_C8DD:
-		.byte $87
-		.byte $85
-		.byte $A3
-		.byte 5
-		.byte $DB
-		.byte $83
-		.byte $FB
-		.byte 3
-		.byte $93
-		.byte $8F
-		.byte $BB
-		.byte 3
-		.byte $CE
-		.byte $42
-SWAPDATA_C8EB:
-		.byte $42
-		.byte $9B
-		.byte $83
-		.byte $AE
-		.byte $B3
-		.byte $40
-		.byte $DB
-		.byte 0
-		.byte $F4
-		.byte $F
-		.byte $33
-		.byte $8F
-		.byte $74
-		.byte $F
-		.byte $10
-		.byte $BC
-		.byte $F5
-SWAPDATA_C8FC:
-		.byte $F
-		.byte $2E
-		.byte $C2
-		.byte $45
-		.byte $B7
-		.byte 3
-		.byte $F7
-		.byte 3
-		.byte $C8
-		.byte $90
-		.byte $FF
-unk_C907:
-		.byte $80
-		.byte $BE
-		.byte $83
-		.byte 3
-		.byte $92
-		.byte $10
-		.byte $4B
-		.byte $80
-		.byte $B0
-		.byte $3C
-		.byte 7
-		.byte $80
-SWAPDATA_C913:
-		.byte $B7
-		.byte $24
-		.byte $C
-		.byte $A4
-		.byte $96
-		.byte $A9
-		.byte $1B
-		.byte $83
-		.byte $7B
-		.byte $24
-		.byte $B7
-		.byte $24
-		.byte $97
-		.byte $83
-		.byte $E2
-		.byte $F
-		.byte $A9
-		.byte $A9
-		.byte $38
-		.byte $A9
-		.byte $F
-		.byte $B
-		.byte $74
-		.byte $8F
-SWAPDATA_C92B:
-		.byte $FF
-unk_C92C:
-		.byte $E2
-		.byte $91
-		.byte $F
-		.byte 3
-		.byte $42
-		.byte $11
-		.byte $F
-		.byte 6
-		.byte $72
-		.byte $11
-		.byte $F
-		.byte 8
-		.byte $EE
-		.byte 2
-		.byte $60
-		.byte 2
-		.byte $91
-		.byte $EE
-		.byte $B3
-		.byte $60
-		.byte $D3
-		.byte $86
-		.byte $FF
-SWAPDATA_C943:
-		.byte $F
-		.byte 2
-		.byte $9B
-		.byte 2
-		.byte $AB
-		.byte 2
-		.byte $F
-		.byte 4
-		.byte $13
-		.byte 3
-		.byte $92
-		.byte $11
-		.byte $60
-		.byte $B7
-		.byte 0
-		.byte $BC
-		.byte 0
-		.byte $BB
-		.byte $B
-		.byte $83
-		.byte $CB
-		.byte 3
-		.byte $7B
-		.byte $85
-		.byte $9E
-SWAPDATA_C95C:
-		.byte $C2
-		.byte $60
-		.byte $E6
-		.byte 5
-		.byte $F
-		.byte $C
-		.byte $62
-		.byte $10
-		.byte $FF
-unk_C965:
-		.byte $E6
-		.byte $A9
-		.byte $57
-		.byte $A8
-		.byte $B5
-		.byte $24
-		.byte $19
-		.byte $A4
-		.byte $76
-		.byte $28
-		.byte $A2
-		.byte $F
-		.byte $95
-		.byte $8F
-		.byte $9D
-		.byte $A8
-		.byte $F
-		.byte 7
-		.byte 9
-		.byte $29
-		.byte $55
-		.byte $24
-		.byte $8B
-		.byte $17
-SWAPDATA_C97D:
-		.byte $A9
-		.byte $24
-		.byte $DB
-		.byte $83
-		.byte 4
-		.byte $A9
-		.byte $24
-		.byte $8F
-		.byte $65
-		.byte $F
-		.byte $FF
-unk_C988:
-		.byte $A
-		.byte $AA
-		.byte $1E
-		.byte $22
-		.byte $29
-		.byte $1E
-		.byte $25
-		.byte $49
-		.byte $2E
-		.byte $27
-		.byte $66
-		.byte $FF
-unk_C994:
-		.byte $A
-		.byte $8E
-unk_C996:
-		.byte $DE
-		.byte $B4
-		.byte 0
-		.byte $E0
-		.byte $37
-		.byte $5B
-		.byte $82
-		.byte $2B
-		.byte $A9
-		.byte $AA
-		.byte $29
-		.byte $29
-		.byte $A9
-		.byte $A8
-		.byte $29
-		.byte $F
-		.byte 8
-		.byte $F0
-		.byte $3C
-		.byte $79
-		.byte $A9
-		.byte $C5
-		.byte $26
-		.byte $CD
-		.byte $26
-		.byte $EE
-		.byte $3B
-		.byte 1
-		.byte $67
-		.byte $B4
-		.byte $F
-		.byte $C
-		.byte $2E
-		.byte $C1
-		.byte 0
-		.byte $FF
-unk_C9BA:
-		.byte 9
-		.byte $A9
-		.byte $19
-		.byte $A9
-		.byte $DE
-		.byte $42
-SWAPDATA_C9C0:
-		.byte 2
-		.byte $7B
-		.byte $83
-		.byte $FF
-unk_C9C4:
-		.byte $1E
-		.byte $A0
-		.byte $A
-		.byte $1E
-		.byte $23
-		.byte $2B
-		.byte $1E
-		.byte $28
-		.byte $6B
-		.byte $F
-		.byte 3
-		.byte $1E
-		.byte $40
-		.byte 8
-		.byte $1E
-		.byte $25
-		.byte $4E
-		.byte $F
-		.byte 6
-		.byte $1E
-		.byte $22
-		.byte $25
-		.byte $1E
-		.byte $25
-		.byte $45
-		.byte $FF
-unk_C9DE:
-		.byte $F
-		.byte 1
-		.byte $2A
-		.byte 7
-		.byte $2E
-		.byte $3B
-		.byte $41
-		.byte $E9
-		.byte 7
-		.byte $F
-		.byte 3
-		.byte $6B
-		.byte 7
-		.byte $F9
-		.byte 7
-		.byte $B8
-		.byte $80
-		.byte $2A
-		.byte $87
-		.byte $4A
-		.byte $87
-		.byte $B3
-		.byte $F
-		.byte $84
-		.byte $87
-		.byte $47
-		.byte $83
-		.byte $87
-		.byte 7
-		.byte $A
-		.byte $87
-		.byte $42
-		.byte $87
-		.byte $1B
-		.byte $87
-		.byte $6B
-		.byte 3
-		.byte $FF
-unk_CA04:
-		.byte $1E
-		.byte $A7
-		.byte $6A
-		.byte $5B
-		.byte $82
-		.byte $74
-		.byte 7
-		.byte $D8
-		.byte 7
-		.byte $E8
-		.byte 2
-		.byte $F
-		.byte 4
-		.byte $26
-		.byte 7
-		.byte $FF
-unk_CA14:
-		.byte $9B
-		.byte 7
-		.byte 5
-		.byte $32
-		.byte 6
-		.byte $33
-		.byte 7
-		.byte $34
-		.byte $33
-		.byte $8E
-		.byte $4E
-		.byte $A
-		.byte $7E
-		.byte 6
-		.byte $9E
-		.byte $A
-		.byte $CE
-unk_CA25:
-		.byte 6
-		.byte $E3
-		.byte 0
-		.byte $EE
-		.byte $A
-		.byte $1E
-		.byte $87
-		.byte $53
-		.byte $E
-		.byte $8E
-		.byte 2
-		.byte $9C
-		.byte 0
-		.byte $C7
-		.byte $E
-		.byte $D7
-		.byte $37
-		.byte $57
-		.byte $8E
-		.byte $6C
-		.byte 5
-		.byte $DA
-		.byte $60
-		.byte $E9
-		.byte $61
-		.byte $F8
-		.byte $62
-		.byte $FE
-		.byte $B
-		.byte $43
-		.byte $8E
-		.byte $C3
-		.byte $E
-		.byte $43
-		.byte $8E
-		.byte $B7
-		.byte $E
-		.byte $EE
-		.byte 9
-		.byte $FE
-		.byte $A
-		.byte $3E
-		.byte $86
-		.byte $57
-		.byte $E
-		.byte $6E
-		.byte $A
-		.byte $7E
-		.byte 6
-		.byte $AE
-		.byte $A
-		.byte $BE
-		.byte 6
-		.byte $FE
-		.byte 7
-		.byte $15
-		.byte $E2
-		.byte $55
-		.byte $62
-		.byte $95
-		.byte $62
-		.byte $FE
-		.byte $A
-		.byte $D
-		.byte $C4
-		.byte $CD
-		.byte $43
-		.byte $CE
-		.byte 9
-		.byte $DE
-		.byte $B
-		.byte $DD
-		.byte $42
-		.byte $FE
-		.byte 2
-		.byte $5D
-		.byte $C7
-		.byte $FD
-unk_CA73:
-		.byte $9B
-		.byte 7
-		.byte 5
-		.byte $32
-		.byte 6
-		.byte $33
-		.byte 7
-		.byte $34
-		.byte 3
-		.byte $E2
-		.byte $E
-		.byte 6
-		.byte $1E
-unk_CA80:
-		.byte $C
-		.byte $7E
-		.byte $A
-		.byte $8E
-		.byte 5
-		.byte $8E
-		.byte $82
-byte_CA87:
-		.byte $8A
-		.byte $8E
-		.byte $8E
-unk_CA8A:
-		.byte $A
-		.byte $EE
-		.byte 2
-		.byte $A
-		.byte $E0
-		.byte $19
-unk_CA90:
-		.byte $61
-		.byte $23
-		.byte 6
-		.byte $28
-unk_CA94:
-		.byte $62
-		.byte $2E
-		.byte $B
-		.byte $7E
-		.byte $A
-		.byte $81
-		.byte $62
-		.byte $87
-		.byte $30
-		.byte $8E
-		.byte 4
-		.byte $A7
-		.byte $31
-		.byte $C7
-		.byte $E
-		.byte $D7
-		.byte $33
-		.byte $FE
-		.byte 3
-		.byte 3
-		.byte $8E
-		.byte $E
-		.byte $A
-		.byte $11
-		.byte $62
-		.byte $1E
-		.byte 4
-		.byte $27
-		.byte $32
-		.byte $4E
-		.byte $A
-		.byte $51
-		.byte $62
-unk_CAB5:
-		.byte $57
-		.byte $E
-		.byte $5E
-unk_CAB8:
-		.byte 4
-		.byte $67
-unk_CABA:
-		.byte $34
-		.byte $9E
-		.byte $A
-		.byte $A1
-		.byte $62
-		.byte $AE
-		.byte 3
-		.byte $B3
-		.byte $E
-		.byte $BE
-		.byte $B
-		.byte $EE
-		.byte 9
-		.byte $FE
-		.byte $A
-		.byte $2E
-		.byte $82
-unk_CACB:
-		.byte $7A
-		.byte $E
-		.byte $7E
-		.byte $A
-		.byte $97
-		.byte $31
-		.byte $BE
-		.byte 4
-		.byte $DA
-		.byte $E
-		.byte $EE
-		.byte $A
-		.byte $F1
-		.byte $62
-		.byte $FE
-		.byte 2
-		.byte $3E
-		.byte $8A
-		.byte $7E
-		.byte 6
-		.byte $AE
-		.byte $A
-		.byte $CE
-		.byte 6
-		.byte $FE
-		.byte $A
-		.byte $D
-		.byte $C4
-		.byte $11
-		.byte $53
-		.byte $21
-		.byte $52
-		.byte $24
-		.byte $B
-		.byte $51
-		.byte $52
-		.byte $61
-		.byte $52
-		.byte $CD
-		.byte $43
-		.byte $CE
-		.byte 9
-		.byte $DD
-		.byte $42
-		.byte $DE
-		.byte $B
-		.byte $FE
-		.byte 2
-		.byte $5D
-		.byte $C7
-		.byte $FD
-unk_CAFE:
-		.byte $5B
-		.byte 9
-		.byte 5
-		.byte $34
-		.byte 6
-		.byte $35
-		.byte $6E
-		.byte 6
-		.byte $7E
-		.byte $A
-		.byte $AE
-		.byte 2
-		.byte $FE
-		.byte 2
-		.byte $D
-		.byte 1
-		.byte $E
-		.byte $E
-		.byte $2E
-		.byte $A
-		.byte $6E
-		.byte 9
-		.byte $BE
-		.byte $A
-		.byte $ED
-		.byte $4B
-		.byte $E4
-		.byte $60
-		.byte $EE
-		.byte $D
-		.byte $5E
-		.byte $82
-		.byte $78
-		.byte $72
-		.byte $A4
-		.byte $3D
-		.byte $A5
-		.byte $3E
-		.byte $A6
-		.byte $3F
-		.byte $A3
-		.byte $BE
-		.byte $A6
-		.byte $3E
-		.byte $A9
-		.byte $32
-		.byte $E9
-		.byte $3A
-unk_CB2E:
-		.byte $9C
-		.byte $80
-		.byte $A3
-		.byte $33
-		.byte $A6
-		.byte $33
-		.byte $A9
-		.byte $33
-		.byte $E5
-		.byte 6
-		.byte $ED
-		.byte $4B
-		.byte $F3
-		.byte $30
-		.byte $F6
-		.byte $30
-		.byte $F9
-unk_CB3F:
-		.byte $30
-		.byte $FE
-		.byte 2
-		.byte $D
-		.byte 5
-		.byte $3C
-		.byte 1
-		.byte $57
-		.byte $73
-		.byte $7C
-		.byte 2
-		.byte $93
-		.byte $30
-		.byte $A7
-		.byte $73
-unk_CB4E:
-		.byte $B3
-unk_CB4F:
-		.byte $37
-unk_CB50:
-		.byte $CC
-		.byte 1
-		.byte 7
-		.byte $83
-		.byte $17
-		.byte 3
-		.byte $27
-		.byte 3
-		.byte $37
-		.byte 3
-		.byte $64
-		.byte $3B
-		.byte $77
-		.byte $3A
-		.byte $C
-		.byte $80
-		.byte $2E
-		.byte $E
-		.byte $9E
-		.byte 2
-		.byte $A5
-		.byte $62
-		.byte $B6
-		.byte $61
-		.byte $CC
-		.byte 2
-		.byte $C3
-		.byte $33
-		.byte $ED
-		.byte $4B
-		.byte 3
-		.byte $B7
-		.byte 7
-		.byte $37
-		.byte $83
-		.byte $37
-		.byte $87
-		.byte $37
-		.byte $DD
-		.byte $4B
-		.byte 3
-		.byte $B5
-		.byte 7
-		.byte $35
-		.byte $5E
-		.byte $A
-		.byte $8E
-		.byte 2
-		.byte $AE
-		.byte $A
-		.byte $DE
-		.byte 6
-		.byte $FE
-		.byte $A
-		.byte $D
-		.byte $C4
-		.byte $CD
-		.byte $43
-		.byte $CE
-		.byte 9
-		.byte $DD
-		.byte $42
-		.byte $DE
-byte_CB8F:
-		.byte $B
-		.byte $FE
-byte_CB91:
-		.byte 2
-		.byte $5D
-		.byte $C7
-		.byte $FD
-unk_CB95:
-		.byte $9B
-		.byte 7
-unk_CB97:
-		.byte 5
-		.byte $32
-		.byte 6
-		.byte $33
-		.byte 7
-		.byte $34
-		.byte $4E
-		.byte 3
-		.byte $5C
-		.byte 2
-		.byte $C
-		.byte $F1
-		.byte $27
-		.byte 0
-		.byte $3C
-		.byte $74
-		.byte $47
-		.byte $E
-		.byte $FC
-		.byte 0
-		.byte $FE
-		.byte $B
-		.byte $77
-		.byte $8E
-		.byte $EE
-		.byte 9
-		.byte $FE
-		.byte $A
-		.byte $45
-		.byte $B2
-		.byte $55
-		.byte $E
-		.byte $99
-		.byte $32
-		.byte $B9
-		.byte $E
-		.byte $FE
-		.byte 2
-		.byte $E
-		.byte $85
-		.byte $FE
-		.byte 2
-		.byte $16
-		.byte $8E
-		.byte $2E
-		.byte $C
-		.byte $AE
-		.byte $A
-		.byte $EE
-		.byte 5
-		.byte $1E
-		.byte $82
-		.byte $47
-		.byte $E
-		.byte 7
-		.byte $BD
-		.byte $C4
-		.byte $72
-		.byte $DE
-		.byte $A
-		.byte $FE
-		.byte 2
-		.byte 3
-		.byte $8E
-		.byte 7
-		.byte $E
-		.byte $13
-unk_CBDA:
-		.byte $3C
-		.byte $17
-		.byte $3D
-		.byte $E3
-		.byte 3
-		.byte $EE
-		.byte $A
-		.byte $F3
-		.byte 6
-		.byte $F7
-		.byte 3
-		.byte $FE
-		.byte $E
-		.byte $FE
-		.byte $8A
-		.byte $38
-		.byte $E4
-		.byte $4A
-		.byte $72
-		.byte $68
-		.byte $64
-		.byte $37
-		.byte $B0
-		.byte $98
-		.byte $64
-		.byte $A8
-		.byte $64
-		.byte $E8
-		.byte $64
-		.byte $F8
-		.byte $64
-		.byte $D
-		.byte $C4
-		.byte $71
-		.byte $64
-		.byte $CD
-		.byte $43
-		.byte $CE
-		.byte 9
-		.byte $DD
-		.byte $42
-		.byte $DE
-		.byte $B
-		.byte $FE
-		.byte 2
-		.byte $5D
-		.byte $C7
-		.byte $FD
-unk_CC0A:
-		.byte $50
-		.byte $31
-		.byte $F
-		.byte $26
-		.byte $13
-		.byte $E4
-		.byte $23
-		.byte $24
-		.byte $27
-		.byte $23
-		.byte $37
-		.byte 7
-		.byte $66
-		.byte $61
-		.byte $AC
-		.byte $74
-		.byte $C7
-		.byte 1
-		.byte $B
-		.byte $F1
-		.byte $77
-		.byte $73
-		.byte $B6
-		.byte 4
-		.byte $DB
-		.byte $71
-		.byte $5C
-		.byte $82
-		.byte $83
-		.byte $2D
-		.byte $A2
-		.byte $47
-		.byte $A7
-		.byte $A
-		.byte $B7
-		.byte $29
-		.byte $4F
-		.byte $B3
-unk_CC30:
-		.byte $87
-		.byte $B
-		.byte $93
-		.byte $23
-		.byte $CC
-		.byte 6
-		.byte $E3
-		.byte $2C
-		.byte $3A
-		.byte $E0
-		.byte $7C
-		.byte $71
-		.byte $97
-		.byte 1
-		.byte $AC
-		.byte $73
-		.byte $E6
-		.byte $61
-		.byte $E
-		.byte $B1
-		.byte $B7
-		.byte $F3
-		.byte $DC
-		.byte 2
-		.byte $D3
-		.byte $25
-		.byte 7
-		.byte $FB
-		.byte $2C
-		.byte 1
-		.byte $E7
-		.byte $73
-		.byte $2C
-		.byte $F2
-		.byte $34
-		.byte $72
-		.byte $57
-		.byte 0
-		.byte $7C
-		.byte 2
-		.byte $39
-		.byte $F1
-		.byte $BF
-		.byte $37
-		.byte $33
-		.byte $E7
-		.byte $CD
-		.byte $41
-		.byte $F
-		.byte $A6
-		.byte $ED
-		.byte $47
-		.byte $FD
-byte_CC65:
-		.byte $50
-		.byte $11
-		.byte $F
-		.byte $26, $FE,	$10, $47, $92, $56, $40, $AC, $16, $AF
-		.byte $12, $F, $95, $73, $16, $82, $44,	$EC, $48, $BC
-		.byte $C2, $1C,	$B1, $B3, $16, $C2, $44, $86, $C0, $9C
-		.byte $14, $9F,	$12, $A6, $40, $DF, $15, $B, $96
-byte_CC8F:
-		.byte $43
-		.byte $12, $97,	$31, $D3, $12, 3, $92, $27, $14, $63, 0
-		.byte $C7, $15,	$D6, $43, $AC, $97, $AF, $11, $1F, $96
-		.byte $64, $13,	$E3
-		.byte $12
-		.byte $2E
-		.byte $91
-		.byte $9D
-		.byte $41
-		.byte $AE
-		.byte $42
-		.byte $DF
-		.byte $20
-		.byte $CD
-		.byte $C7
-		.byte $FD
-byte_CCB4:
-		.byte $52
-		.byte $21
-		.byte $F
-byte_CCB7:
-		.byte $20
-		.byte $6E
-		.byte $64
-		.byte $4F
-		.byte $B2
-		.byte $7C
-		.byte $5F
-		.byte $7C
-		.byte $3F
-		.byte $7C
-		.byte $D8
-		.byte $7C
-		.byte $38
-		.byte $83
-		.byte 2
-		.byte $A3
-		.byte 0
-		.byte $C3
-		.byte 2
-		.byte $F7
-		.byte $16
-		.byte $5C
-		.byte $D6
-		.byte $CF
-		.byte $35
-		.byte $D3
-		.byte $20
-		.byte $E3
-		.byte $A
-		.byte $F3
-		.byte $20
-		.byte $25
-		.byte $B5
-		.byte $2C
-		.byte $53
-		.byte $6A
-		.byte $7A
-		.byte $8C
-		.byte $54
-		.byte $DA
-		.byte $72
-		.byte $FC
-		.byte $50
-		.byte $C
-		.byte $D2
-		.byte $39
-		.byte $73
-		.byte $5C
-		.byte $54
-		.byte $AA
-		.byte $72
-		.byte $CC
-		.byte $53
-		.byte $F7
-		.byte $16
-		.byte $33
-		.byte $83
-		.byte $40
-		.byte 6
-		.byte $5C
-		.byte $5B
-		.byte 9
-		.byte $93
-		.byte $27
-		.byte $F
-		.byte $3C
-		.byte $5C
-		.byte $A
-		.byte $B0
-		.byte $63
-		.byte $27
-		.byte $78
-		.byte $72
-		.byte $93
-		.byte 9
-		.byte $97
-		.byte 3
-		.byte $A7
-		.byte 3
-		.byte $B7
-		.byte $22
-		.byte $47
-		.byte $81
-		.byte $5C
-		.byte $72
-		.byte $2A
-		.byte $B0
-unk_CD0E:
-		.byte $28
-		.byte $F
-		.byte $3C
-		.byte $5F
+		.byte $56
 		.byte $58
-		.byte $31
-		.byte $B8
-		.byte $31
-		.byte $28
-		.byte $B1
-		.byte $3C
-		.byte $5B
-		.byte $98
-		.byte $31
-		.byte $FA
-		.byte $30
-		.byte 3
-		.byte $B2
-		.byte $20
-		.byte 4
-		.byte $7F
-		.byte $B7
-		.byte $F3
-		.byte $67
-		.byte $8D
-		.byte $C1
-		.byte $BF
-		.byte $26
-		.byte $AD
-		.byte $C7
-		.byte $FD
-byte_CD2D:
-		.byte $54
-		.byte $11
-		.byte $F
-		.byte $26
-		.byte $38
-		.byte $F2
-		.byte $AB
-		.byte $71
-		.byte $B
-		.byte $F1
-		.byte $96
-		.byte $42
-		.byte $CE
-		.byte $10
-		.byte $1E
-		.byte $91
-		.byte $29
-		.byte $61
-		.byte $3A
-		.byte $60
-		.byte $4E
-		.byte $10
-		.byte $78
-		.byte $74
-		.byte $8E
-		.byte $11
-		.byte 6
-		.byte $C3
-		.byte $1A
-		.byte $E0
-		.byte $1E
-		.byte $10
-		.byte $5E
-		.byte $11
-		.byte $67
-		.byte $63
-		.byte $77
-		.byte $63
-		.byte $88
-		.byte $62
-		.byte $99
-		.byte $61
-		.byte $AA
-		.byte $60
-		.byte $BE
-		.byte $10
-		.byte $A
-		.byte $F2
-		.byte $15
-		.byte $45
-		.byte $7E
-		.byte $11
-		.byte $7A
-		.byte $31
-		.byte $9A
-		.byte $E0
-		.byte $AC
-		.byte 2
-		.byte $D9
-		.byte $61
-		.byte $D4
-		.byte $A
-		.byte $EC
-		.byte 1
-		.byte $D6
-		.byte $C2
-		.byte $84
-		.byte $C3
-		.byte $98
-		.byte $FA
-		.byte $D3
-		.byte 7
-		.byte $D7
-		.byte $B
-		.byte $E9
-		.byte $61
-		.byte $EE
-		.byte $10
-byte_CD7B:
-		.byte $2E
-		.byte $91
-		.byte $39
-		.byte $71
-		.byte $93
-		.byte 3
-		.byte $A6
-		.byte 3
-		.byte $BE
-		.byte $10
-		.byte $E1
-		.byte $71
-		.byte $E3
-		.byte $31
-		.byte $5E
-		.byte $91
-		.byte $69
-		.byte $61
-		.byte $E6
-		.byte $41
-		.byte $28
-		.byte $E2
-		.byte $99
-		.byte $71
-		.byte $AE
-		.byte $10
-		.byte $CE
-		.byte $11
-		.byte $BE
-		.byte $90
-		.byte $D6
-		.byte $32
-		.byte $3E
-		.byte $91
-		.byte $5F
-		.byte $37
-		.byte $66
-		.byte $60
-		.byte $D3
-		.byte $67
-		.byte $6D
-		.byte $C1
-		.byte $AF
-		.byte $26
-		.byte $9D
-		.byte $C7
-		.byte $FD
-byte_CDAA:
-		.byte $54
-		.byte $11
-		.byte $F
-		.byte $26
-		.byte $AF
-		.byte $32
-		.byte $D8
-		.byte $62
-		.byte $E8
-		.byte $62
-		.byte $F8
-		.byte $62
-		.byte $FE
-		.byte $10
-		.byte $C
-		.byte $BE
-		.byte $F8
-		.byte $64
-		.byte $D
-		.byte $C8
-		.byte $2C
-		.byte $43
-		.byte $98
-		.byte $64
-		.byte $AC
-		.byte $39
-		.byte $48
-		.byte $E4
-		.byte $6A
-		.byte $62
-		.byte $7C
-		.byte $47
-		.byte $FA
-		.byte $62
-		.byte $3C
-		.byte $B7
-		.byte $EA
-		.byte $62
-		.byte $FC
-		.byte $4D
-		.byte $F6
-		.byte 2
-		.byte 3
-		.byte $80
-		.byte 6
-		.byte 2
-		.byte $13
-		.byte 2
-		.byte $DA
-		.byte $62
-		.byte $D
-		.byte $C8
-		.byte $B
-		.byte $17
-		.byte $97
-		.byte $16
-		.byte $2C
-		.byte $B1
-		.byte $33
-		.byte $43
-		.byte $6C
-		.byte $31
-		.byte $AC
-		.byte $31
-		.byte $17
-		.byte $93
-		.byte $73
-		.byte $12
-		.byte $CC
-		.byte $31
-		.byte $1A
-		.byte $E2
-		.byte $2C
-		.byte $4B
-		.byte $67
-		.byte $48
-		.byte $EA
-		.byte $62
-		.byte $D
-		.byte $CA
-		.byte $17
-		.byte $12
-		.byte $53
-		.byte $12
-byte_CDFE:
-		.byte $BE
-		.byte $11
-		.byte $1D
-		.byte $C1
-		.byte $3E
-		.byte $42
-		.byte $6F
-		.byte $20
-		.byte $4D
-		.byte $C7
-		.byte $FD
-byte_CE09:
-		.byte $52
-		.byte $B1
-		.byte $F
-		.byte $20
-		.byte $6E
-		.byte $75
-		.byte $53
-		.byte $AA
-		.byte $57
-		.byte $25
-		.byte $B7
-		.byte $A
-		.byte $C7
-		.byte $23
-		.byte $C
-		.byte $83
-		.byte $5C
-		.byte $72
-		.byte $87
-		.byte 1
-		.byte $C3
-		.byte 0
-		.byte $C7
-		.byte $20
-		.byte $DC
-		.byte $65
-		.byte $C
-		.byte $87
-		.byte $C3
-byte_CE26:
-		.byte $22
-		.byte $F3
-		.byte 3
-		.byte 3
-		.byte $A2
-		.byte $27
-		.byte $7B
-		.byte $33
-		.byte 3
-		.byte $43
-		.byte $23
-		.byte $52
-		.byte $42
-		.byte $9C
-		.byte 6
-		.byte $A7
-		.byte $20
-		.byte $C3
-		.byte $23
-		.byte 3
-		.byte $A2
-		.byte $C
-		.byte 2
-		.byte $33
-		.byte 9
-		.byte $39
-		.byte $71
-		.byte $43
-		.byte $23
-		.byte $77
-		.byte 6
-		.byte $83
-		.byte $67
-		.byte $A7
-		.byte $73
-		.byte $5C
-		.byte $82
-		.byte $C9
-		.byte $11
-		.byte 7
-		.byte $80
-		.byte $1C
-		.byte $71
-		.byte $98
-		.byte $11
-		.byte $9A
-		.byte $10
-		.byte $F3
-		.byte 4
-		.byte $16
-		.byte $F4
-		.byte $3C
-		.byte 2
-unk_CE5B:
-		.byte $68
-		.byte $7A
-		.byte $8C
-		.byte 1
-		.byte $A7
-		.byte $73
-		.byte $E7
-		.byte $73
-		.byte $AC
-		.byte $83
-		.byte 9
-		.byte $8F
-		.byte $1C
-		.byte 3
-		.byte $9F
-		.byte $37
-		.byte $13
-		.byte $E7
-		.byte $7C
-		.byte 2
-		.byte $AD
-		.byte $41
-		.byte $EF
-		.byte $26
-		.byte $D
-		.byte $E
-		.byte $39
-		.byte $71
-		.byte $7F
-		.byte $37
-		.byte $F2
-		.byte $68
-		.byte 2
-		.byte $E8
-		.byte $12
-		.byte $3A
-		.byte $1C
-		.byte 0
-		.byte $68
-		.byte $7A
-		.byte $DE
-		.byte $3F
-		.byte $6D
-		.byte $C5
-		.byte $FD
-byte_CE88:
-		.byte $55
-		.byte $10
-		.byte $B
-		.byte $1F
-		.byte $F, $26, $D6, $12, 7, $9F, $33, $1A, $FB,	$1F, $F7
-		.byte $94, $53,	$94, $71, $71, $CC, $15, $CF, $13, $1F
-		.byte $98, $63,	$12, $9B, $13, $A9, $71, $FB, $17, 9, $F1
-		.byte $13, $13,	$21, $42, $59, $F, $EB,	$13, $33, $93
-		.byte $40, 6, $8C, $14,	$8F, $17, $93, $40, $CF, $13, $B
-		.byte $94, $57,	$15, 7,	$93, $19, $F3, $C6, $43, $C7, $13
-		.byte $D3, 3, $E3, 3, $33, $B0,	$4A, $72, $55, $46
-byte_CED6:
-		.byte $73
-		.byte $31
-		.byte $A8
-		.byte $74, $E3,	$12, $8E, $91, $AD, $41, $CE, $42, $EF
-		.byte $20, $DD,	$C7, $FD
-byte_CEE7:
-		.byte $52
-		.byte $21
-		.byte $F
-		.byte $20
-		.byte $6E
-		.byte $63
-		.byte $A9
-		.byte $F1
-		.byte $FB
-		.byte $71
-		.byte $22
-		.byte $83
-		.byte $37
-		.byte $B
-		.byte $36
-		.byte $50
-		.byte $39
-		.byte $51
-		.byte $B8
-		.byte $62
-		.byte $57
-		.byte $F3
-		.byte $E8
-		.byte 2
-		.byte $F8
-		.byte 2
-		.byte 8
-		.byte $82
-		.byte $18
-		.byte 2
-		.byte $2D
-		.byte $4A
-		.byte $28
-		.byte 2
-		.byte $38
-		.byte 2
-		.byte $48
-		.byte 0
-		.byte $A8
-		.byte $F
-		.byte $AA
-		.byte $30
-		.byte $BC
-		.byte $5A
-		.byte $6A
-		.byte $B0
-		.byte $4F
-		.byte $B6
-		.byte $B7
-		.byte 4
-		.byte $9A
-		.byte $B0
-		.byte $AC
-		.byte $71
-		.byte $C7
-		.byte 1
-		.byte $E6
-		.byte $74
-		.byte $D
-		.byte 9
-		.byte $46
-		.byte 2
-		.byte $56
-		.byte 0
-		.byte $6C
-		.byte 1
-		.byte $84
-		.byte $79
-		.byte $86
-		.byte 2
-		.byte $96
-		.byte 2
-		.byte $A4
-		.byte $71
-		.byte $A6
-		.byte 2
-		.byte $B6
-		.byte 2
-		.byte $C4
-		.byte $71
-		.byte $C6
-		.byte 2
-		.byte $D6
-		.byte 2
-		.byte $39
-		.byte $F1
-		.byte $6C
-		.byte 0
-		.byte $77
-		.byte 2
-		.byte $A3
-		.byte 9
-		.byte $AC
-		.byte 0
-		.byte $B8
-		.byte $72
-		.byte $DC
-		.byte 1
-		.byte 7
-		.byte $F3
-unk_CF4B:
-		.byte $4C
-		.byte 0
-		.byte $6F
-		.byte $37
-		.byte $E3
-		.byte 3
-		.byte $E6
-		.byte 3
-		.byte $5D
-		.byte $CA
-		.byte $6C
-		.byte 0
-		.byte $7D
-		.byte $41
-		.byte $CF
-		.byte $26
-		.byte $9D
-		.byte $C7
-		.byte $FD
-byte_CF5E:
-		.byte $50
-		.byte $A1
-		.byte $F
-		.byte $26
-		.byte $17
-		.byte $91
-		.byte $19
-		.byte $11
-		.byte $48
-		.byte 0
-		.byte $68
-		.byte $11
-		.byte $6A
-		.byte $10
-		.byte $96
-		.byte $14
-		.byte $D8, $A, $E8, 2, $F8, 2, $DC, $81, $6C, $81, $89
-		.byte $F, $9C, 0, $C3, $29, $F8, $62, $47, $A7,	$C6, $61
-		.byte $D, 7, $56, $74, $B7, 0, $B9, $11, $CC, $76, $ED
-		.byte $4A, $1C,	$80, $37, 1, $3A, $10, $DE, $20, $E9, $B
-		.byte $EE, $21,	$C8, $BC, $9C, $F6, $BC, 0, $CB, $7A, $EB
-		.byte $72, $C, $82, $39, $71, $B7, $63,	$CC, 3,	$E6, $60
-		.byte $26, $E0,	$4A, $30, $53
-byte_CFB5:
-		.byte $31
-byte_CFB6:
-		.byte $5C
 		.byte $58
-		.byte $ED
-		.byte $41
-		.byte $2F
-		.byte $A6
-		.byte $1D
-		.byte $C7
-		.byte $FD
-unk_CFBF:
-		.byte $50
-		.byte $11
-		.byte $F
-		.byte $26
-		.byte $FE
-		.byte $10
-		.byte $8B
-		.byte $93
-		.byte $A9
-		.byte $F
-		.byte $14
-		.byte $C1
-		.byte $CC
-		.byte $16
-		.byte $CF
-		.byte $11
-		.byte $2F
-		.byte $95
-		.byte $B7
-		.byte $14
-		.byte $C7
-		.byte $96
-		.byte $D6
-		.byte $44
-		.byte $2B
-		.byte $92
-		.byte $39
-		.byte $F
-		.byte $72
-		.byte $41
-		.byte $A7
-		.byte 0
-		.byte $1B
-		.byte $95
-		.byte $97
-		.byte $13
-		.byte $6C
-		.byte $95
-		.byte $6F
-		.byte $11
-		.byte $A2
-		.byte $40
-		.byte $BF
-		.byte $15
-		.byte $C2
-		.byte $40
-		.byte $B
-		.byte $9F
-		.byte $53
-		.byte $16
-		.byte $62
-		.byte $44
-		.byte $72
-		.byte $C2
-		.byte $9B
-		.byte $1D
-		.byte $B7
-		.byte $E0
-		.byte $ED
-		.byte $4A
-		.byte 3
-		.byte $E0
-		.byte $8E
-		.byte $11
-		.byte $9D
-		.byte $41
-		.byte $BE
-		.byte $42
-		.byte $EF
-		.byte $20
-		.byte $CD
-		.byte $C7
-		.byte $FD
-byte_D008:
-		.byte 0
-		.byte $C1
-		.byte $4C
-		.byte 0
-		.byte 3
-		.byte $CF
-		.byte 0
-		.byte $D7
-		.byte $23
-		.byte $4D
-		.byte 7
-		.byte $AF
-		.byte $2A
-		.byte $4C
-		.byte 3
-		.byte $CF
-		.byte $3E
-		.byte $80
-unk_D01A:
-		.byte $F3
-unk_D01B:
-		.byte $4A
-		.byte $BB
-		.byte $C2
-		.byte $BD
-		.byte $C7
-		.byte $FD
-unk_D021:
-		.byte $48
-		.byte $F
-byte_D023:
-		.byte $E
-		.byte 1
-		.byte $5E
-		.byte 2
-		.byte $A
-		.byte $B0
-		.byte $1C
-		.byte $54
-		.byte $6A
-		.byte $30
-		.byte $7F
-		.byte $34
-		.byte $C6
-		.byte $64
-		.byte $D6
-		.byte $64
-		.byte $E6
-		.byte $64
-		.byte $F6
-		.byte $64
-		.byte $FE
-		.byte 0
-		.byte $F0
-		.byte 7
-		.byte 0
-		.byte $A1
-		.byte $1E
-		.byte 2
-		.byte $47
-		.byte $73
-		.byte $7E
-		.byte 4
-		.byte $84
-		.byte $52
-		.byte $94
-		.byte $50
-		.byte $95
-		.byte $B
-		.byte $96
-		.byte $50
-		.byte $A4
-		.byte $52
-		.byte $AE
-		.byte 5
-		.byte $B8
-		.byte $51
-		.byte $C8
-unk_D052:
-		.byte $51
-		.byte $CE
-		.byte 1
-		.byte $17
-		.byte $F3
-		.byte $45
-		.byte 3
-		.byte $52
-		.byte 9
-		.byte $62
-		.byte $21
-		.byte $6F
-		.byte $34
-		.byte $81
-		.byte $21
-		.byte $9E
-		.byte 2
-		.byte $B6
-		.byte $64
-		.byte $C6
-		.byte $64
-		.byte $C0
-		.byte $C
-		.byte $D6
-		.byte $64
-		.byte $D0
-		.byte 7
-		.byte $E6
-		.byte $64
-		.byte $E0
-		.byte $C
-		.byte $F0
-		.byte 7
-		.byte $FE
-		.byte $A
-		.byte $D
-		.byte 6
-		.byte $E
-		.byte 1
-		.byte $4E
-		.byte 4
-		.byte $67
-		.byte $73
-		.byte $8E
-		.byte 2
-		.byte $B7
-		.byte $A
-		.byte $BC
-		.byte 3
-		.byte $C4
-		.byte $72
-		.byte $C7
-		.byte $22
-		.byte 8
-		.byte $F2
-		.byte $2C
-		.byte 2
-		.byte $59
-		.byte $71
-		.byte $7C
-		.byte 1
-		.byte $96
-		.byte $74
-		.byte $BC
-		.byte 1
-		.byte $D8
-		.byte $72
-		.byte $FC
-		.byte 1
-		.byte $39
-		.byte $F1
-		.byte $4E
-		.byte 1
-		.byte $9E
-		.byte 4
-		.byte $A7
-		.byte $52
-		.byte $B7
-		.byte $B
-		.byte $B8
-		.byte $51
-		.byte $C7
-		.byte $51
-		.byte $D7
-		.byte $50
-		.byte $DE
-		.byte 2
-		.byte $3A
-		.byte $E0
-		.byte $3E
-		.byte $A
-		.byte $9E
-		.byte 0
-		.byte 8
-		.byte $D4
-		.byte $18
-		.byte $54
-		.byte $28
-		.byte $54
-		.byte $48
-		.byte $54
-		.byte $6E
-		.byte 6
-		.byte $9E
-		.byte 1
-		.byte $A8
-		.byte $52
-		.byte $AF
-		.byte $47
-		.byte $B8
-		.byte $52
-		.byte $C8
-		.byte $52
-		.byte $D8
-		.byte $52
-		.byte $DE
-		.byte $F
-		.byte $4D
-		.byte $C7
-		.byte $CE
-		.byte 1
-		.byte $DC
-		.byte 1
-		.byte $F9
-		.byte $79
-		.byte $1C
-		.byte $82
-		.byte $48
-		.byte $72
-		.byte $7F
-		.byte $37
-		.byte $F2
-		.byte $68
-		.byte 1
-		.byte $E9
-		.byte $11
-		.byte $3A
-		.byte $68
-		.byte $7A
-		.byte $DE
-		.byte $F
-		.byte $6D
-		.byte $C5
-		.byte $FD
-unk_D0E2:
-		.byte $B
-		.byte $F
-		.byte $E
-		.byte 1
-		.byte $9C
-		.byte $71
-		.byte $B7
-		.byte 0
-		.byte $BE
-		.byte 0
-		.byte $3E
-		.byte $81
-		.byte $47
-		.byte $73
-		.byte $5E
-		.byte 0
-		.byte $63
-		.byte $42
-		.byte $8E
-		.byte 1
-		.byte $A7
-		.byte $73
-		.byte $BE
-		.byte 0
-		.byte $7E
-		.byte $81
-		.byte $88
-		.byte $72
-		.byte $F0
-		.byte $59
-		.byte $FE
-		.byte 0
-		.byte 0
-		.byte $D9
-		.byte $E
-		.byte 1
-		.byte $39
-		.byte $79
-		.byte $A7
-		.byte 3
-		.byte $AE
-		.byte 0
-		.byte $B4
-		.byte 3
-		.byte $DE
-		.byte $F
-		.byte $D
-		.byte 5
-		.byte $E
-		.byte 2
-		.byte $68
-		.byte $7A
-		.byte $BE
-		.byte 1
-		.byte $DE
-		.byte $F
-		.byte $6D
-		.byte $C5
-		.byte $FD
-unk_D11D:
-		.byte 8
-		.byte $8F
-unk_D11F:
-		.byte $E
-		.byte 1
-		.byte $17
-		.byte 5
-		.byte $2E
-		.byte 2
-		.byte $30
-		.byte 7
-		.byte $37
-		.byte 3
-		.byte $3A
-		.byte $49
-		.byte $44
-		.byte 3
+		.byte $56
+		.byte $56
+		.byte $57
 		.byte $58
-		.byte $47
-		.byte $DF
-		.byte $4A
-		.byte $6D
-		.byte $C7
-		.byte $E
-		.byte $81
-		.byte 0
-		.byte $5A
-		.byte $2E
-		.byte 2
-		.byte $87
-		.byte $52
-		.byte $97
-		.byte $2F
-		.byte $99
-		.byte $4F
-		.byte $A
-		.byte $90
-		.byte $93
-		.byte $56
-		.byte $A3
-		.byte $B
-		.byte $A7
-		.byte $50
-		.byte $B3
-		.byte $55
-		.byte $DF
-		.byte $4A
-		.byte $6D
-		.byte $C7
-		.byte $E
-		.byte $81
-		.byte 0
-		.byte $5A
-		.byte $2E
-		.byte 0
-		.byte $3E
-		.byte 2
-		.byte $41
-		.byte $56
 		.byte $57
-		.byte $25
-		.byte $56
-		.byte $45
-		.byte $68
-		.byte $51
-		.byte $7A
-		.byte $43
-		.byte $B7
-unk_D160:
-		.byte $B
-		.byte $B8
-		.byte $51
-		.byte $DF
-		.byte $4A
-		.byte $6D
-		.byte $C7
-		.byte $FD
-unk_D168:
-		.byte $41
-		.byte 1
-		.byte 3
-		.byte $B4
-		.byte 4
-		.byte $34
-		.byte 5
-		.byte $34
-		.byte $5C
-		.byte 2
-		.byte $83
-		.byte $37
-		.byte $84
-		.byte $37
-		.byte $85
-		.byte $37
-		.byte 9
-		.byte $C2
-		.byte $C
-		.byte 2
-		.byte $1D
-		.byte $49
-		.byte $FA
-		.byte $60
-		.byte 9
-		.byte $E1
-		.byte $18
-		.byte $62
-		.byte $20
-		.byte $63
-		.byte $27
-		.byte $63
-		.byte $33
-		.byte $37
-		.byte $37
-		.byte $63
-		.byte $47
-		.byte $63
-		.byte $5C
-		.byte 5
-		.byte $79
-		.byte $43
-		.byte $FE
-		.byte 6
-		.byte $35
-		.byte $D2
-		.byte $46
-		.byte $48
-		.byte $91
-		.byte $53
-		.byte $D6
-		.byte $51
-		.byte $FE
-		.byte 1
-		.byte $C
-		.byte $83
-		.byte $6C
-		.byte 4
-		.byte $B4
-		.byte $62
-		.byte $C4
-		.byte $62
-		.byte $D4
-		.byte $62
-		.byte $E4
-		.byte $62
-		.byte $F4
-		.byte $62
-		.byte $18
-		.byte $D2
-		.byte $79
-		.byte $51
-		.byte $F4
-		.byte $66
-		.byte $FE
-		.byte 2
-		.byte $C
-		.byte $8A
-		.byte $1D
-		.byte $49
-		.byte $31
-		.byte $55
-		.byte $56
-		.byte $41
-		.byte $77
-		.byte $41
-		.byte $98
-		.byte $41
-		.byte $C5
-		.byte $55
-		.byte $FE
-		.byte 1
-		.byte 7
-		.byte $E3
-		.byte $17
-		.byte $63
-		.byte $27
-		.byte $63
-		.byte $37
-		.byte $63
-		.byte $47
-		.byte $63
-		.byte $57
-		.byte $63
-		.byte $67
-		.byte $63
-		.byte $78
-		.byte $62
-		.byte $89
-		.byte $61
-		.byte $9A
-		.byte $60
-		.byte $BC
-		.byte 7
-		.byte $CA
-		.byte $42
-		.byte $3A
-		.byte $B3
-		.byte $46
-		.byte $53
-		.byte $63
-		.byte $34
-		.byte $66
-		.byte $44
-		.byte $7C
-		.byte 1
-		.byte $9A
-		.byte $33
-		.byte $B7
-		.byte $52
-		.byte $DC
-		.byte 1
-		.byte $FA
-		.byte $32
-		.byte 5
-		.byte $D4
-		.byte $2C
-		.byte $D
-		.byte $43
-		.byte $37
-		.byte $47
-		.byte $35
-		.byte $B7
-		.byte $30
-		.byte $C3
-		.byte $64
-		.byte $23
-		.byte $E4
-		.byte $29
-		.byte $45
-		.byte $33
-		.byte $64
-		.byte $43
-		.byte $64
-		.byte $53
-		.byte $64
-		.byte $63
-		.byte $64
-		.byte $73
-		.byte $64
-		.byte $9A
-		.byte $60
-		.byte $A9
-		.byte $61
-		.byte $B8
-		.byte $62
-		.byte $BE
-		.byte $B
-		.byte $D4
-		.byte $31
-		.byte $D5
-		.byte $D
-		.byte $DE
-		.byte $F
-		.byte $D
-		.byte $CA
-		.byte $7D
-		.byte $47
-		.byte $FD
-unk_D21B:
-		.byte 1
-		.byte 1
-		.byte $78
-		.byte $52
-		.byte $B5
-		.byte $55
-		.byte $DA
-		.byte $60
-byte_D223:
-		.byte $E9
-		.byte $61
-		.byte $F8
-		.byte $62
-		.byte $FE
-		.byte $B
-unk_D229:
-		.byte $FE
-		.byte $81
-		.byte $A
-		.byte $CF
-		.byte $36
-		.byte $49
-		.byte $62
-		.byte $43
-		.byte $FE
-		.byte 7
-		.byte $36
-		.byte $C9
-		.byte $FE
-		.byte 1
-		.byte $C
-		.byte $84
-		.byte $65
-		.byte $55
-		.byte $97
-		.byte $52
-		.byte $9A
-		.byte $32
-		.byte $A9
-		.byte $31
-		.byte $B8
-unk_D242:
-		.byte $30
-		.byte $C7
-		.byte $63
-		.byte $CE
-		.byte $F
-		.byte $D5
-		.byte $D
-		.byte $7D
-		.byte $C7
-		.byte $FD
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
+		.byte $58
+		.byte $59
+		.byte $59
+		.byte $58
+		.byte $58
+		.byte $5A
+		.byte $5A
+		.byte $58
+		.byte $58
+		.byte $59
+		.byte $5A
+		.byte $59
+		.byte $5A
+
+UpdateLeafPositions:
+		ldx #$B
+@update_next:
+		lda WRAM_LeafX,x
+		clc
+		adc LeafSpeed,x
+		adc LeafSpeed,x
+		sta WRAM_LeafX,x
+		lda WRAM_LeafY,x
+		clc
+		adc LeafSpeed,x
+		sta WRAM_LeafY,x
+		dex
+		bpl @update_next
+		rts
 
 .include "utils.inc"
 
