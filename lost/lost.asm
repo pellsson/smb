@@ -15467,7 +15467,7 @@ TitleScreenMode:
 		.word FinalizeTitleScreen
 
 IsBigWorld:
-  .byte 1, 0, 1, 0, 0, 0, 1, 0
+  .byte 1, 0, 1, 0, 1, 1, 0, 0
 
 RunTitleScreen:
 		jsr Enter_PracticeTitleMenu

@@ -16,6 +16,7 @@ STUPID?:
 -- Predefined rules
 
 TODO:
+-- Loader stops paletet rotation on reboot sometimes.
 -- AreaAddrsLOffset still referenced outside of leveldata
 -- WarpZone load thing (also pipe 4 leads to w2 :))
 -- LL jitters at end of castles (likely due to THANK YOU ___)
@@ -28,12 +29,12 @@ TODO:
 
 MINOR:
 -- Save rules in ram :(
--- Kill GameMenuRoutine_NEW (and friends) PrepareDrawTitleScreen
 -- GamePauseStats | 2 hack? Rework? Also, hit sprite0 when pre-save/-load
 -- Highbit in pause required? Remove for some cycles...
 -- Kill all old variables
 
 DONE:
+-- Kill GameMenuRoutine_NEW (and friends) PrepareDrawTitleScreen
 -- Player palette fucks around in LL (after death f.ex). Could be org too.
 -- Restart level doesnt work? Or at least doesnt render ok.
 -- Kill jsr Enter_LL_WritePlayerPhysics (lost)
