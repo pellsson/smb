@@ -30,6 +30,7 @@ WarpZoneNumbers:
 		.byte $D
 
 LoadWarpzone:
+		lda WarpZoneControl
 		and #$F
 		tax
 		lda WarpZoneNumbers,x
@@ -197,6 +198,7 @@ loc_C346:
 		sta AreaDataHigh
 		jmp ReturnBank
 
+; Remove this crap?
 byte_C1BD:
 		.byte $5B
 		.byte 2

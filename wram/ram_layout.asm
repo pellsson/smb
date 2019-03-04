@@ -7,9 +7,14 @@ WRAM_Magic:
 
 WRAM_MenuIndex:
 	.byte $00
-
 WRAM_PracticeFlags:
 	.byte $00
+WRAM_DelayFrames:
+	.byte $00
+WRAM_SaveStateBank:
+	.byte $00
+
+WRAM_ToSaveFile:
 WRAM_LevelAreaPointer:
 	.byte $00
 WRAM_LevelAreaType:
@@ -28,10 +33,11 @@ WRAM_LevelRandomData:
 	.res $07, $00
 WRAM_LevelFrameRuleData:
 	.res $04, $00
-WRAM_DelayFrames:
-	.byte $00
-WRAM_SaveStateBank:
-	.byte $00
+WRAM_EnemyData:
+	.res $80-(WRAM_EnemyData-WRAM_ToSaveFile), $00
+WRAM_LevelData:
+	.res $100, $00
+
 
 WRAM_Temp:
 	.res $64, $00
@@ -71,12 +77,6 @@ WRAM_LostRules:
 	.word 0, 0, 0, 0 ; World B
 	.word 0, 0, 0, 0 ; World C
 	.word 0, 0, 0, 0 ; World D
-
-WRAM_EnemyData:
-		.res $80, $00
-WRAM_LevelData:
-		.res $100, $00
-
 ;
 ; Number of stars collected
 ;
@@ -188,10 +188,14 @@ WRAM_LostEnd:
 WRAM_SaveRAM:
 		.res $800, $00
 
+WRAM_SaveWRAM:
+		.res $80, $00
+WRAM_SaveLevel:
+		.res $100, $00
+
 WRAM_SaveNT:
 		.res $800, $00
 
 WRAM_SavePAL:
 		.res $20, $00
-
 

@@ -15692,9 +15692,6 @@ PrimaryGameSetup:
 		sta PlayerSize
 		jmp SecondaryGameSetup
 
-MarioOrLuigiNames:
-		.byte $16, $0A, $1B, $12, $18 ; Mario
-		.byte $15, $1E, $12, $10, $12 ; Luigi
 MarioOrLuigiColors:
 		.byte $22, $16, $27, $18 ; Mario
 		.byte $22, $30, $27, $19 ; Luigi
@@ -15710,16 +15707,6 @@ PatchToMarioOrLuigi:
 		iny
 		sty TMP_0
 loc_C609:
-
-		tay
-		ldx #4
-loc_C60C:
-
-		lda MarioOrLuigiNames,y
-		sta WRAM_PatchMarioName1,x
-		dey
-		dex
-		bpl loc_C60C
 		pla
 		sec
 		sbc TMP_0

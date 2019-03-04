@@ -10,27 +10,29 @@ EXTRAS:
 -- Keybindings.
 -- Make powerup reflect on title screen?
 -- LL Maybe do something about coin-firework-thing?
-
+-- Save rules in ram :(
+-- GamePauseStats | 2 hack? Rework? Also, hit sprite0 when pre-save/-load
+-- Highbit in pause required? Remove for some cycles...
+-- Kill all old variables
+-- Exit to launcher
+-- Player position + Turtle.
 
 STUPID?:
 -- Predefined rules
 
 TODO:
--- Save & load SHOULD break WRAM-levelenemy data
 -- Loader stops paletet rotation on reboot sometimes.
 -- AreaAddrsLOffset still referenced outside of leveldata
--- WarpZone load thing (also pipe 4 leads to w2 :))
 -- During delay disable sound
--- LL name shit doesnt need to exist. Probably just buggy.
 -- LL world A-D
+-- Use lost sound (for org too? should work right?)
+-- Beat world 8. What happens? Death happens. SM2DATA3 i think.
 
 MINOR:
--- Save rules in ram :(
--- GamePauseStats | 2 hack? Rework? Also, hit sprite0 when pre-save/-load
--- Highbit in pause required? Remove for some cycles...
--- Kill all old variables
-
 DONE:
+-- WarpZone load thing (also pipe 4 leads to w2 :))
+-- LL name shit doesnt need to exist. Probably just buggy.
+-- Save & load SHOULD break WRAM-levelenemy data
 -- LL jitters at end of castles (likely due to THANK YOU ___)
 -- Overwriting pattern tables (due to THANK YOU ___?)
 -- LL world 9

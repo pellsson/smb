@@ -955,7 +955,18 @@ LoadState:
 		sta GamePauseStatus
 		rts
 @do_loadstate:
+		ldx #$7F
+@save_wram:
+		lda WRAM_SaveWRAM, x
+		sta WRAM_ToSaveFile, x
+		dex
+		bpl @save_wram
 		ldx #0
+@save_level:
+		lda WRAM_SaveLevel, x
+		sta WRAM_LevelData, x
+		inx
+		bne @save_level
 @copy_ram:
 		lda WRAM_SaveRAM, x
 		sta $000, x
@@ -1037,7 +1048,18 @@ SaveState:
 		sta GamePauseStatus
 		rts
 @do_savestate:
+		ldx #$7F
+@save_wram:
+		lda WRAM_ToSaveFile, x
+		sta WRAM_SaveWRAM, x
+		dex
+		bpl @save_wram
 		ldx #0
+@save_level:
+		lda WRAM_LevelData, x
+		sta WRAM_SaveLevel, x
+		inx
+		bne @save_level
 @copy_ram:
 		lda $000, x
 		sta WRAM_SaveRAM, x
