@@ -16,16 +16,15 @@ STUPID?:
 -- Predefined rules
 
 TODO:
+-- Save & load SHOULD break WRAM-levelenemy data
 -- Loader stops paletet rotation on reboot sometimes.
 -- AreaAddrsLOffset still referenced outside of leveldata
 -- WarpZone load thing (also pipe 4 leads to w2 :))
 -- LL jitters at end of castles (likely due to THANK YOU ___)
--- LL worlds beyond 4
+-- Overwriting pattern tables (due to THANK YOU ___?)
 -- During delay disable sound
 -- LL name shit doesnt need to exist. Probably just buggy.
--- The buggy THANK YOU ___ write nukes pattern tables.
--- Menus dont work if you hold dirs
-
+-- LL world A-D
 
 MINOR:
 -- Save rules in ram :(
@@ -34,6 +33,9 @@ MINOR:
 -- Kill all old variables
 
 DONE:
+-- LL world 9
+-- LL worlds beyond 4
+-- Menus dont work if you hold dirs
 -- Kill GameMenuRoutine_NEW (and friends) PrepareDrawTitleScreen
 -- Player palette fucks around in LL (after death f.ex). Could be org too.
 -- Restart level doesnt work? Or at least doesnt render ok.

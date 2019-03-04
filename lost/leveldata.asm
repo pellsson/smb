@@ -344,12 +344,12 @@ EnemyDataAddrLow:
 		.word E_World2CastleArea3
 		.word E_World3CastleArea4
 		.word E_World4CastleArea3
-		.word E_World5CastleAreaN_MAYBE ;  PrepareInitializeArea
+		.word E_World5CastleAreaN_MAYBE ; PrepareInitializeArea
 		.word E_World6CastleAreaN_MAYBE ; loc_C609
 		.word E_World7CastleAreaN_MAYBE ; unk_C630
 		.word E_World8CastleAreaN_MAYBE ; unk_C66F
-		.word E_UnknownData2_0 ; unk_CA80
-		.word E_UnknownData2_1 ; unk_CA8A
+		.word E_UnknownData3_0 ; unk_CA80 (BAD)
+		.word E_UnknownData3_1 ; unk_CA8A (BAD)
 		.word E_World1GroundArea1
 		.word E_World1GroundArea3
 		.word E_World2GroundArea0
@@ -374,9 +374,9 @@ EnemyDataAddrLow:
 		.word E_UnknownData2_10 ; unk_C7E7
 		.word E_UnknownData2_11 ; unk_C80A
 		.word E_UnknownData2_12_None ; unk_C831
-		.word E_UnknownData2_13_XX ; unk_CA90
-		.word E_UnknownData2_14_XX ; unk_CA94
-		.word E_UnknownData2_14_XX ; unk_CA94
+		.word E_UnknownData3_2 ; unk_CA90
+		.word E_UnknownData3_3 ; unk_CA94
+		.word E_UnknownData3_3 ; unk_CA94
 		.word E_NoEnemies
 		.word E_UnknownData2_15_XX ; byte_C832
 		.word E_World1UndergroundArea2
@@ -389,9 +389,9 @@ EnemyDataAddrLow:
 		.word E_World4UndergroundArea0 ; (Water)
 		.word E_UnknownData2_19_XX ; unk_C8A6 (good)
 		.word E_UnknownData2_20_XX ; unk_C8B4 (good)
-		.word E_UnknownData2_14_XX ; unk_CA94
-		.word E_UnknownData2_21_XX ; unk_CAB5
-		.word E_UnknownData2_22_XX ; unk_CABA
+		.word E_UnknownData3_3 ; unk_CA94
+		.word E_UnknownData3_4 ; unk_CAB5
+		.word E_UnknownData3_5 ; unk_CABA
 AreaDataHOffsets:
 		.byte $2C
 		.byte $A
@@ -406,8 +406,8 @@ AreaDataAddrLow:
 		.word L_World6CastleAreaN_MAYBE ; unk_C996
 		.word L_World7CastleAreaN_MAYBE ; unk_CA25
 		.word L_World8CastleAreaN_MAYBE ; unk_CAB8
-		.word L_World9CastleAreaN_MAYBE ; unk_CACB
-		.word L_UnknownData2_0 ; unk_CB2E
+		.word L_UnknownData3_0 ; unk_CACB
+		.word L_UnknownData3_1 ; unk_CB2E
 		.word L_World1GroundArea0
 		.word L_World1GroundArea3
 		.word L_World2GroundArea0
@@ -431,10 +431,10 @@ AreaDataAddrLow:
 		.word L_World1Warp3Area2
 		.word L_UnknownData2_9 ; unk_CF4B
 		.word L_UnknownData2_10 ; byte_CFB6
-		.word L_UnknownData2_11_XX ; unk_D01A
-		.word L_UnknownData2_12_XX ; unk_CB3F
-		.word L_UnknownData2_13_XX ; unk_CB4E
-		.word L_UnknownData2_14_XX ; unk_CB4F
+		.word L_UnknownData2_11 ; unk_D01A
+		.word L_UnknownData3_2 ; unk_CB3F
+		.word L_UnknownData3_3 ; unk_CB4E
+		.word L_UnknownData3_4 ; unk_CB4F
 		.word L_World1GroundArea2
 		.word L_UnknownData2_15_XX ; unk_D01B
 		.word L_World1UndergroundArea2
@@ -447,9 +447,9 @@ AreaDataAddrLow:
 		.word L_World4UndergroundArea0
 		.word L_UnknownData2_19 ; unk_D229
 		.word L_UnknownData2_20 ; unk_D242
-		.word L_UnknownData2_21_XX ; unk_CB50
-		.word L_UnknownData2_22_XX ; unk_CB97
-		.word L_UnknownData2_23_XX ; unk_CBDA
+		.word L_UnknownData3_5 ; unk_CB50
+		.word L_UnknownData3_6 ; unk_CB97
+		.word L_UnknownData3_7 ; unk_CBDA
 		.word $FFFF
 
 
@@ -476,7 +476,6 @@ E_World1CastleArea4:
 		.byte $15
 		.byte $59
 		.byte $9D
-unk_C7A6:
 		.byte $F
 		.byte 8
 		.byte $78
@@ -503,7 +502,6 @@ E_World2CastleArea3:
 		.byte $9B
 		.byte $1C
 		.byte $C
-unk_C7BF:
 		.byte $59
 		.byte $1B
 		.byte $B5
@@ -545,7 +543,6 @@ E_World3CastleArea4:
 		.byte $78
 		.byte $2D
 		.byte $90
-unk_C7E7:
 		.byte $B5
 		.byte $FF
 E_World4CastleArea3:
@@ -582,7 +579,6 @@ E_World4CastleArea3:
 		.byte $F
 		.byte 8
 		.byte 5
-unk_C80A:
 		.byte $9B
 		.byte 9
 		.byte $1D
@@ -624,9 +620,7 @@ E_World1GroundArea1:
 		.byte $A0
 		.byte $3D
 		.byte $90
-unk_C831:
 		.byte $3B
-byte_C832:
 		.byte $90
 		.byte $B7
 		.byte $60
@@ -636,7 +630,6 @@ byte_C832:
 		.byte $EE
 		.byte $42
 		.byte 0
-byte_C83B:
 		.byte $F7
 		.byte $80
 		.byte $6B
@@ -672,7 +665,6 @@ byte_C858:
 		.byte $24
 		.byte $4B
 		.byte $83
-byte_C85C:
 		.byte $67
 		.byte $83
 		.byte $17
@@ -700,7 +692,6 @@ E_World2GroundArea0:
 		.byte $EE
 		.byte $42
 		.byte $25
-SWAPDATA_C876:
 		.byte $F
 		.byte 6
 		.byte $AC
@@ -753,7 +744,6 @@ SWAPDATA_C893:
 		.byte $37
 		.byte $4B
 		.byte $8E
-unk_C8A6:
 		.byte $6B
 		.byte $80
 		.byte $BB
@@ -769,7 +759,6 @@ SWAPDATA_C8AB:
 		.byte $CB
 		.byte 0
 		.byte $AB
-unk_C8B4:
 		.byte $83
 		.byte $EB
 		.byte $BB
@@ -793,7 +782,6 @@ E_World2GroundArea2:
 		.byte $C0
 		.byte $BE
 		.byte $F
-unk_C8C9:
 		.byte 3
 		.byte $38
 		.byte $E
@@ -1013,7 +1001,6 @@ E_World2CloudArea0:
 E_World1UndergroundArea2:
 		.byte $A
 		.byte $8E
-unk_C996:
 		.byte $DE
 		.byte $B4
 		.byte 0
@@ -1163,7 +1150,6 @@ L_World1CastleArea4:
 		.byte $9E
 		.byte $A
 		.byte $CE
-unk_CA25:
 		.byte 6
 		.byte $E3
 		.byte 0
@@ -1256,7 +1242,6 @@ L_World2CastleArea3:
 		.byte $E
 		.byte 6
 		.byte $1E
-unk_CA80:
 		.byte $C
 		.byte $7E
 		.byte $A
@@ -1264,23 +1249,19 @@ unk_CA80:
 		.byte 5
 		.byte $8E
 		.byte $82
-byte_CA87:
 		.byte $8A
 		.byte $8E
 		.byte $8E
-unk_CA8A:
 		.byte $A
 		.byte $EE
 		.byte 2
 		.byte $A
 		.byte $E0
 		.byte $19
-unk_CA90:
 		.byte $61
 		.byte $23
 		.byte 6
 		.byte $28
-unk_CA94:
 		.byte $62
 		.byte $2E
 		.byte $B
@@ -1314,14 +1295,11 @@ unk_CA94:
 		.byte $A
 		.byte $51
 		.byte $62
-unk_CAB5:
 		.byte $57
 		.byte $E
 		.byte $5E
-unk_CAB8:
 		.byte 4
 		.byte $67
-unk_CABA:
 		.byte $34
 		.byte $9E
 		.byte $A
@@ -1339,7 +1317,6 @@ unk_CABA:
 		.byte $A
 		.byte $2E
 		.byte $82
-unk_CACB:
 		.byte $7A
 		.byte $E
 		.byte $7E
@@ -1440,7 +1417,6 @@ L_World3CastleArea4:
 		.byte $32
 		.byte $E9
 		.byte $3A
-unk_CB2E:
 		.byte $9C
 		.byte $80
 		.byte $A3
@@ -1458,7 +1434,6 @@ unk_CB2E:
 		.byte $F6
 		.byte $30
 		.byte $F9
-unk_CB3F:
 		.byte $30
 		.byte $FE
 		.byte 2
@@ -1474,11 +1449,8 @@ unk_CB3F:
 		.byte $30
 		.byte $A7
 		.byte $73
-unk_CB4E:
 		.byte $B3
-unk_CB4F:
 		.byte $37
-unk_CB50:
 		.byte $CC
 		.byte 1
 		.byte 7
@@ -1542,7 +1514,6 @@ unk_CB50:
 		.byte $DD
 		.byte $42
 		.byte $DE
-byte_CB8F:
 		.byte $B
 		.byte $FE
 byte_CB91:
@@ -1553,7 +1524,6 @@ byte_CB91:
 L_World4CastleArea3:
 		.byte $9B
 		.byte 7
-unk_CB97:
 		.byte 5
 		.byte $32
 		.byte 6
@@ -1621,7 +1591,6 @@ unk_CB97:
 		.byte 7
 		.byte $E
 		.byte $13
-unk_CBDA:
 		.byte $3C
 		.byte $17
 		.byte $3D
@@ -1709,7 +1678,6 @@ L_World1GroundArea0:
 		.byte $29
 		.byte $4F
 		.byte $B3
-unk_CC30:
 		.byte $87
 		.byte $B
 		.byte $93
@@ -1880,7 +1848,6 @@ byte_CCB7:
 		.byte $72
 		.byte $2A
 		.byte $B0
-unk_CD0E:
 		.byte $28
 		.byte $F
 		.byte $3C
@@ -1991,7 +1958,6 @@ L_World2GroundArea1:
 		.byte $61
 		.byte $EE
 		.byte $10
-byte_CD7B:
 		.byte $2E
 		.byte $91
 		.byte $39
@@ -2124,7 +2090,6 @@ L_World2GroundArea2:
 		.byte $12
 		.byte $53
 		.byte $12
-byte_CDFE:
 		.byte $BE
 		.byte $11
 		.byte $1D
@@ -2220,7 +2185,6 @@ byte_CE26:
 		.byte $F4
 		.byte $3C
 		.byte 2
-unk_CE5B:
 		.byte $68
 		.byte $7A
 		.byte $8C
@@ -2278,7 +2242,6 @@ L_World3GroundArea3:
 		.byte $40, 6, $8C, $14,	$8F, $17, $93, $40, $CF, $13, $B
 		.byte $94, $57,	$15, 7,	$93, $19, $F3, $C6, $43, $C7, $13
 		.byte $D3, 3, $E3, 3, $33, $B0,	$4A, $72, $55, $46
-byte_CED6:
 		.byte $73
 		.byte $31
 		.byte $A8
@@ -2385,7 +2348,6 @@ L_World4GroundArea0:
 		.byte 1
 		.byte 7
 		.byte $F3
-unk_CF4B:
 		.byte $4C
 		.byte 0
 		.byte $6F
@@ -2431,7 +2393,6 @@ L_World4GroundArea1:
 		.byte $26, $E0,	$4A, $30, $53
 byte_CFB5:
 		.byte $31
-byte_CFB6:
 		.byte $5C
 		.byte $58
 		.byte $ED
@@ -2536,7 +2497,6 @@ L_World2CloudArea0:
 		.byte $80
 unk_D01A:
 		.byte $F3
-unk_D01B:
 		.byte $4A
 		.byte $BB
 		.byte $C2
@@ -2594,7 +2554,6 @@ byte_D023:
 		.byte $B8
 		.byte $51
 		.byte $C8
-unk_D052:
 		.byte $51
 		.byte $CE
 		.byte 1
@@ -2802,7 +2761,6 @@ L_World1SecretWarpArea2:
 L_World1UndergroundArea0:
 		.byte 8
 		.byte $8F
-unk_D11F:
 		.byte $E
 		.byte 1
 		.byte $17
@@ -2868,7 +2826,6 @@ unk_D11F:
 		.byte $7A
 		.byte $43
 		.byte $B7
-unk_D160:
 		.byte $B
 		.byte $B8
 		.byte $51
@@ -3073,7 +3030,6 @@ byte_D223:
 		.byte $62
 		.byte $FE
 		.byte $B
-unk_D229:
 		.byte $FE
 		.byte $81
 		.byte $A
@@ -3099,7 +3055,6 @@ unk_D229:
 		.byte $A9
 		.byte $31
 		.byte $B8
-unk_D242:
 		.byte $30
 		.byte $C7
 		.byte $63
@@ -3110,88 +3065,6 @@ unk_D242:
 		.byte $7D
 		.byte $C7
 		.byte $FD
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
 		.byte $FF
 
 ;
@@ -4421,7 +4294,6 @@ L_World7CastleAreaN_MAYBE:
 		.byte 9
 		.byte $3F
 		.byte $E
-E_UnknownData2_0:
 		.byte $82
 		.byte $2E
 		.byte $86
@@ -4439,12 +4311,10 @@ E_UnknownData2_1:
 		.byte $E
 		.byte $86
 		.byte $5E
-E_UnknownData2_13_XX:
 		.byte $C
 		.byte $7E
 		.byte 9
 		.byte $A1
-E_UnknownData2_14_XX:
 		.byte $62
 		.byte $A4
 		.byte $E
@@ -4478,14 +4348,12 @@ E_UnknownData2_14_XX:
 		.byte $B
 		.byte $FE
 		.byte 2
-E_UnknownData2_21_XX:
 		.byte $5D
 		.byte $C7
 		.byte $FD
 L_World8CastleAreaN_MAYBE:
 		.byte $5B
 		.byte 3
-E_UnknownData2_22_XX:
 		.byte 5
 		.byte $34
 		.byte 6
@@ -4503,7 +4371,6 @@ E_UnknownData2_22_XX:
 		.byte $17
 		.byte $E
 		.byte $97
-L_World9CastleAreaN_MAYBE:
 		.byte $E
 		.byte $9E
 		.byte 2
@@ -4603,7 +4470,6 @@ L_World9CastleAreaN_MAYBE:
 		.byte $B0
 		.byte $1E
 		.byte $A
-L_UnknownData2_0:
 		.byte $4E
 		.byte 6
 		.byte $57
@@ -4621,7 +4487,6 @@ L_UnknownData2_0:
 		.byte $D
 		.byte $E
 		.byte $FE
-L_UnknownData2_12_XX:
 		.byte $A
 		.byte $78
 		.byte $E4
@@ -4637,11 +4502,8 @@ L_UnknownData2_12_XX:
 		.byte $C7
 		.byte $E
 		.byte $82
-L_UnknownData2_13_XX:
 		.byte $39
-L_UnknownData2_14_XX:
 		.byte $73
-L_UnknownData2_21_XX:
 		.byte $9A
 		.byte $60
 		.byte $A9
@@ -4714,7 +4576,6 @@ L_UnknownData2_1:
 		.byte $75
 		.byte $CC
 		.byte $73
-L_UnknownData2_22_XX:
 		.byte $A3
 		.byte $B3
 		.byte $BF
@@ -4782,7 +4643,6 @@ L_UnknownData2_22_XX:
 		.byte $53
 		.byte $67
 		.byte $DC
-L_UnknownData2_23_XX:
 		.byte 2
 		.byte $59
 		.byte $91
@@ -5880,7 +5740,7 @@ L_UnknownData2_10:
 		.byte $20
 		.byte $AD
 		.byte $C7
-L_UnknownData2_11_XX:
+L_UnknownData2_11:
 		.byte $FD
 L_UnknownData2_15_XX:
 		.byte 0
@@ -6505,33 +6365,453 @@ L_UnknownData2_20:
 		.byte $C7
 		.byte $FD
 		.byte $FF
+
+;
+; SM2DATA3
+;
+E_UnknownData3_0:
+		.byte $1F
+		.byte 1
+		.byte $E
+		.byte $69
+		.byte 0
+		.byte $1F
+		.byte $B
+		.byte $78
+		.byte $2D
 		.byte $FF
+E_UnknownData3_1:
+		.byte $1F
+		.byte 1
+		.byte $1E
+		.byte $68
+		.byte 6
 		.byte $FF
+E_UnknownData3_2:
+		.byte $1E
+		.byte 5
+		.byte 0
 		.byte $FF
+E_UnknownData3_3:
+		.byte $26
+		.byte $8F
+		.byte 5
+		.byte $AC
+		.byte $46
+		.byte $F
+		.byte $1F
+		.byte 4
+		.byte $E8
+		.byte $10
+		.byte $38
+		.byte $90
+		.byte $66
+		.byte $11
+		.byte $FB
+		.byte $3C
+		.byte $9B
+		.byte $B7
+		.byte $CB
+		.byte $85
+		.byte $29
+		.byte $87
+		.byte $95
+		.byte 7
+		.byte $EB
+		.byte 2
+		.byte $B
+		.byte $82
+		.byte $96
+		.byte $E
+		.byte $C3
+		.byte $E
 		.byte $FF
+E_UnknownData3_4:
+		.byte $1F
+		.byte 1
+		.byte $E6
+		.byte $11
 		.byte $FF
+E_UnknownData3_5:
+		.byte $3B
+		.byte $86
+		.byte $7B
+		.byte 0
+		.byte $BB
+		.byte 2
+		.byte $2B
+		.byte $8E
+		.byte $7A
+		.byte 5
+		.byte $57
+		.byte $87
+		.byte $27
+		.byte $8F
+		.byte $9A
+		.byte $C
 		.byte $FF
+L_UnknownData3_0:
+		.byte $55
+		.byte $31
+		.byte $D
+		.byte 1
+		.byte $CF
+		.byte $33
+		.byte $FE
+		.byte $39
+		.byte $FE
+		.byte $B2
+		.byte $2E
+		.byte $BE
+		.byte $FE
+		.byte $31
+		.byte $29
+		.byte $8F
+		.byte $9E
+		.byte $43
+		.byte $FE
+		.byte $30
+		.byte $16
+		.byte $B1
+		.byte $23
+		.byte 9
+		.byte $4E
+		.byte $31
+		.byte $4E
+		.byte $40
+		.byte $D7
+		.byte $E0
+		.byte $E6
+		.byte $61
+		.byte $FE
+		.byte $3E
+		.byte $F5
+		.byte $62
+		.byte $FA
+		.byte $60
+		.byte $C
+		.byte $DF
+		.byte $C
+		.byte $DF
+		.byte $C
+		.byte $D1
+		.byte $1E
+		.byte $3C
+		.byte $2D
+		.byte $40
+		.byte $4E
+		.byte $32
+		.byte $5E
+		.byte $36
+		.byte $5E
+		.byte $42
+		.byte $CE
+		.byte $38
+		.byte $D
+		.byte $B
+		.byte $8E
+		.byte $36
+		.byte $8E
+		.byte $40
+		.byte $87
+		.byte $37
+		.byte $96
+		.byte $36
+		.byte $BE
+		.byte $3A
+		.byte $CC
+		.byte $5D
+		.byte 6
+		.byte $BD
+		.byte 7
+		.byte $3E
+		.byte $A8
+		.byte $64
+		.byte $B8
+		.byte $64
+		.byte $C8
+		.byte $64
+		.byte $D8
+		.byte $64
+		.byte $E8
+		.byte $64
+		.byte $F8
+		.byte $64
+		.byte $FE
+		.byte $31
+		.byte 9
+		.byte $E1
+		.byte $1A
+		.byte $60
+		.byte $6D
+		.byte $41
+		.byte $9F
+		.byte $26
+		.byte $7D
+		.byte $C7
+		.byte $FD
+L_UnknownData3_1:
+		.byte 0
+		.byte $F1
+		.byte $FE
+		.byte $B5
+		.byte $D
+		.byte 2
+		.byte $FE
+		.byte $34
+		.byte 7
+		.byte $CF
+		.byte $CE
+		.byte 0
+		.byte $D
+		.byte 5
+		.byte $8D
+		.byte $47
+		.byte $FD
+L_UnknownData3_2:
+		.byte $50
+		.byte 2
+		.byte $9F
+		.byte $38
+		.byte $EE
+		.byte 1
+		.byte $12
+		.byte $B9
+		.byte $77
+		.byte $7B
+		.byte $DE
+		.byte $F
+		.byte $6D
+		.byte $C7
+		.byte $FD
+L_UnknownData3_3:
+		.byte $FD
+L_UnknownData3_4:
+		.byte $FD
+L_UnknownData3_5:
+		.byte 0
+		.byte $A1
+		.byte $A
+		.byte $60
+		.byte $19
+		.byte $61
+		.byte $28
+		.byte $62
+		.byte $39
+		.byte $71
+		.byte $58
+		.byte $62
+		.byte $69
+		.byte $61
+		.byte $7A
+		.byte $60
+		.byte $7C
+		.byte $F5
+		.byte $A5
+		.byte $11
+		.byte $FE
+		.byte $20
+		.byte $1F
+		.byte $80
+		.byte $5E
+		.byte $21
+		.byte $80
+		.byte $3F
+		.byte $8F
+		.byte $65
+		.byte $D6
+		.byte $74
+		.byte $5E
+		.byte $A0
+		.byte $6F
+		.byte $66
+		.byte $9E
+		.byte $21
+		.byte $C3
+		.byte $37
+		.byte $47
+		.byte $F3
+		.byte $9E
+		.byte $20
+		.byte $FE
+		.byte $21
+		.byte $D
+		.byte 6
+		.byte $57
+		.byte $32
+		.byte $64
+		.byte $11
+		.byte $66
+		.byte $10
+		.byte $83
+		.byte $A7
+		.byte $87
+		.byte $27
+		.byte $D
+		.byte 9
+		.byte $1D
+		.byte $4A
+		.byte $5F
+		.byte $38
+		.byte $6D
+		.byte $C1
+		.byte $AF
+		.byte $26
+		.byte $6D
+		.byte $C7
+		.byte $FD
+L_UnknownData3_6:
+		.byte $50
+		.byte $11
+		.byte $D7
+		.byte $73
+		.byte $FE
+		.byte $1A
+		.byte $6F
+		.byte $E2
+		.byte $1F
+		.byte $E5
+		.byte $BF
+		.byte $63
+		.byte $C7
+		.byte $A8
+		.byte $DF
+		.byte $61
+		.byte $15
+		.byte $F1
+		.byte $7F
+		.byte $62
+		.byte $9B
+		.byte $2F
+		.byte $A8
+		.byte $72
+		.byte $FE
+		.byte $10
+		.byte $69
+		.byte $F1
+		.byte $B7
+		.byte $25
+		.byte $C5
+		.byte $71
+		.byte $33
+		.byte $AC
+		.byte $5F
+		.byte $71
+		.byte $8D
+		.byte $4A
+		.byte $AA
+		.byte $14
+		.byte $D1
+		.byte $71
+		.byte $17
+		.byte $95
+		.byte $26
+		.byte $42
+		.byte $72
+		.byte $42
+		.byte $73
+		.byte $12
+		.byte $7A
+		.byte $14
+		.byte $C6
+		.byte $14
+		.byte $D5
+		.byte $42
+		.byte $FE
+		.byte $11
+		.byte $7F
+		.byte $B8
+		.byte $8D
+		.byte $C1
+		.byte $CF
+		.byte $26
+		.byte $6D
+		.byte $C7
+		.byte $FD
+L_UnknownData3_7:
+		.byte $57
+		.byte 0
+		.byte $B
+		.byte $3F
+		.byte $B
+		.byte $BF
+		.byte $B
+		.byte $BF
+		.byte $73
+		.byte $36
+		.byte $9A
+		.byte $30
+		.byte $A5
+		.byte $64
+		.byte $B6
+		.byte $31
+		.byte $D4
+		.byte $61
+		.byte $B
+		.byte $BF
+		.byte $13
+		.byte $63
+		.byte $4A
+		.byte $60
+		.byte $53
+		.byte $66
+		.byte $A5
+		.byte $34
+		.byte $B3
+		.byte $67
+		.byte $E5
+		.byte $65
+		.byte $F4
+		.byte $60
+		.byte $B
+		.byte $BF
+		.byte $14
+		.byte $60
+		.byte $53
+		.byte $67
+		.byte $67
+		.byte $32
+		.byte $C4
+		.byte $62
+		.byte $D4
+		.byte $31
+		.byte $F3
+		.byte $61
+		.byte $FA
+		.byte $60
+		.byte $B
+		.byte $BF
+		.byte 4
+		.byte $30
+		.byte 9
+		.byte $61
+		.byte $14
+		.byte $65
+		.byte $63
+		.byte $65
+		.byte $6A
+		.byte $60
+		.byte $B
+		.byte $BF
+		.byte $F
+		.byte $38
+		.byte $B
+		.byte $BF
+		.byte $1D
+		.byte $41
+		.byte $3E
+		.byte $42
+		.byte $5F
+		.byte $20
+		.byte $CE
+		.byte $40
+		.byte $B
+		.byte $BF
+		.byte $3D
+		.byte $47
+		.byte $FD
 		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
-		.byte $FF
+
 
 
 practice_callgate

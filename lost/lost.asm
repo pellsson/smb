@@ -791,33 +791,29 @@ IncSubtask:
 
 DisplayIntermediate:
 		lda OperMode
-		beq loc_6653
+		beq @no_intermediate
 		cmp #3
-		beq loc_6644
+		beq @gameoverinter
 		lda AltEntranceControl
-		bne loc_6653
+		bne @no_intermediate
 		ldy AreaType
 		cpy #3
-		beq loc_6631
+		beq @playerinter
 		lda DisableIntermediate
-		bne loc_6653
-loc_6631:
+		bne @no_intermediate
+@playerinter:
 		jsr DrawPlayer_Intermediate
 		lda #1
 		jsr WriteTextAndResetTimers
-		lda WorldNumber
-		cmp #8
-		bne IncSubtask
-		inc DisableScreenFlag
-		rts
-loc_6644:
+		jmp IncSubtask
+@gameoverinter:
 		lda #3
 		jsr WriteGameText_NEW
 		lda WorldNumber
 		cmp #8
 		beq IncSubtask
 		jmp Next_OperMode_Task
-loc_6653:
+@no_intermediate:
 		lda #9
 		sta ScreenRoutineTask
 		rts
@@ -15467,7 +15463,7 @@ TitleScreenMode:
 		.word FinalizeTitleScreen
 
 IsBigWorld:
-  .byte 1, 0, 1, 0, 1, 1, 0, 0
+		.byte 1, 0, 1, 0, 1, 1, 0, 0, 0
 
 RunTitleScreen:
 		jsr Enter_PracticeTitleMenu

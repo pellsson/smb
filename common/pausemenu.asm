@@ -637,8 +637,8 @@ RunPauseMenu:
 @no_wrap_up:
 		jmp @save_exit
 @check_a:
-		cmp #A_Button
-		bne @exit
+		and #(B_Button|A_Button)
+		beq @exit
 		jmp pause_menu_activate
 @save_exit:
 		stx WRAM_MenuIndex
