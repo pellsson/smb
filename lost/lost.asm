@@ -15428,7 +15428,10 @@ TitleScreenMode:
 		.word FinalizeTitleScreen
 
 IsBigWorld:
-		.byte 1, 0, 1, 0, 1, 1, 0, 0, 0
+		.byte 1, 0, 1, 0
+		.byte 1, 1, 0, 0
+		.byte 0
+		.byte 1, 1, 0, 0
 
 RunTitleScreen:
 		jsr Enter_PracticeTitleMenu
@@ -15444,6 +15447,17 @@ RunTitleScreen:
 		inx
 @save_area:
 		stx AreaNumber
+
+		lda #$00
+		cpy #$09
+		bmi @not_extended
+		tya
+		sec
+		sbc #9
+		sta WorldNumber
+		lda #$01
+@not_extended:
+		sta IsPlayingExtendedWorlds
 		;
 		; Start it...
 		;

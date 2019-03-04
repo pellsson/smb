@@ -24,12 +24,12 @@ TODO:
 -- Loader stops paletet rotation on reboot sometimes.
 -- AreaAddrsLOffset still referenced outside of leveldata
 -- During delay disable sound
--- LL world A-D
 -- Use lost sound (for org too? should work right?)
 -- Beat world 8. What happens? Death happens. SM2DATA3 i think.
 
 MINOR:
 DONE:
+-- LL world A-D
 -- WarpZone load thing (also pipe 4 leads to w2 :))
 -- LL name shit doesnt need to exist. Probably just buggy.
 -- Save & load SHOULD break WRAM-levelenemy data
