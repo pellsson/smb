@@ -7,6 +7,7 @@
 	.include "shared.inc"
 	.include "macros.inc"
 	.include "wram.inc"
+	.include "text.inc"
 
 	FDS_Delay132:
 	FDS_LoadFiles:
@@ -77,8 +78,8 @@ VRAM_AddrTable_DW_NEW:
 		.word word_6C1D
 		.word unk_6C25
 		.word unk_6C2D
-		.word WRAM_ThankYouMario
-		.word unk_6C51
+		.word ThankYouMario
+		.word ButOurPrincess
 		.word TitleScreenData ; TODO : SWAPDATA_C876
 		.word TitleScreenData ; TODO : SWAPDATA_C87F
 		.word TitleScreenData ; TODO : SWAPDATA_C893
@@ -1945,53 +1946,17 @@ unk_6C35:
 		.byte $30
 		.byte $27
 		.byte 0
-unk_6C51:
-		.byte $25
-		.byte $C5
-		.byte $16
-		.byte $B
-		.byte $1E
-		.byte $1D
-		.byte $24
-		.byte $18
-		.byte $1E
-		.byte $1B
-		.byte $24
-		.byte $19
-		.byte $1B
-		.byte $12
-		.byte $17
-		.byte $C
-		.byte $E
-		.byte $1C
-		.byte $1C
-		.byte $24
-		.byte $12
-		.byte $1C
-		.byte $24
-		.byte $12
-		.byte $17
-		.byte $26
-		.byte 5
-		.byte $F
-		.byte $A
-		.byte $17
-		.byte $18
-		.byte $1D
-		.byte $11
-		.byte $E
-		.byte $1B
-		.byte $24
-		.byte $C
-		.byte $A
-		.byte $1C
-		.byte $1D
-		.byte $15
-		.byte $E
-		.byte $2B
-		.byte 0
-JumpEngine:
 
+ThankYouMario:
+		text_block $2548, "THANK YOU CASTLE!"
+		.byte 0
+
+ButOurPrincess:
+		text_block $25C5, "BUT OUR MARIO IS IN"
+		text_block $2605, "ANOTHER ZELDA!"
+		.byte 0
+
+JumpEngine:
 		asl
 		tay
 		pla

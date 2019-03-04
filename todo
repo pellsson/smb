@@ -20,8 +20,6 @@ TODO:
 -- Loader stops paletet rotation on reboot sometimes.
 -- AreaAddrsLOffset still referenced outside of leveldata
 -- WarpZone load thing (also pipe 4 leads to w2 :))
--- LL jitters at end of castles (likely due to THANK YOU ___)
--- Overwriting pattern tables (due to THANK YOU ___?)
 -- During delay disable sound
 -- LL name shit doesnt need to exist. Probably just buggy.
 -- LL world A-D
@@ -33,6 +31,8 @@ MINOR:
 -- Kill all old variables
 
 DONE:
+-- LL jitters at end of castles (likely due to THANK YOU ___)
+-- Overwriting pattern tables (due to THANK YOU ___?)
 -- LL world 9
 -- LL worlds beyond 4
 -- Menus dont work if you hold dirs

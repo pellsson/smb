@@ -179,8 +179,6 @@ WRAM_HalfwayPageNybbles:
 ;
 ; Thank you mario buffer
 ;
-WRAM_ThankYouMario:
-		text_block $2548, "THANK YOU "
 WRAM_PatchMarioName1:
 		.byte "MARIO"
 		.byte $00
