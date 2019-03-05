@@ -554,9 +554,9 @@ draw_menu:
 		sty VRAM_Buffer1_Offset
 		rts
 @redraw_extra:
+		jsr DrawRuleNumber
 		jsr DrawRuleCursor
 		jsr DrawMushroomIcon
-		jsr DrawRuleNumber
 		jmp RedrawFrameNumbersInner
 
 ;-------------------------------------------------------------------------------------
@@ -742,7 +742,6 @@ next_task:
 		bpl @reset_next
 		inc OperMode_Task
 		jmp ReturnBank
-
 
 PracticeTitleMenu:
 		jsr draw_menu

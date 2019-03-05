@@ -54,29 +54,29 @@ WRAM_LostUser1:
 	.word 0
 
 WRAM_OrgRules:
-	.word 0, 0, 0, 0 ; World 1
-	.word 0, 0, 0, 0 ; World 2
-	.word 0, 0, 0, 0 ; World 3
-	.word 0, 0, 0, 0 ; World 4
-	.word 0, 0, 0, 0 ; World 5
-	.word 0, 0, 0, 0 ; World 6
-	.word 0, 0, 0, 0 ; World 7
-	.word 0, 0, 0, 0 ; World 8
+	.dword 0, 0, 0, 0 ; World 1
+	.dword 0, 0, 0, 0 ; World 2
+	.dword 0, 0, 0, 0 ; World 3
+	.dword 0, 0, 0, 0 ; World 4
+	.dword 0, 0, 0, 0 ; World 5
+	.dword 0, 0, 0, 0 ; World 6
+	.dword 0, 0, 0, 0 ; World 7
+	.dword 0, 0, 0, 0 ; World 8
 
 WRAM_LostRules:
-	.word 0, 0, 0, 0 ; World 1
-	.word 0, 0, 0, 0 ; World 2
-	.word 0, 0, 0, 0 ; World 3
-	.word 0, 0, 0, 0 ; World 4
-	.word 0, 0, 0, 0 ; World 5
-	.word 0, 0, 0, 0 ; World 6
-	.word 0, 0, 0, 0 ; World 7
-	.word 0, 0, 0, 0 ; World 8
-	.word 0, 0, 0, 0 ; World 9
-	.word 0, 0, 0, 0 ; World A
-	.word 0, 0, 0, 0 ; World B
-	.word 0, 0, 0, 0 ; World C
-	.word 0, 0, 0, 0 ; World D
+	.dword 0, 0, 0, 0 ; World 1
+	.dword 0, 0, 0, 0 ; World 2
+	.dword 0, 0, 0, 0 ; World 3
+	.dword 0, 0, 0, 0 ; World 4
+	.dword 0, 0, 0, 0 ; World 5
+	.dword 0, 0, 0, 0 ; World 6
+	.dword 0, 0, 0, 0 ; World 7
+	.dword 0, 0, 0, 0 ; World 8
+	.dword 0, 0, 0, 0 ; World 9
+	.dword 0, 0, 0, 0 ; World A
+	.dword 0, 0, 0, 0 ; World B
+	.dword 0, 0, 0, 0 ; World C
+	.dword 0, 0, 0, 0 ; World D
 ;
 ; Number of stars collected
 ;

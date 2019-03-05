@@ -4,7 +4,7 @@
 CustomRow = WRAM_Temp+$10
 
 .define MENU_ROW_LENGTH 16
-.define MENU_ROW_COUNT 12
+.define MENU_ROW_COUNT 13
 
 pm_empty_row:
 	.byte "                "
@@ -43,7 +43,6 @@ pm_title_row:
 	.byte $24, " EXIT TITLE ", $24, $24, $24
 pm_intro_row:
 	.byte $24, " EXIT INTRO ", $24, $24, $24
-
 
 
 .macro row_render_data ppu, data

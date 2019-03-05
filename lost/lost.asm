@@ -15937,8 +15937,8 @@ LeafSprites:
 MakeItWindy:
 		lda #1
 		bne MakeItNotWindy
-		lda #0
 MakeItNotWindy:
+		lda #0
 		sta IsWindy
 		rts
 

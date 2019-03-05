@@ -1,25 +1,26 @@
-EXTRAS:
--- Time all worlds in frames
+For Release:
 -- Settings on loader screen:
 	-- "Factory Reset"-WRAM @ launcher
 	-- Redraw user-vars timer
 	-- Sleep before Save & Load
 	-- Charset / Game.
+	-- Keybindings.
+-- Faces?
+-- Save rules in ram :(
+-- Hidden1UpBlocks
+
+BUGS:
+-- Wind weak
+
+TODO AT SOME POINT:
+-- Time all worlds in frames
 -- Contra Code & Faces?
 -- Add start on second quest (for smborg).
--- Keybindings.
 -- Make powerup reflect on title screen?
 -- LL Maybe do something about coin-firework-thing?
--- Save rules in ram :(
 -- GamePauseStats | 2 hack? Rework? Also, hit sprite0 when pre-save/-load
 -- Highbit in pause required? Remove for some cycles...
 -- Kill all old variables
--- Exit to launcher
-
-STUPID?:
--- Predefined rules
-
-TODO:
 -- Loader stops paletet rotation on reboot sometimes.
 -- AreaAddrsLOffset still referenced outside of leveldata
 -- During delay disable sound
@@ -28,8 +29,12 @@ TODO:
 -- Beating the game leaves you without a cursor on menu
 -- Ending is complete fuckery.
 
-MINOR:
+STUPID?:
+-- Predefined rules
+
 DONE:
+-- Wind throughout 5
+-- Exit to launcher
 -- Beat world 8. What happens? Death happens. SM2DATA3 i think.
 -- Player position + Turtle.
 -- Tecate frog.
