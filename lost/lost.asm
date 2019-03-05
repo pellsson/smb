@@ -15936,9 +15936,10 @@ LeafSprites:
 
 MakeItWindy:
 		lda #1
-		bne MakeItNotWindy
+		bne SetWindState
 MakeItNotWindy:
 		lda #0
+SetWindState:
 		sta IsWindy
 		rts
 
