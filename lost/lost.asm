@@ -67,36 +67,36 @@ EndlessLoop:
 
 VRAM_AddrTable_DW_NEW:
 		.word $301
-		.word unk_6B8D
-		.word unk_6BB1
+		.word WaterPalette_MAYBE
+		.word UndergroundPalette_MAYBE
 		.word GroundPaletteData
-		.word unk_6BF9
+		.word CastlePalette_MAYBE
 		.word TitleScreenData
 		.word VRAM_Buffer2
 		.word VRAM_Buffer2
-		.word unk_6C35
-		.word word_6C1D
-		.word unk_6C25
-		.word unk_6C2D
+		.word SomePalette_0
+		.word SomePalette_1
+		.word SomePalette_2
+		.word SomePalette_3
 		.word ThankYouMario
 		.word ButOurPrincess
-		.word TitleScreenData ; TODO : SWAPDATA_C876
-		.word TitleScreenData ; TODO : SWAPDATA_C87F
-		.word TitleScreenData ; TODO : SWAPDATA_C893
-		.word TitleScreenData ; TODO : SWAPDATA_C8AB
-		.word TitleScreenData ; TODO : SWAPDATA_C8C1
-		.word TitleScreenData ; TODO : SWAPDATA_C8D7
-		.word TitleScreenData ; TODO : SWAPDATA_C8EB
-		.word TitleScreenData ; TODO : SWAPDATA_C8FC
-		.word TitleScreenData ; TODO : SWAPDATA_C913
-		.word TitleScreenData ; TODO : SWAPDATA_C92B
-		.word TitleScreenData ; TODO : SWAPDATA_C943
-		.word $FFFF
+		.word StaticFrame_0E ; SWAPDATA_C876
+		.word SomePalette_0F ; SWAPDATA_C87F
+		.word StaticFrame_10 ; SWAPDATA_C893
+		.word StaticFrame_11 ; SWAPDATA_C8AB
+		.word StaticFrame_12 ; SWAPDATA_C8C1
+		.word StaticFrame_13 ; SWAPDATA_C8D7
+		.word StaticFrame_14 ; SWAPDATA_C8EB
+		.word StaticFrame_15 ; SWAPDATA_C8FC
+		.word StaticFrame_16 ; SWAPDATA_C913
+		.word StaticFrame_17 ; SWAPDATA_C92B
+		.word StaticFrame_18 ; SWAPDATA_C943
+		.word 0 ; Removed? byte_C149
 		.word byte_C10B
-		.word TitleScreenData ; TODO : SWAPDATA_C95C
+		.word StaticFrame_1B ; SWAPDATA_C95C
 		.word WRAM_MushroomSelection
-		.word TitleScreenData ; TODO : SWAPDATA_C97D
-		.word TitleScreenData ; TODO : SWAPDATA_C9C0
+		.word WePresentFantasyWorld ; SWAPDATA_C97D
+		.word YouAreSuperPlayer ; SWAPDATA_C9C0
 VRAM_Buffer_Offset:
 		.byte 0
 		.byte $40
@@ -340,8 +340,8 @@ AutoPlayer:
 
 		jsr RelativePlayerPosition
 		jmp PlayerGfxHandler
-VictoryModeSubroutines:
 
+VictoryModeSubroutines:
 		lda WorldNumber
 		cmp #7
 		beq VictoryOnWorld8_NEW
@@ -353,8 +353,8 @@ VictoryModeSubroutines:
 		.word PrintVictoryMessages
 		.word PlayerEndWorld_MAYBE_NEW
 		.word PlayerEndWorld_2_MAYBE_NEW
-VictoryOnWorld8_NEW:
 
+VictoryOnWorld8_NEW:
 		lda OperMode_Task
 		jsr JumpEngine
 		.word BridgeCollapse
@@ -372,11 +372,24 @@ VictoryOnWorld8_NEW:
 		.word XXX_SomethingOrOther
 		.word FdsWriteFile_SM2SAVE
 
+ConvertIndexToBit:
+	.byte   1
+	.byte   2
+	.byte   4
+	.byte   8
+	.byte $10
+	.byte $20
+	.byte $40
+	.byte $80 
+
 SetupVictoryMode:
 		ldx ScreenRight_PageLoc
 		inx
 		stx FirebarSpinDirection
 		ldy WorldNumber
+		lda ConvertIndexToBit,Y
+		ora WorldsCompleted
+		sta WorldsCompleted
 		lda IsPlayingExtendedWorlds
 		beq loc_6322
 		lda WorldNumber
@@ -490,6 +503,7 @@ locret_63D1:
 PlayerEndWorld_2_MAYBE_NEW:
 		lda WorldEndTimer
 		bne locret_63FC
+PlayerEndWorld_Force:
 		lda #0
 		sta AreaNumber
 		sta LevelNumber
@@ -636,7 +650,7 @@ ScreenRoutines:
 		.word DisplayTimeUp
 		.word ResetSpritesAndScreenTimer
 		.word DisplayIntermediate
-		.word PrepareInitializeArea
+		.word PrepareInitScreen ; PrepareInitializeArea ; Unused?
 		.word ResetSpritesAndScreenTimer
 		.word AreaParserTaskControl
 		.word GetAreaPalette
@@ -806,7 +820,11 @@ DisplayIntermediate:
 		jsr DrawPlayer_Intermediate
 		lda #1
 		jsr WriteTextAndResetTimers
-		jmp IncSubtask
+		lda WorldNumber
+		cmp #8
+		bne IncSubtask
+		inc DisableScreenFlag
+		rts
 @gameoverinter:
 		lda #3
 		jsr WriteGameText_NEW
@@ -1762,7 +1780,7 @@ Palette3_MTiles:
 		.byte $7D
 		.byte $7C
 		.byte $7E
-unk_6B8D:
+WaterPalette_MAYBE:
 		.byte $3F
 		.byte 0
 		.byte $20
@@ -1799,7 +1817,7 @@ unk_6B8D:
 		.byte $30
 		.byte $10
 		.byte 0
-unk_6BB1:
+UndergroundPalette_MAYBE:
 		.byte $3F
 		.byte 0
 		.byte $20
@@ -1873,7 +1891,7 @@ GroundPaletteData:
 		.byte $3C
 		.byte $1C
 		.byte 0
-unk_6BF9:
+CastlePalette_MAYBE:
 		.byte $3F
 		.byte 0
 		.byte $20
@@ -1910,7 +1928,7 @@ unk_6BF9:
 		.byte $30
 		.byte $10
 		.byte 0
-word_6C1D:
+SomePalette_1:
 		.word $3F
 		.byte 4
 byte_6C20:
@@ -1919,7 +1937,7 @@ byte_6C20:
 		.byte 0
 		.byte $10
 		.byte 0
-unk_6C25:
+SomePalette_2:
 		.byte $3F
 		.byte 0
 		.byte 4
@@ -1928,7 +1946,7 @@ unk_6C25:
 		.byte 0
 		.byte $10
 		.byte 0
-unk_6C2D:
+SomePalette_3:
 		.byte $3F
 		.byte 0
 		.byte 4
@@ -1937,7 +1955,7 @@ unk_6C2D:
 		.byte $16
 		.byte $F
 		.byte 0
-unk_6C35:
+SomePalette_0:
 		.byte $3F
 		.byte $14
 		.byte 4
@@ -15433,11 +15451,18 @@ IsBigWorld:
 		.byte 0
 		.byte 1, 1, 0, 0
 
+NoGoTime:
+		lda #0
+		sta IsWindy
+		sta SavedJoypad1Bits
+		jsr GameCoreRoutine_RW
+		rts
+
 RunTitleScreen:
 		jsr Enter_PracticeTitleMenu
 		lda OperMode_Task
 		cmp #5
-		bne @not_running
+		bne NoGoTime
 		ldx LevelNumber
 		ldy WorldNumber
 		lda IsBigWorld, y
@@ -15449,6 +15474,7 @@ RunTitleScreen:
 		stx AreaNumber
 
 		lda #$00
+		sta WorldsCompleted
 		cpy #$09
 		bmi @not_extended
 		tya
@@ -15458,6 +15484,7 @@ RunTitleScreen:
 		lda #$01
 @not_extended:
 		sta IsPlayingExtendedWorlds
+		jsr Enter_LL_WriteHalfwayPages
 		;
 		; Start it...
 		;
@@ -15502,37 +15529,6 @@ TitleInitializeFdsLoads:
 		.word FDSResetZero
 
 LoadCorrectWorldFiles:
-		lda ContinueWorld
-		beq loc_C03E
-		lda IsPlayingExtendedWorlds
-		bne loc_C027
-		lda WorldNumber
-		cmp #4
-		bcc loc_C03E
-loc_C027:
-
-		lda #0
-		sta LoadListIndex
-		jsr LoadFilesFromFDS
-		bne loc_C038
-		jsr sub_C0CA
-		beq loc_C03E
-loc_C036:
-
-		lda #$40
-loc_C038:
-
-		inc FdsOperTask
-REMOVEME_DiskError:
-		jmp REMOVEME_DiskError
-
-loc_C03E:
-
-		lda #1
-		sta ContinueWorld
-		lsr
-		sta WorldNumber
-		sta IsPlayingExtendedWorlds
 		jmp FdsOperationDone
 
 LoadCorrectData:
@@ -15556,13 +15552,13 @@ InitializeWorldEndTimer:
 		lda #$10
 		sta WorldEndTimer
 		bne Increase_OperMode_Task
-CheckWorldEndTimer:
 
+CheckWorldEndTimer:
 		lda WorldEndTimer
 		beq Increase_OperMode_Task
 		rts
-FdsLoadFile_SM2DATA3:
 
+FdsLoadFile_SM2DATA3:
 		lda FdsOperTask
 		jsr JumpEngine
 		.word PrepareFdsLoad
@@ -15572,40 +15568,10 @@ FdsLoadFile_SM2DATA3:
 		.word FDSResetZero
 
 LoadFdsFileIndex2:
-		lda #2
-		sta LoadListIndex
-		jsr LoadFilesFromFDS
-		bne loc_C038
-		jsr sub_C0CA
-		beq loc_C0B2
-		lda #0
-		sta WRAM_NumberOfStars
-loc_C0B2:
-		lda WRAM_NumberOfStars
-		clc
-		adc #1
-		cmp #$19
-		bcc loc_C0BE
-		lda #$18
-loc_C0BE:
-		sta WRAM_NumberOfStars
 		jsr InitializeNameTables
 		jsr FdsOperationDone
-		; jmp byte_C858
-xxx_todo_fix_me: ; ^^^ 
-		jmp xxx_todo_fix_me
+		jmp SetMarioName
 
-sub_C0CA:
-		tya
-		ldy LoadListIndex
-		cmp word_C0F0,y
-		rts
-
-word_C0F0: ; remove me
-		.word $103
-		.word $103
-LoadFilesFromFDS:
-		jmp LoadFilesFromFDS
 
 byte_C10B:
 		.byte $3F
@@ -15646,7 +15612,6 @@ MoreFDSStuff:
 FDSResetZero:
 		lda #0
 		sta FdsOperTask
-		sta LoadListIndex
 		rts
 
 SWAPDATA_AreaDataOfsLoopback:
@@ -15711,7 +15676,6 @@ MarioOrLuigiColors:
 		.byte $22, $30, $27, $19 ; Luigi
 NameOffsets:
 		.byte 4
-AlternateInitScreen:
 		.byte 9
 
 PatchToMarioOrLuigi:
@@ -15734,14 +15698,6 @@ loc_C620:
 		dex
 		bpl loc_C620
 		rts
-
-AlternatePrintVictoryMessages:
-AlternatePlayerEndWorld:
-UNK_C6CA:
-XXX_CopySomethingAndReset:
-XXX_SomethingOrOther:
-FdsWriteFile_SM2SAVE:
-		; MOVED.
 
 TitleScreenData:
 		.byte $20, $84
@@ -16057,6 +16013,812 @@ UpdateLeafPositions:
 		sta WRAM_LeafY,x
 		dex
 		bpl @update_next
+		rts
+
+StaticFrame_0E:
+		.byte $23
+		.byte $C0
+		.byte $48
+		.byte $55
+		.byte $23
+		.byte $C2
+		.byte 1
+		.byte $D5
+		.byte 0
+SomePalette_0F:
+		.byte $3F
+		.byte 0
+		.byte $10
+		.byte $F
+		.byte $F
+		.byte $F
+		.byte $F
+		.byte $F
+		.byte $30
+		.byte $10
+		.byte 0
+		.byte $F
+		.byte $21
+		.byte $12
+		.byte 2
+		.byte $F
+		.byte $27
+		.byte $17
+		.byte 0
+		.byte 0
+StaticFrame_10:
+		.byte $20
+		.byte $E8
+		.byte $10
+		.byte $1D
+		.byte $11
+		.byte $A
+		.byte $17
+		.byte $14
+		.byte $24
+		.byte $22
+		.byte $18
+		.byte $1E
+		.byte $24
+unk_C8A0:
+		.byte $16
+		.byte $A
+		.byte $1B
+		.byte $12
+		.byte $18
+		.byte $2B
+		.byte $23
+		.byte $C8
+		.byte $48
+		.byte 5
+		.byte 0
+StaticFrame_11:
+		.byte $21
+		.byte 9
+		.byte $E
+		.byte $19
+		.byte $E
+		.byte $A
+		.byte $C
+		.byte $E
+		.byte $24
+		.byte $12
+		.byte $1C
+		.byte $24
+		.byte $19
+		.byte $A
+		.byte $1F
+		.byte $E
+		.byte $D
+		.byte $23
+		.byte $D0
+		.byte $58
+		.byte $AA
+		.byte 0
+StaticFrame_12:
+		.byte $21
+		.byte $47
+		.byte $12
+		.byte $20
+		.byte $12
+		.byte $1D
+		.byte $11
+		.byte $24
+		.byte $14
+		.byte $12
+		.byte $17
+		.byte $10
+		.byte $D
+		.byte $18
+		.byte $16
+		.byte $24
+		.byte $1C
+		.byte $A
+		.byte $1F
+		.byte $E
+		.byte $D
+		.byte 0
+StaticFrame_13:
+		.byte $21
+		.byte $89
+		.byte $10
+		.byte $11
+		.byte $1E
+		.byte $1B
+		.byte $1B
+		.byte $A
+		.byte $11
+		.byte $24
+		.byte $1D
+		.byte $18
+		.byte $24
+		.byte $24
+unk_C8E5:
+		.byte $16
+		.byte $A
+		.byte $1B
+		.byte $12
+		.byte $18
+		.byte 0
+StaticFrame_14:
+		.byte $21
+		.byte $CA
+		.byte $D
+		.byte $18
+		.byte $1E
+		.byte $1B
+		.byte $24
+		.byte $18
+		.byte $17
+		.byte $15
+		.byte $22
+		.byte $24
+		.byte $11
+		.byte $E
+		.byte $1B
+		.byte $18
+		.byte 0
+StaticFrame_15:
+		.byte $22
+		.byte 7
+		.byte $13
+		.byte $1D
+		.byte $11
+		.byte $12
+		.byte $1C
+		.byte $24
+		.byte $E
+		.byte $17
+		.byte $D
+		.byte $1C
+		.byte $24
+		.byte $22
+		.byte $18
+		.byte $1E
+		.byte $1B
+		.byte $24
+		.byte $1D
+		.byte $1B
+		.byte $12
+		.byte $19
+		.byte 0
+StaticFrame_16:
+		.byte $22
+		.byte $46
+		.byte $14
+		.byte $18
+		.byte $F
+		.byte $24
+		.byte $A
+		.byte $24
+		.byte $15
+		.byte $18
+		.byte $17
+		.byte $10
+		.byte $24
+		.byte $F
+		.byte $1B
+		.byte $12
+		.byte $E
+		.byte $17
+		.byte $D
+		.byte $1C
+		.byte $11
+		.byte $12
+		.byte $19
+		.byte 0
+StaticFrame_17:
+		.byte $22
+		.byte $88
+		.byte $10
+		.byte 1
+		.byte 0
+		.byte 0
+		.byte 0
+		.byte 0
+		.byte 0
+		.byte $24
+		.byte $19
+		.byte $1D
+		.byte $1C
+		.byte $AF
+		.byte $A
+		.byte $D
+		.byte $D
+		.byte $E
+		.byte $D
+		.byte $23
+		.byte $E8
+		.byte $48
+		.byte $FF
+		.byte 0
+StaticFrame_18:
+		.byte $22
+		.byte $A6
+		.byte $15
+		.byte $F
+		.byte $18
+		.byte $1B
+		.byte $24
+		.byte $E
+		.byte $A
+		.byte $C
+		.byte $11
+		.byte $24
+		.byte $19
+		.byte $15
+		.byte $A
+		.byte $22
+		.byte $E
+		.byte $1B
+		.byte $24
+		.byte $15
+		.byte $E
+		.byte $F
+		.byte $1D
+		.byte $AF
+		.byte 0
+StaticFrame_1B:
+		.byte $20
+		.byte $80
+		.byte $60
+		.byte $5E
+		.byte $20
+		.byte $A0
+		.byte $60
+		.byte $5D
+		.byte $23
+		.byte $40
+		.byte $60
+		.byte $5E
+		.byte $23
+		.byte $60
+		.byte $60
+		.byte $5D
+		.byte $23
+		.byte $80
+		.byte $60
+		.byte $5E
+		.byte $23
+		.byte $A0
+		.byte $60
+		.byte $5D
+		.byte $23
+		.byte $C0
+		.byte $50
+		.byte $55
+		.byte $23
+		.byte $F0
+		.byte $50
+		.byte $55
+		.byte 0
+WePresentFantasyWorld:
+		.byte $22
+		.byte $24
+		.byte $18
+		.byte $20
+		.byte $E
+		.byte $24
+		.byte $19
+		.byte $1B
+		.byte $E
+		.byte $1C
+		.byte $E
+		.byte $17
+		.byte $1D
+		.byte $24
+		.byte $F
+		.byte $A
+		.byte $17
+		.byte $1D
+		.byte $A
+		.byte $1C
+		.byte $22
+		.byte $24
+		.byte $20
+		.byte $18
+		.byte $1B
+		.byte $15
+		.byte $D
+		.byte $22
+		.byte $66
+		.byte $13
+		.byte $15
+		.byte $E
+		.byte $1D
+		.byte $F2
+		.byte $1C
+		.byte $24
+		.byte $1D
+		.byte $1B
+		.byte $22
+		.byte $24
+		.byte $76
+		.byte 9
+		.byte $24
+		.byte $20
+		.byte $18
+		.byte $1B
+		.byte $15
+		.byte $D
+		.byte $75
+		.byte $22
+		.byte $A9
+		.byte $E
+		.byte $20
+		.byte $12
+		.byte $1D
+		.byte $11
+		.byte $24
+		.byte $18
+		.byte $17
+		.byte $E
+		.byte $24
+		.byte $10
+		.byte $A
+		.byte $16
+		.byte $E
+		.byte $AF
+		.byte 0
+YouAreSuperPlayer:
+		.byte $21
+		.byte $E0
+		.byte $60
+		.byte $24
+		.byte $22
+		.byte $40
+		.byte $60
+		.byte $24
+		.byte $22
+		.byte $25
+		.byte $16
+		.byte $22
+		.byte $18
+		.byte $1E
+		.byte $F2
+		.byte $1B
+		.byte $E
+		.byte $24
+		.byte $A
+		.byte $24
+		.byte $1C
+		.byte $1E
+		.byte $19
+		.byte $E
+		.byte $1B
+		.byte $24
+		.byte $19
+		.byte $15
+		.byte $A
+		.byte $22
+		.byte $E
+		.byte $1B
+		.byte $2B
+		.byte $22
+		.byte $69
+		.byte $D
+		.byte $20
+		.byte $E
+		.byte $24
+		.byte $11
+		.byte $18
+		.byte $19
+		.byte $E
+		.byte $24
+		.byte $20
+		.byte $E
+		.byte $F2
+		.byte $15
+		.byte $15
+		.byte $22
+		.byte $A9
+		.byte $E
+		.byte $1C
+		.byte $E
+		.byte $E
+		.byte $24
+		.byte $22
+		.byte $18
+		.byte $1E
+		.byte $24
+		.byte $A
+		.byte $10
+		.byte $A
+		.byte $12
+		.byte $17
+		.byte $AF
+		.byte $22
+		.byte $E8
+		.byte $10
+		.byte $16
+		.byte $A
+		.byte $1B
+		.byte $12
+		.byte $18
+		.byte $24
+		.byte $A
+		.byte $17
+		.byte $D
+		.byte $24
+		.byte $1C
+		.byte $1D
+		.byte $A
+		.byte $F
+		.byte $F
+		.byte $AF
+		.byte 0
+
+PrepareInitScreen:
+		lda OperMode
+		cmp #3
+		beq @playerdead
+		lda byte_7F5
+		bne @wait
+		lda #$1D
+		sta VRAM_Buffer_AddrCtrl
+		lda #$10
+		sta ScreenTimer
+		inc byte_7F5
+@wait:
+		lda #0
+		sta DisableScreenFlag
+		inc ScreenRoutineTask
+		rts
+@playerdead:
+		lda #$20
+		sta ScreenTimer
+		lda #$1E
+		sta VRAM_Buffer_AddrCtrl
+		inc OperMode_Task
+		rts
+
+AlternateInitScreen:
+		lda ScreenRoutineTask
+		jsr JumpEngine
+		.word InitializeScreeNoSpritesNoNt
+		.word WriteTopStatusLine
+		.word WriteBottomStatusLine
+		.word SetEndingFrameBuffer
+		.word GetAreaPalette
+		.word GetBackgroundColor
+		.word PrintAndPatchSoundEngine
+
+SetEndingFrameBuffer:
+		lda #$1B
+		sta VRAM_Buffer_AddrCtrl
+		lda #0
+		sta Sprite0HitDetectFlag
+		inc ScreenRoutineTask
+		rts
+
+PrintAndPatchSoundEngine:
+		;lda #$A2
+		;jsr PrintStatusBarNumbers
+
+		;lda #$CC
+		;sta VOLDST_PatchSoundEngineHigh
+		;lda #$5F
+		;sta VOLDST_PatchSoundEngineLow
+		lda #1
+		sta AreaMusicQueue
+		lda #0
+		sta Left_Right_Buttons
+		sta NumberOfPlayers
+		sta DisableScreenFlag
+		inc Sprite0HitDetectFlag
+		inc OperMode_Task
+		rts
+
+AlternatePrintVictoryMessages:
+		lda SecondaryMsgCounter
+		bne @has_Secondary
+		ldy PrimaryMsgCounter
+		cpy #$A
+		bcs @set_endtimer
+		iny
+		iny
+		iny
+		cpy #5
+		bne @noeventmusic
+		lda #4
+		sta EventMusicQueue
+@noeventmusic:
+		tya
+		clc
+		adc #$C
+		sta VRAM_Buffer_AddrCtrl
+@has_Secondary:
+		lda SecondaryMsgCounter
+		clc
+		adc #4
+		sta SecondaryMsgCounter
+		lda PrimaryMsgCounter
+		adc #0
+		sta PrimaryMsgCounter
+		rts
+@set_endtimer:
+		lda #$C
+		sta WorldEndTimer
+loc_C677:
+		inc OperMode_Task
+sub_C67A:
+		lda #0
+		sta OffScr_NumberofLives
+		sta OffScr_HalfwayPage
+		sta OffScr_LevelNumber
+locret_C685:
+		rts
+
+AlternatePlayerEndWorld:
+		lda WorldEndTimer
+		bne locret_C685
+		jmp loc_C677
+.ifdef END_OF_WORLD_LIFES
+		lda NumberofLives
+		bmi loc_C677
+		lda SelectTimer
+		bne locret_C685
+		lda #$30
+		sta SelectTimer
+		lda #$40
+		sta Square2SoundQueue
+		dec NumberofLives
+		lda #1
+		sta unk_135
+		rts
+.endif
+
+byte_C6A9:
+		.byte $3F
+		.byte 0
+		.byte $10
+		.byte $F
+		.byte $30
+		.byte $F
+		.byte $F
+		.byte $F
+		.byte $30
+		.byte $10
+		.byte 0
+		.byte $F
+		.byte $21
+		.byte $12
+		.byte $21
+		.byte $F
+		.byte $27
+		.byte $17
+		.byte 0
+		.byte 0
+unk_C6BD:
+		.byte 1
+		.byte 2
+		.byte $11
+		.byte $21
+unk_C6C1:
+		.byte $22
+		.byte $86
+		.byte $55
+		.byte $24
+		.byte $22
+		.byte $A6
+		.byte $55
+		.byte $24
+		.byte 0
+
+UNK_C6CA:
+		inc OffScr_NumberofLives
+		lda OffScr_LevelNumber
+		bne loc_C6DF
+		lda OffScr_NumberofLives
+		and #$FF
+		bne locret_C70F
+		inc OffScr_LevelNumber
+		jmp loc_C6E6
+loc_C6DF:
+		lda OffScr_NumberofLives
+		and #$F
+		bne locret_C70F
+loc_C6E6:
+		ldx #$13
+loc_C6E8:
+		lda byte_C6A9,x
+		sta VRAM_Buffer1,x
+		dex
+		bpl loc_C6E8
+		ldx #$C
+		ldy OffScr_HalfwayPage
+loc_C6F6:
+		lda unk_C6BD,y
+		sta VRAM_Buffer1+3,x
+		dex
+		dex
+		dex
+		dex
+		bpl loc_C6F6
+		inc OffScr_HalfwayPage
+		lda OffScr_HalfwayPage
+		cmp #4
+		bne locret_C70F
+		inc OperMode_Task
+locret_C70F:
+		rts
+
+XXX_CopySomethingAndReset:
+		ldx #8
+loc_C712:
+		lda unk_C6C1,x
+		sta VRAM_Buffer1,x
+		dex
+		bpl loc_C712
+		inc OperMode_Task
+		jsr sub_C67A
+		lda #$60
+		sta OffScr_Hidden1UpFlag
+		rts
+
+XXX_SomethingOrOther:
+		jsr MoveShitheads
+		lda $608
+		bne locret_C737
+		lda IsPlayingExtendedWorlds
+		bne RestoreSoundEngine
+		inc OperMode_Task
+locret_C737:
+		rts
+
+FdsWriteFile_SM2SAVE:
+		lda FdsOperTask
+		jsr JumpEngine
+		.word PrepareFdsLoad
+		.word FdsWriteSaveFile
+		.word WaitFDSReady
+		.word MoreFDSStuff
+		.word FDSResetZero
+
+FdsWriteSaveFile:
+RestoreSoundEngine:
+		; lda #$D2
+		; sta VOLDST_PatchSoundEngineHigh
+		; lda #$A0
+		; sta VOLDST_PatchSoundEngineLow
+		lda #0
+		sta FdsOperTask
+		sta OperMode_Task
+		lda IsPlayingExtendedWorlds
+		bne @isextended
+		lda WorldsCompleted
+		cmp #$FF
+		beq loc_C793
+@isextended:
+		lda #0
+		sta WorldsCompleted
+		sta OperMode
+		jmp TitleScreenMode
+loc_C793:
+		lda #0
+		sta WorldsCompleted
+		sta byte_7F5
+		jmp PlayerEndWorld_Force
+
+unk_C7A1:
+		.byte $50
+		.byte $B0
+		.byte $E0
+		.byte $68
+		.byte $98
+		.byte $C8
+unk_C7A7:
+		.byte $80
+		.byte $50
+		.byte $68
+		.byte $80
+		.byte $98
+		.byte $B0
+		.byte $C8
+unk_C7AE:
+		.byte $E0
+		.byte $B8
+		.byte $90
+		.byte $70
+		.byte $68
+		.byte $70
+		.byte $90
+unk_C7B5:
+		.byte $B8
+		.byte $38
+		.byte $48
+		.byte $60
+		.byte $80
+		.byte $A0
+		.byte $B8
+		.byte $C8
+MoveShitheads:
+		lda OffScr_Hidden1UpFlag
+		beq loc_C7C6
+		dec OffScr_Hidden1UpFlag
+		rts
+loc_C7C6:
+		jsr MoveSpritesOffscreen
+		ldx OffScr_HalfwayPage
+		cpx #7
+		beq loc_C7E1
+		lda OffScr_NumberofLives
+		and #$1F
+		bne loc_C7F7
+		inc OffScr_HalfwayPage
+		lda #1
+		sta Square2SoundQueue
+		jmp loc_C7F7
+loc_C7E1:
+		lda OffScr_NumberofLives
+		and #$1F
+		bne loc_C7F7
+		inc OffScr_LevelNumber
+		lda OffScr_LevelNumber
+		cmp #$B
+		bcc loc_C7F7
+		lda #4
+		sta OffScr_LevelNumber
+loc_C7F7:
+		inc OffScr_NumberofLives
+		lda WorldNumber
+		pha
+		lda OffScr_HalfwayPage
+		pha
+		tax
+loc_C803:
+		lda OffScr_LevelNumber
+		cmp #4
+		bcc loc_C815
+		sbc #4
+		tay
+		lda unk_C7A1,y
+		cmp unk_C7A7,x
+		beq loc_C834
+loc_C815:
+		ldy unk_C7A7,x
+		sty Enemy_SprDataOffset
+		lda #$35
+		sta Enemy_ID
+		lda unk_C7AE,x
+		sta Enemy_Y_Position
+		lda unk_C7B5,x
+		sta Enemy_Rel_XPos
+		ldx #0
+		stx WorldNumber
+		stx $08
+		jsr EnemyGfxHandler
+loc_C834:
+		dec OffScr_HalfwayPage
+		ldx OffScr_HalfwayPage
+		bne loc_C803
+		pla
+		sta OffScr_HalfwayPage
+		pla
+		sta WorldNumber
+		lda #$30
+		sta Enemy_SprDataOffset
+		lda #$B8
+		sta Enemy_Y_Position
+		rts
+
+
+byte_C84E:
+		.byte $16
+		.byte  $a
+		.byte $1b
+		.byte $12
+		.byte $18
+		.byte $15
+		.byte $1e
+		.byte $12
+		.byte $10
+		.byte $12
+
+SetMarioName:
+		lda #0
+		sta ScreenRoutineTask
+		; Remove patching.
 		rts
 
 .include "utils.inc"

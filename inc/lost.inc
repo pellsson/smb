@@ -9,19 +9,22 @@ FDS_DRIVE_STATUS = $4032
 IsWindy = $0717 ; Old DemoAction
 FdsOperTask = $07FC				; SMB2J
 ; WaitForIRQ = $077B				; SMB2J ; KILLED.
-LoadListIndex = $07f7			; SMB2J
+; LoadListIndex = $07f7			; SMB2J KILLED
 FdsBiosIrqAction = $101			; SMB2J
 FdsLastWrite4025 = $fa			; SMB2J
 UseNtBase2400 = $77a			; SMB2J
 IsPlayingExtendedWorlds = $7FB	; SMB2J
+byte_7F5 = $7f5 ; what is this...?
+WorldsCompleted = $7f7 ; Moved from 7FA (think there is other shit there ;))
 
+; ContinueWorld is killed too
 ; Old LOST timer:
 ; byte_7EC = $7ec ; KILLED
 ; byte_7ED = $7ed ; KILLED
 ; byte_7EE = $7ee ; KILLED
 ; </timer> 
 
-; byte_7FA = $7fa; KILLED.
+; byte_7FA = $7fa; KILLED. WorldsCompleted
 ; byte_7F9 = $7f9; KILLED
 ; GameTimerDisplay_OBSOLETE = $07f8 ; KILLED.
 

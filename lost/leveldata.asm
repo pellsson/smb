@@ -11,6 +11,7 @@
 	.export LoadWarpzone
 	.export GetAreaDataAddrs
 	.export LoadAreaPointer
+	.export WriteHalfwayPages
 
 NonMaskableInterrupt:
 Start:
@@ -209,6 +210,35 @@ GetAreaType:
 		adc #0
 		sta AreaDataHigh		
 .endmacro
+
+HalfwayPageNybblesEx:
+		.byte $76, $50
+		.byte $65, $50
+		.byte $75, $B0
+		.byte 0, 0
+
+HalfwayPageNybbles:
+		.byte $66, $60
+		.byte $88, $60
+		.byte $66, $70
+		.byte $77, $60
+		
+WriteHalfwayPages:
+		ldy #7
+		lda IsPlayingExtendedWorlds
+		beq @copy_normal
+@copy_ext:
+		lda HalfwayPageNybblesEx,y
+		sta WRAM_HalfwayPageNybbles,y
+		dey
+		bpl @copy_ext
+		jmp ReturnBank
+@copy_normal:
+		lda HalfwayPageNybbles,y
+		sta WRAM_HalfwayPageNybbles,y
+		dey
+		bpl @copy_normal
+		jmp ReturnBank
 
 GetAreaDataAddrsNormal:
 		CreateGetAreaDataAddrs EnemyAddrHOffsets, EnemyDataAddrLow, AreaDataHOffsets, AreaDataAddrLow

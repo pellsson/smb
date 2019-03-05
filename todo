@@ -15,7 +15,6 @@ EXTRAS:
 -- Highbit in pause required? Remove for some cycles...
 -- Kill all old variables
 -- Exit to launcher
--- Player position + Turtle.
 
 STUPID?:
 -- Predefined rules
@@ -24,11 +23,19 @@ TODO:
 -- Loader stops paletet rotation on reboot sometimes.
 -- AreaAddrsLOffset still referenced outside of leveldata
 -- During delay disable sound
--- Use lost sound (for org too? should work right?)
--- Beat world 8. What happens? Death happens. SM2DATA3 i think.
+-- Beat world 8 must set IsPlayingExtendedWorlds & Enter_LL_WriteHalfwayPages
+-- SM2DATA3 50%?
+-- Beating the game leaves you without a cursor on menu
+-- Ending is complete fuckery.
 
 MINOR:
 DONE:
+-- Beat world 8. What happens? Death happens. SM2DATA3 i think.
+-- Player position + Turtle.
+-- Tecate frog.
+-- SM2DATA2 100%
+-- SM2DATA4 100%
+-- Use lost sound (for org too? should work right?)
 -- LL world A-D
 -- WarpZone load thing (also pipe 4 leads to w2 :))
 -- LL name shit doesnt need to exist. Probably just buggy.

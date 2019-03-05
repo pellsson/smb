@@ -7,11 +7,20 @@
 	.org $8000
 	.segment "bank4"
 
+	.ifndef ENABLE_SFX
+      .define ENABLE_SFX 1
+    .endif
+
+    .ifndef ENABLE_MUSIC
+      .define ENABLE_MUSIC 1
+    .endif
+
 Start:	; Dummy
 NonMaskableInterrupt: ; Dummy
 
 	.include "utils.inc"
 	.include "sound.asm"
+	.include "sound-ll.asm"
 	.include "game.asm"
 	.include "pausemenu.asm"
 	.include "practice.asm"
@@ -21,6 +30,8 @@ NonMaskableInterrupt: ; Dummy
 	.export PracticeOnFrame
 	.export PracticeTitleMenu
 	.export SoundEngine
+	.export SoundEngineEternal
+	.export LL_SoundEngine
 	.export ProcessLevelLoad
 	.export RedrawUserVars
 	.export RedrawAll

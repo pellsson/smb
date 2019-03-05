@@ -2,19 +2,11 @@
 ;
 ; Bank for all sound-related stuff
 ;
-.ifndef ENABLE_SFX
-  .define ENABLE_SFX 1
-.endif
-
-.ifndef ENABLE_MUSIC
-  .define ENABLE_MUSIC 1
-.endif
-
-SoundEngine:
-        jsr SoundEngineInner
+SoundEngineEternal:
+        jsr SoundEngine
         jmp ReturnBank
 
-SoundEngineInner:
+SoundEngine:
          lda OperMode              ;are we in title screen mode?
          bne SndOn
          sta SND_MASTERCTRL_REG    ;if so, disable sound and leave

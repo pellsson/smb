@@ -105,6 +105,11 @@
 		jsr SetBankFromA
 		jmp LoadAreaPointer
 
+	Enter_LL_WriteHalfwayPages:
+		lda #BANK_LLDATA
+		jsr SetBankFromA
+		jmp WriteHalfwayPages
+
 .endmacro
 
 
@@ -142,7 +147,7 @@
 	Enter_SoundEngine:
 		lda #BANK_COMMON
 		jsr SetBankFromA
-		jmp SoundEngine
+		jmp SoundEngineEternal
 
 	Enter_LoadChrFromX:
 		lda #BANK_CHR

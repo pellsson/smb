@@ -827,9 +827,15 @@ PracticeOnFrameInner:
 		and #PF_SaveState|PF_LoadState
 		beq @no_queued_commands
 		jmp run_save_load
-
 @no_queued_commands:
-		jsr SoundEngineInner
+		lda BANK_SELECTED
+		cmp #BANK_ORG
+		bne @lost_sound
+		jsr SoundEngine
+		jmp @read_keypads
+@lost_sound:
+		jsr LL_SoundEngine
+@read_keypads:
 		lda SavedJoypad1Bits
 		ora JoypadBitMask
 		sta LastInputBits

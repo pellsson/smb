@@ -54,7 +54,7 @@ $(OUT)/chrloader.o: $(INCS) chr/chrloader.asm
 $(OUT)/original.o: $(INCS) org/original.asm
 	$(AS) $(AFLAGS) -l $(OUT)/original.map org/original.asm -o $@
 
-$(OUT)/common.o: common/common.asm common/sound.asm common/practice.asm
+$(OUT)/common.o: common/common.asm common/sound.asm common/sound-ll.asm common/practice.asm
 	$(AS) $(AFLAGS) -l $(OUT)/common.map common/common.asm -o $@
 
 $(OUT)/scenario_data.o: $(INCS) $(GEN_SCENARIOS) scen/scen_exports.asm

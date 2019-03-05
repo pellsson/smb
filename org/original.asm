@@ -1207,19 +1207,17 @@ MushroomRetainerSaved:
 
 PrincessSaved1:
 ;"YOUR QUEST IS OVER."
-  .byte $25, $a3, $1b
-  .byte $0a, $17, $0d, $24, $0a, $24, $11, $1e, $10
-  .byte $0e, $24, $1d, $11, $0a, $17, $14, $1c, $24
-  .byte $1d, $18, $24, $0d, $0a, $1b, $19, $0e, $22
+  .byte $25, $a3, $12
+  .byte $1e, $11, $11, $11, $11, $24, $17, $18
+  .byte $24, $12, $0d, $0e, $0a, $24, $20, $11, $0a, $1d
   .byte $00
 
 
 PrincessSaved2:
 ;"WE PRESENT YOU A NEW QUEST."
-  .byte $25, $e3, $1a
-  .byte $0f, $18, $1b, $24, $0a, $15, $15, $24, $11
-  .byte $12, $1c, $24, $11, $0e, $15, $19, $24, $20
-  .byte $12, $1d, $11, $24, $03, $af, $01, $2b
+  .byte $25, $e3, $13
+  .byte $1d, $18, $24, $20, $1b, $12, $1d, $0e
+  .byte $24, $11, $0e, $1b, $0e, $24, $24, $10, $10, $1c, $2b
   .byte $00
 
 WorldSelectMessage1:
