@@ -23,7 +23,6 @@ FpgOldFlags = $07da		; TopScoreDisplay+3
 ;
 PowerUpFrames				= $04	; Anywhere thats temporary
 LastInputBits				= $075a ; Previously NumberOfLives
-FirstTimeInit				= $075e ; Previously CoinTally
 MenuSelection				= $077a ; Previously NumberOfPlayers
 FrameRuleData				= $07df ; Previously in score somewhere
 ;SaveStateFlags				= $07fc ; Previously WorldSelectEnableFlag
