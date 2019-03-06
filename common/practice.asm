@@ -499,20 +499,20 @@ GetSelectedValue:
 		rts
 
 DrawRuleNumber:
-		ldy VRAM_Buffer1_Offset
+		ldx VRAM_Buffer1_Offset
 		lda #$22
-		sta VRAM_Buffer1, y
+		sta VRAM_Buffer1, x
 		lda #$Eb
-		sta VRAM_Buffer1+1, y
+		sta VRAM_Buffer1+1, x
 		lda #$04
-		sta VRAM_Buffer1+2, y
-		ldx #0
+		sta VRAM_Buffer1+2, x
+		ldy #0
 @copy_next:
-		lda SavedRule, x
-		sta VRAM_Buffer1+3, y
-		iny
+		lda ($04), y
+		sta VRAM_Buffer1+3, x
 		inx
-		cpx #4
+		iny
+		cpy #4
 		bne @copy_next
 		lda VRAM_Buffer1_Offset
 		clc 
@@ -650,9 +650,10 @@ rule_input:
 		bne rule_done
 		lda #$01
 @update:
-		ldx RuleIndex
+		ldy RuleIndex
+		dey
 		clc
-		adc SavedRule-1,x
+		adc ($04),y
 		bmi @negative
 		cmp #10
 		bmi @save_digit
@@ -661,7 +662,7 @@ rule_input:
 @negative:
 		lda #9
 @save_digit:
-		sta SavedRule-1,x
+		sta ($04), y
 rule_done:
 		rts
 
@@ -740,10 +741,49 @@ next_task:
 		sta Sprite_Data+4, x
 		dex
 		bpl @reset_next
+		jsr WriteRulePointer
+		ldy #3
+@copy_rule:
+		lda ($04), y
+		sta SavedRule, y
+		dey
+		bpl @copy_rule
 		inc OperMode_Task
 		jmp ReturnBank
 
+WriteRulePointer:
+		lda WorldNumber
+		asl ; *=2
+		asl ; *=4
+		asl ; *=8
+		asl ; *=16
+		sta $04
+		lda LevelNumber
+		asl ; *=2
+		asl ; *=4
+		clc
+		adc $04
+		ldx BANK_SELECTED
+		cpx #BANK_ORG
+		beq @is_org
+		clc
+		adc #<WRAM_LostRules
+		sta $04
+		lda #0
+		adc #>WRAM_LostRules
+		sta $05
+		rts
+@is_org:
+		clc
+		adc #<WRAM_OrgRules
+		sta $04
+		lda #0
+		adc #>WRAM_OrgRules
+		sta $05
+		rts
+
 PracticeTitleMenu:
+		jsr WriteRulePointer
 		jsr draw_menu
 		lda JoypadBitMask
 		ora SavedJoypadBits

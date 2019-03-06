@@ -217,8 +217,8 @@ CurrentPlayer         = $0753
 PlayerSize            = $0754
 PlayerStatus          = $0756
 
-OnscreenPlayerInfo    = $075a
-NumberofLives         = $075a ;used by current player
+;OnscreenPlayerInfo    = $075a
+;NumberofLives         = $075a ;used by current player
 HalfwayPage           = $075b
 LevelNumber           = $075c ;the actual dash number
 Hidden1UpFlag         = $075d

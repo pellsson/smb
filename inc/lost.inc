@@ -6,7 +6,7 @@ FDS_DISK_STATUS = $4030
 FDS_DRIVE_STATUS = $4032
 
 
-IsWindy = $0717 ; Old DemoAction
+IsWindy = $075a ; Old NumberOfLives
 FdsOperTask = $07FC				; SMB2J
 ; WaitForIRQ = $077B				; SMB2J ; KILLED.
 ; LoadListIndex = $07f7			; SMB2J KILLED

@@ -6,11 +6,10 @@ For Release:
 	-- Charset / Game.
 	-- Keybindings.
 -- Faces?
--- Save rules in ram :(
 -- Hidden1UpBlocks
 
 BUGS:
--- Wind weak
+-- Save-states occationally mute.
 
 TODO AT SOME POINT:
 -- Time all worlds in frames
@@ -33,6 +32,8 @@ STUPID?:
 -- Predefined rules
 
 DONE:
+-- Save rules in ram :(
+-- Wind weak
 -- Wind throughout 5
 -- Exit to launcher
 -- Beat world 8. What happens? Death happens. SM2DATA3 i think.
