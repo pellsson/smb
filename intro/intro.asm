@@ -4,6 +4,11 @@ STAR_INDEX = $700
 SEL_INDEX = $701
 LDR_MODE = $702 ; ?
 SETTINGS_INDEX = $703
+LAST_INPUT = $704
+SETTINGS_X = $705
+RECORD_BUTTONS = $706
+RECORD_FRAMES = $707
+SETTINGS_ATTR = $708
 SEL_START_Y = $7e
 LoaderFrameCounter = $30
 CurrentHead = $31
@@ -107,14 +112,13 @@ hang:
 		jmp hang
 
 ReadJoypads: 
+		lda SavedJoypadBits
+		sta LAST_INPUT
 		lda #$01
 		sta JOYPAD_PORT
 		lsr
 		tax
 		sta JOYPAD_PORT
-		jsr ReadPortBits
-		inx
-ReadPortBits:
 		ldy #$08
 PortLoop:
 		pha
@@ -127,21 +131,7 @@ PortLoop:
 		rol
 		dey
 		bne PortLoop
-		sta SavedJoypadBits,x
-		pha
-		and #%00110000
-		and JoypadBitMask,x
-		beq Save8Bits
-		pla
-		and #%11001111
-		sta SavedJoypadBits,x
-		rts
-Save8Bits:
-		pla
-		sta JoypadBitMask,x
-		rts
-
-run_settings:
+		sta SavedJoypadBits
 		rts
 
 NonMaskableInterrupt:
@@ -164,6 +154,8 @@ NonMaskableInterrupt:
 
 		lda LDR_MODE
 		beq @run_menu
+		;jsr sml_export_play
+		jsr ReadJoypads
 		jsr run_settings
 		jmp no_start
 @run_menu:
@@ -228,10 +220,11 @@ dont_update_cursor:
 		;
 		; Update sound
 		;
-		; jsr EnterSoundEngine
 		jsr sml_export_play
 		jsr ReadJoypads
 		lda SavedJoypadBits
+		cmp LAST_INPUT
+		beq no_select
 		cmp #Select_Button
 		bne no_select
 		ldx SEL_INDEX
