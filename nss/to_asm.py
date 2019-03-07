@@ -1,8 +1,8 @@
-nt = open('namedump.nam', 'rb').read()
+nt = open('settings.nam', 'rb').read()
 row = []
 for i in range(0, len(nt)):
 	if 0 == (i & 0xff):
-		print('\nnametable_data_%d:\n\t.byte ' % (i / 0x100), end='')
+		print('\nsettings_nt_data_%d:\n\t.byte ' % (i / 0x100), end='')
 	elif i and 0 == (i & 0xf):
 		print('\n\t.byte ', end='')
 	row.append('$%02X' % (nt[i]))

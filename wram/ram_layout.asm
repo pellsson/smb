@@ -9,9 +9,27 @@ WRAM_MenuIndex:
 	.byte $00
 WRAM_PracticeFlags:
 	.byte $00
+WRAM_CharSet:
+	.byte $00
+WRAM_DelaySaveFrames:
+	.byte $00
+WRAM_DelayUserFrames:
+	.byte $00
 WRAM_DelayFrames:
 	.byte $00
 WRAM_SaveStateBank:
+	.byte $00
+WRAM_DisableMusic:
+	.byte $00
+WRAM_DisableSound:
+	.byte $00
+WRAM_SaveButtons:
+	.byte $00
+WRAM_LoadButtons:
+	.byte $00
+WRAM_TitleButtons:
+	.byte $00
+WRAM_RestartButtons:
 	.byte $00
 
 WRAM_ToSaveFile:

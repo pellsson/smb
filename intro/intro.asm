@@ -2,6 +2,8 @@ LEADER_HEAD_SPRITE = 17*4
 KAPPA_SPRITE = 52*4
 STAR_INDEX = $700
 SEL_INDEX = $701
+LDR_MODE = $702 ; ?
+SETTINGS_INDEX = $703
 SEL_START_Y = $7e
 LoaderFrameCounter = $30
 CurrentHead = $31
@@ -11,6 +13,10 @@ CURSOR_SPRITE = $f9
 	.include "shared.inc"
 	.include "macros.inc"
 	.include "wram.inc"
+	.include "text.inc"
+
+	.include "intro.inc"
+
 	.org $c000
 	.segment "bank1"
 
@@ -46,39 +52,8 @@ dont_wipe_bank_selection:
 		;
 		; Install nametable
 		;
-		ldx PPU_STATUS	; Read PPU status to reset the high/low latch
-		ldx #$00
-		stx PPU_SCROLL_REG ; No scrolling
-		stx PPU_SCROLL_REG
-		stx PPU_CTRL_REG2 ; No rendering
-		;
-		; Copycopycopycopy
-		;
-		lda PPU_STATUS
-		lda #$20
-		sta PPU_ADDRESS
-		lda #$00
-		sta PPU_ADDRESS
-write_nt_0:
-		lda nametable_data_0, x
-		sta PPU_DATA
-		inx
-		bne write_nt_0
-write_nt_1:
-		lda nametable_data_1, x
-		sta PPU_DATA
-		inx
-		bne write_nt_1
-write_nt_2:
-		lda nametable_data_2, x
-		sta PPU_DATA
-		inx
-		bne write_nt_2
-write_nt_3:
-		lda nametable_data_3, x
-		sta PPU_DATA
-		inx
-		bne write_nt_3
+		write_nt "nametable_data"
+
 		;
 		; Copy static sprite-data over
 		;
@@ -166,22 +141,18 @@ Save8Bits:
 		sta JoypadBitMask,x
 		rts
 
+run_settings:
+		rts
+
 NonMaskableInterrupt:
 		inc LoaderFrameCounter
-
+		lda #$00
+		sta PPU_CTRL_REG1
 		;
 		; Turn on rendering (Sprites, background)
 		;
 		lda #$1E
 		sta PPU_CTRL_REG2
-		;
-		; Rotate star palette
-		;
-		lda LoaderFrameCounter
-		and #$0f
-		bne no_rotate_stars
-		jsr rotate_star_palette
-no_rotate_stars:
 		;
 		; Copy sprite data
 		;
@@ -190,6 +161,20 @@ no_rotate_stars:
 		sta PPU_SPR_ADDR
 		lda #$02
 		sta SPR_DMA
+
+		lda LDR_MODE
+		beq @run_menu
+		jsr run_settings
+		jmp no_start
+@run_menu:
+		;
+		; Rotate star palette
+		;
+		lda LoaderFrameCounter
+		and #$0f
+		bne @no_rotate_stars
+		jsr rotate_star_palette
+@no_rotate_stars:
 		;
 		; Change head
 		;
@@ -266,9 +251,11 @@ no_select:
 		bne no_start
 		ldx SEL_INDEX
 		cpx #3
-		beq no_start
+		beq @settings
 		lda bank_table, x
 		jmp StartBank
+@settings:
+		jsr enter_settings
 no_start:
 		;
 		; Reset
@@ -388,6 +375,7 @@ sine_curve:
 	.byte $24, $24, $25, $26, $27, $27, $28, $29, $2A, $2A, $2B, $2C, $2C, $2D, $2E, $2E, $2F, $2F, $30, $30, $31, $31, $32, $32, $32, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $32, $32, $32, $31, $31, $31, $30, $30, $2F, $2F, $2E, $2D, $2D, $2C, $2B, $2B, $2A, $29, $29, $28, $27, $26, $25, $25, $24, $23, $22, $22, $21, $20, $1F, $1E, $1E, $1D, $1C, $1C, $1B, $1A, $1A, $19, $18, $18, $17, $17, $16, $16, $16, $15, $15, $15, $14, $14, $14, $14, $14, $14, $14, $14, $14, $14, $14, $14, $14, $14, $15, $15, $15, $16, $16, $17, $17, $18, $18, $19, $19, $1A, $1B, $1B, $1C, $1D, $1D, $1E, $1F, $20, $20, $21, $22, $23, $23
 
 	.include "nt.asm"
+	.include "nt_settings.asm"
 
 static_sprite_data:
 	.byte SEL_START_Y, CURSOR_SPRITE, $02, $30
@@ -499,6 +487,8 @@ palette_star_shuffle:
 
 bank_table:
 		.byte BANK_ORG, BANK_SMBLL, BANK_SCEN
+
+	.include "settings.asm"
 
 practice_callgate
 control_bank

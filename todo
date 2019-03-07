@@ -7,8 +7,10 @@ For Release:
 	-- Keybindings.
 -- Faces?
 -- Hidden1UpBlocks
+-- Try mute sound on save/load
 
 BUGS:
+-- Beating org fucks up everything
 -- Save-states occationally mute.
 
 TODO AT SOME POINT:
@@ -32,6 +34,7 @@ STUPID?:
 -- Predefined rules
 
 DONE:
+-- Devil Spell bork
 -- Save rules in ram :(
 -- Wind weak
 -- Wind throughout 5
