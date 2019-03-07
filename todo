@@ -1,4 +1,6 @@
 For Release:
+-- Crashes when beating original.
+
 BUGS:
 -- Beating org fucks up everything
 -- Save-states occationally mute.
