@@ -654,7 +654,7 @@ _reset_wram_input:
 		lda SavedJoypadBits
 		and #(B_Button|A_Button)
 		beq @nothing
-		jsr FactoryResetWRAM
+		jsr Enter_FactoryResetWRAM
 		jmp Start
 @nothing:
 		rts
