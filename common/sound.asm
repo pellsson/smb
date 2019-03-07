@@ -62,14 +62,16 @@ SkipPIn: lda #$00                  ;clear pause sfx buffer
          beq SkipSoundSubroutines
 
 RunSoundSubroutines:
-         .if ENABLE_SFX
+         lda WRAM_DisableSound
+         bne @nosound
          jsr Square1SfxHandler  ;play sfx on square channel 1
          jsr Square2SfxHandler  ; ''  ''  '' square channel 2
          jsr NoiseSfxHandler    ; ''  ''  '' noise channel
-         .endif
-         .if ENABLE_MUSIC
+@nosound:
+         lda WRAM_DisableMusic
+         bne @nomusic
          jsr MusicHandler       ;play music on all channels
-         .endif
+@nomusic:
          lda #$00               ;clear the music queues
          sta AreaMusicQueue
          sta EventMusicQueue

@@ -154,7 +154,6 @@ NonMaskableInterrupt:
 
 		lda LDR_MODE
 		beq @run_menu
-		;jsr sml_export_play
 		jsr ReadJoypads
 		jsr run_settings
 		jmp no_start
@@ -220,7 +219,10 @@ dont_update_cursor:
 		;
 		; Update sound
 		;
+		lda WRAM_DisableMusic
+		bne @disabled
 		jsr sml_export_play
+@disabled:
 		jsr ReadJoypads
 		lda SavedJoypadBits
 		cmp LAST_INPUT

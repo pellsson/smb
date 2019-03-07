@@ -828,9 +828,10 @@ begin_save:
 		ora #PF_SaveState
 		sta WRAM_PracticeFlags
 		inc DisableScreenFlag
-		; todo dynamic
-		lda #30
-		sta WRAM_DelayFrames
+		lda WRAM_DelaySaveFrames
+		sta WRAM_SaveFramesLeft
+		lda #0
+		sta SND_MASTERCTRL_REG
 		rts
 
 begin_load:
@@ -844,9 +845,10 @@ begin_load:
 		ora #PF_LoadState
 		sta WRAM_PracticeFlags
 		inc DisableScreenFlag
-		; todo dynamic
-		lda #30
-		sta WRAM_DelayFrames
+		lda WRAM_DelaySaveFrames
+		sta WRAM_SaveFramesLeft
+		lda #$00
+		sta SND_MASTERCTRL_REG
 @invalid_save:
 		rts
 
@@ -881,21 +883,22 @@ PracticeOnFrameInner:
 		jsr ReadJoypads
 		lda JoypadBitMask
 		ora SavedJoypadBits
+		beq @pause_things
 		cmp LastInputBits
 		beq @pause_things
-		cmp #SAVE_STATE_BUTTONS
+		cmp WRAM_SaveButtons
 		bne @no_begin_save
 		jmp begin_save
 @no_begin_save:
-		cmp #LOAD_STATE_BUTTONS
+		cmp WRAM_LoadButtons
 		bne @no_begin_load
 		jmp begin_load
 @no_begin_load:
-		cmp #RESTART_LEVEL_BUTTONS
+		cmp WRAM_RestartButtons
 		bne @no_restart_level
 		jmp RequestRestartLevel
 @no_restart_level:
-		cmp #RESTART_GAME_BUTTONS
+		cmp WRAM_TitleButtons
 		bne @pause_things
 		lda BANK_SELECTED
 		jmp StartBank
@@ -993,7 +996,7 @@ ForceUpdateSockHash:
 		jmp ReturnBank
 
 LoadState:
-		dec WRAM_DelayFrames
+		dec WRAM_SaveFramesLeft
 		beq @do_loadstate
 		lda GamePauseStatus
 		ora #02
@@ -1086,7 +1089,7 @@ LoadState:
 		rts
 
 SaveState:
-		dec WRAM_DelayFrames
+		dec WRAM_SaveFramesLeft
 		beq @do_savestate
 		lda GamePauseStatus
 		ora #02
@@ -1193,11 +1196,16 @@ SaveState:
 		stx VRAM_Buffer1+off+0
 .endmacro
 
-RedrawUserVars:
-		ldy VRAM_Buffer1_Offset
-		beq @do_redraw
+noredraw_dec:
+		dec WRAM_UserFramesLeft
+noredraw:
 		jmp ReturnBank
-@do_redraw:
+
+RedrawUserVars:
+		lda WRAM_UserFramesLeft
+		bne noredraw_dec
+		ldy VRAM_Buffer1_Offset
+		bne noredraw
 		lda #$20
 		sta VRAM_Buffer1
 		lda #$71
@@ -1218,6 +1226,8 @@ RedrawUserVars:
 		RedrawUserVar WRAM_OrgUser1, 7
 @terminate:
 		sty VRAM_Buffer1+$0A
+		lda WRAM_DelayUserFrames
+		sta WRAM_UserFramesLeft
 		jmp ReturnBank
 
 RequestRestartLevel:
@@ -1391,6 +1401,20 @@ SetDefaultWRAM:
 		lda #>SprObject_X_MoveForce
 		sta WRAM_OrgUser1+1
 		sta WRAM_LostUser1+1
+
+		lda #30
+		sta WRAM_DelaySaveFrames
+		lda #8
+		sta WRAM_DelayUserFrames
+
+		lda #RESTART_LEVEL_BUTTONS
+		sta WRAM_RestartButtons
+		lda #RESTART_GAME_BUTTONS
+		sta WRAM_TitleButtons
+		lda #SAVE_STATE_BUTTONS
+		sta WRAM_SaveButtons
+		lda #LOAD_STATE_BUTTONS
+		sta WRAM_LoadButtons
 		;
 		; TODO : Sane init values
 		;
@@ -1399,9 +1423,10 @@ SetDefaultWRAM:
 FactoryResetWRAM:
 		ldx #$60
 @copy_page:
-		ldy #00
-		stx $00
-		lda #00
+		stx $01
+		lda #$00
+		sta $00
+		ldy #$00
 @copy_byte:
 		sta ($00), Y
 		iny

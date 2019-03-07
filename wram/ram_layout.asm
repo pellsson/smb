@@ -15,7 +15,9 @@ WRAM_DelaySaveFrames:
 	.byte $00
 WRAM_DelayUserFrames:
 	.byte $00
-WRAM_DelayFrames:
+WRAM_SaveFramesLeft:
+	.byte $00
+WRAM_UserFramesLeft:
 	.byte $00
 WRAM_SaveStateBank:
 	.byte $00

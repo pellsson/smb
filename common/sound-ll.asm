@@ -70,14 +70,16 @@ loc_D319:
 
     beq LL_SkipSoundSubroutines
 LL_RunSoundSubroutines:
-    .if ENABLE_SFX
+    lda WRAM_DisableSound
+    bne @nosound
     jsr sub_D3EB
     jsr sub_D54C
     jsr sub_D677
-    .endif
-    .if ENABLE_MUSIC
+@nosound:
+    lda WRAM_DisableMusic
+    bne @nomusic
     jsr LL_MusicHandler
-    .endif
+@nomusic:
     lda #0
     sta AreaMusicQueue
     sta EventMusicQueue

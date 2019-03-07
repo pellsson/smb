@@ -1,10 +1,36 @@
 	.org $8000
 	.include "mario.inc"
 	.include "shared.inc"
+	.include "wram.inc"
 	.include "macros.inc"
 	.segment "bank2"
 
 	.export LoadChrFromX
+
+.macro copy_charset name
+	lda PPU_STATUS
+	lda #$10
+	sta PPU_ADDRESS
+	lda #$00
+	sta PPU_ADDRESS
+	ldx #0
+@block0:
+	lda name, x
+	sta PPU_DATA
+	inx
+	bne @block0
+@block1:
+	lda name+$100, x
+	sta PPU_DATA
+	inx
+	bne @block1
+@block2:
+	lda name+$200, x
+	sta PPU_DATA
+	inx
+	cpx #$40
+	bne @block2
+.endmacro
 
 .macro copy_chr name
 	.local copy_next
@@ -54,6 +80,12 @@ org_tiles:
 lost_tiles:
 	.incbin "lost.chr"
 
+org_charset:
+	.incbin "org-charset.chr"
+
+lost_charset:
+	.incbin "lost-charset.chr"
+
 NonMaskableInterrupt:
 Start:
 LoadChrFromX:
@@ -79,23 +111,48 @@ copy_intro_background:
 check_is_org:
 	bne check_is_scen
 	jsr copy_original
-	; todo patch it
-	rts
+	jmp set_charset
 check_is_scen:
 	dex
 	bne check_is_lost
 	jsr copy_original
-	; todo patch it
-	rts
+	jmp set_charset
 check_is_lost:
 	dex
 	bne unknown_chr
 	jsr copy_lost
-	; todo patch it?
-	rts
+	jmp set_charset
 
 unknown_chr:
 	jmp unknown_chr
+
+
+set_charset:
+	lda WRAM_CharSet
+	beq @done
+	cmp #1
+	beq @use_org
+	lda BANK_SELECTED
+	cmp #BANK_SMBLL
+	beq @done
+	; LOST -> ORG
+	jsr copy_lost_charset
+@use_org:
+	lda BANK_SELECTED
+	cmp #BANK_ORG
+	beq @done
+	; ORG -> LOST
+	jmp copy_org_charset
+@done:
+	rts
+
+copy_org_charset:
+	copy_charset org_charset
+	rts
+
+copy_lost_charset:
+	copy_charset lost_charset
+	rts
 
 copy_lost:
 	ldx #0

@@ -261,7 +261,7 @@ redraw_setting:
 
 set_selection_sprites:
 		ldy #(8*4)-1
-		lda #$ff
+		lda #$fe
 @zero_more:
 		sta $204, y
 		dey
@@ -655,6 +655,8 @@ _reset_wram_input:
 		and #(B_Button|A_Button)
 		beq @nothing
 		jsr Enter_FactoryResetWRAM
+		lda #0
+		sta LDR_MODE
 		jmp Start
 @nothing:
 		rts

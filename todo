@@ -1,19 +1,15 @@
 For Release:
--- Settings on loader screen:
-	-- "Factory Reset"-WRAM @ launcher
-	-- Redraw user-vars timer
-	-- Sleep before Save & Load
-	-- Charset / Game.
-	-- Keybindings.
 -- Faces?
--- Hidden1UpBlocks
--- Try mute sound on save/load
+-- Dont factory reset on startup?
 
 BUGS:
 -- Beating org fucks up everything
 -- Save-states occationally mute.
 
 TODO AT SOME POINT:
+-- Reflect charset
+-- Double check defaults?
+-- Hidden1UpBlocks?
 -- Time all worlds in frames
 -- Contra Code & Faces?
 -- Add start on second quest (for smborg).
@@ -34,6 +30,19 @@ STUPID?:
 -- Predefined rules
 
 DONE:
+-- Settings on loader screen:
+	-- "Factory Reset"-WRAM @ launcher
+	-- Redraw user-vars timer
+	-- Sleep before Save & Load
+	-- Keybindings.
+	-- Charset / Game.
+-- Reflect redraw delay
+-- Reflect sound delay
+-- Reflect buttons
+-- Reflect music setting
+-- Reflect sound setting
+-- Try mute sound on save/load
+-- All defaults
 -- Devil Spell bork
 -- Save rules in ram :(
 -- Wind weak
