@@ -27,7 +27,8 @@ if 0 != (width % 8) or 0 != (height % 8):
 	raise 'fucked dimensions %d, %d' % (width, height)
 
 # colormap = [ 3, 0, 2, 1 ] # Somewes
-colormap = [ 3, 0, 1, 2 ] #
+colormap = [ 3, 0, 2, 1 ] # Roylt
+# colormap = [ 3, 0, 1, 2 ] # Kosmic?
 
 tiles = []
 ty = 0

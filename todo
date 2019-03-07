@@ -1,7 +1,4 @@
 For Release:
--- Faces?
--- Dont factory reset on startup?
-
 BUGS:
 -- Beating org fucks up everything
 -- Save-states occationally mute.
@@ -30,6 +27,8 @@ STUPID?:
 -- Predefined rules
 
 DONE:
+-- Faces?
+-- Dont factory reset on startup?
 -- Settings on loader screen:
 	-- "Factory Reset"-WRAM @ launcher
 	-- Redraw user-vars timer
