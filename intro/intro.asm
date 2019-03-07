@@ -85,7 +85,7 @@ next_palette_entry:
 		;
 		; Init WRAM
 		;
-		jsr Enter_SetDefaultWRAM
+		jsr Enter_InitializeWRAM
 		;
 		; Enable sound
 		;

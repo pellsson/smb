@@ -399,6 +399,19 @@ redraw_selection:
 		sta $01
 		jmp ($0000)
 
+settings_pal:
+		.byte $0f, $33, $0f, $0f ; Title
+		.byte $0f, $3a, $0f, $0f ; Options
+		.byte $0f, $0f, $0f, $0f ; Unused
+		.byte $0f, $30, $10, $30 ; Values
+		;
+		;
+		;
+		.byte $0f, $0f, $17, $0f ; Selection
+		.byte $0f, $0f, $28, $0f ; Flash
+		.byte $0f, $0f, $0f, $0f ; Unused
+		.byte $0f, $0f, $0f, $0f ; Unused
+
 enter_settings:
 		lda #0
 		sta SND_MASTERCTRL_REG
@@ -410,6 +423,21 @@ enter_settings:
 		inx
 		bne @nuke_sprites
 		stx SETTINGS_INDEX
+		;
+		; Copy palette
+		;
+		lda PPU_STATUS ; Latch
+		lda #$3F
+		sta PPU_ADDRESS
+		ldx #$00
+		stx PPU_ADDRESS
+@copypal:
+		lda settings_pal, x
+		sta PPU_DATA
+		inx
+		cpx #$20
+		bne @copypal
+
 		lda #1
 		sta LDR_MODE
 		ldx #MAX_SETTING

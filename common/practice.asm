@@ -1366,21 +1366,32 @@ RedrawSockTimer:
 		stx VRAM_Buffer1_Offset
 		jmp RedrawFrameNumbers
 
-SetDefaultWRAM:
+ValidWRAMMagic:
 		lda WRAM_Magic+0
 		cmp #$70 ; P
-		bne @run_init
+		bne @exit
 		lda WRAM_Magic+1
 		cmp #$65 ; E
-		bne @run_init
+		bne @exit
 		lda WRAM_Magic+2
 		cmp #$6C ; L
-		bne @run_init
+		bne @exit
 		lda WRAM_Magic+3
 		cmp #$6C ; L
-		bne @run_init
+@exit:
+		rts
+
+InitializeWRAM:
+		jsr ValidWRAMMagic
+		beq RamGoodExit
+		jmp FactoryResetWRAM	
+RamGoodExit:
 		jmp ReturnBank
-@run_init:
+
+SetDefaultWRAM:
+		jsr ValidWRAMMagic
+		beq RamGoodExit
+
 		lda #$70 ; P
 		sta WRAM_Magic+0
 		lda #$65 ; E
@@ -1389,6 +1400,7 @@ SetDefaultWRAM:
 		sta WRAM_Magic+2
 		lda #$6C ; L
 		sta WRAM_Magic+3
+
 		lda #<Player_Rel_XPos
 		sta WRAM_OrgUser0
 		sta WRAM_LostUser0

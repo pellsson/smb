@@ -25,6 +25,11 @@
 		jsr SetBankFromA
 		jmp UpdateGameTimer
 
+	Enter_InitializeWRAM:
+		lda #BANK_COMMON
+		jsr SetBankFromA
+		jmp InitializeWRAM
+
 	Enter_SetDefaultWRAM:
 		lda #BANK_COMMON
 		jsr SetBankFromA

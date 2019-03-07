@@ -26,6 +26,7 @@ NonMaskableInterrupt: ; Dummy
 	.include "practice.asm"
 
 	.export PracticeInit
+	.export InitializeWRAM
 	.export ForceUpdateSockHash
 	.export PracticeOnFrame
 	.export PracticeTitleMenu
