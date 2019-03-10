@@ -5245,6 +5245,8 @@ GetWNum: ldy WarpZoneNumbers,x     ;get warp zone numbers
          ldx WorldAddrOffsets,y    ;get offset to where this world's area offsets are
          lda AreaAddrOffsets,x     ;get area offset based on world offset
          sta AreaPointer           ;store area offset here to be used to change areas
+         sta WRAM_LevelAreaPointer
+         PF_SetToLevelEnd_A
          lda #Silence
          sta EventMusicQueue       ;silence music
          lda #$00

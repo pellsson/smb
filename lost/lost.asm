@@ -504,6 +504,7 @@ PlayerEndWorld_2_MAYBE_NEW:
 		lda WorldEndTimer
 		bne locret_63FC
 PlayerEndWorld_Force:
+		PF_SetToLevelEnd_A
 		lda #0
 		sta AreaNumber
 		sta LevelNumber
@@ -4802,11 +4803,12 @@ loc_7E7F:
 		inc FetchNewGameTimerFlag
 		jsr sub_7D6B
 		sta HalfwayPage
+		PF_SetToLevelEnd_A
 		lda #$80
 		sta EventMusicQueue
 locret_7E8F:
-
 		rts
+
 PlayerMovementSubs:
 
 		lda #0

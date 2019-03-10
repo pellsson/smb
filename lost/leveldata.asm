@@ -46,8 +46,10 @@ LoadWarpzone:
 		ldx WorldAddrOffsets,y
 		lda AreaAddrOffsets,x
 		sta AreaPointer
+		sta WRAM_LevelAreaPointer
 		lda #$80
 		sta EventMusicQueue
+		PF_SetToLevelEnd_A
 		lda #0
 		sta EntrancePage
 		sta AreaNumber
