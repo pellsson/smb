@@ -30,6 +30,8 @@
 Start:
              lda #%00010000               ;init PPU control register 1 
              sta PPU_CTRL_REG1
+             lda #0
+             sta PPU_CTRL_REG2
              ldx #$ff                     ;reset stack pointer
              txs
 VBlank1:     lda PPU_STATUS               ;wait two frames
