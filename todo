@@ -1,13 +1,9 @@
 For Release:
--- Crashes when beating original.
 
 BUGS:
--- Beating org fucks up everything
 -- Save-states occationally mute.
 
 TODO AT SOME POINT:
--- Reflect charset
--- Double check defaults?
 -- Hidden1UpBlocks?
 -- Time all worlds in frames
 -- Contra Code & Faces?
@@ -29,6 +25,10 @@ STUPID?:
 -- Predefined rules
 
 DONE:
+-- Double check defaults?
+-- Crashes when beating original.
+-- Beating org fucks up everything
+-- Reflect charset
 -- Faces?
 -- Dont factory reset on startup?
 -- Settings on loader screen:
