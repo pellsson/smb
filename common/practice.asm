@@ -1015,6 +1015,27 @@ LoadState:
 		sta WRAM_LevelData, x
 		inx
 		bne @save_level
+
+		lda AreaType
+		cmp WRAM_SaveRAM+AreaType
+		beq @copy_ram
+
+		lda PPU_STATUS
+		lda #$3F
+		sta PPU_ADDRESS
+		lda #$00
+		sta PPU_ADDRESS
+		lda PPU_DATA ; Internal buffer; throw
+
+		ldx #$0
+		ldy #$20
+@copy_pal:
+		lda WRAM_SavePAL, x
+		sta PPU_DATA
+		inx
+		dey
+		bne @copy_pal
+
 @copy_ram:
 		lda WRAM_SaveRAM, x
 		sta $000, x
@@ -1060,22 +1081,6 @@ LoadState:
 		sta PPU_DATA
 		inx
 		bne @copy_nt
-
-		lda PPU_STATUS
-		lda #$3F
-		sta PPU_ADDRESS
-		lda #$00
-		sta PPU_ADDRESS
-		lda PPU_DATA ; Internal buffer; throw
-
-		ldx #$0
-		ldy #$20
-@copy_pal:
-		lda WRAM_SavePAL, x
-		sta PPU_DATA
-		inx
-		dey
-		bne @copy_pal
 
 		; todo copy palette
 		lda GamePauseStatus
