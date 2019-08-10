@@ -9,6 +9,10 @@ SETTINGS_X = $705
 RECORD_BUTTONS = $706
 RECORD_FRAMES = $707
 SETTINGS_ATTR = $708
+RECORDS_MODE = $709
+RECORDS_TMP = $70A
+RECORDS_TMP_HI = $70B
+
 SEL_START_Y = $7e
 LoaderFrameCounter = $30
 CurrentHead = $31
@@ -102,7 +106,6 @@ next_palette_entry:
 		ldx #$00
 		stx PPU_SCROLL_REG ; No scrolling
 		stx PPU_SCROLL_REG
-		
 		;
 		; Enable NMI
 		;
@@ -152,10 +155,16 @@ NonMaskableInterrupt:
 		lda #$02
 		sta SPR_DMA
 
-		lda LDR_MODE
-		beq @run_menu
 		jsr ReadJoypads
+
+		ldx LDR_MODE
+		beq @run_menu
+		dex
+		bne @not_settings
 		jsr run_settings
+		jmp no_start
+@not_settings:
+		jsr run_records
 		jmp no_start
 @run_menu:
 		;
@@ -223,7 +232,6 @@ dont_update_cursor:
 		bne @disabled
 		jsr sml_export_play
 @disabled:
-		jsr ReadJoypads
 		lda SavedJoypadBits
 		cmp LAST_INPUT
 		beq no_select
@@ -232,7 +240,7 @@ dont_update_cursor:
 		ldx SEL_INDEX
 		lda $200
 		inx 
-		cpx #4
+		cpx #5
 		bne no_loop_around
 		ldx #0
 		lda #SEL_START_Y-16
@@ -247,8 +255,13 @@ no_select:
 		ldx SEL_INDEX
 		cpx #3
 		beq @settings
+		cpx #4
+		beq @showrecords
 		lda bank_table, x
 		jmp StartBank
+@showrecords:
+		jsr enter_records
+		jmp no_start
 @settings:
 		jsr enter_settings
 no_start:
@@ -483,6 +496,7 @@ bank_table:
 		.byte BANK_ORG, BANK_SMBLL, BANK_SCEN
 
 	.include "settings.asm"
+	.include "records.asm"
 
 practice_callgate
 control_bank

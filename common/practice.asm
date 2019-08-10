@@ -456,7 +456,7 @@ NotEvenFrameRule:
 
 PrintableWorldNumber:
 		lda BANK_SELECTED
-		cmp BANK_ORG
+		cmp #BANK_ORG
 		bne @get_ll_world
 @org_world:
 		lda WorldNumber
@@ -1452,3 +1452,234 @@ FactoryResetWRAM:
 		bpl @copy_page
 		jmp SetDefaultWRAM
 
+EndLevel:
+		jsr EndLevelInner
+		jmp ReturnBank
+
+EndLevelInner:
+		lda WorldNumber
+		asl ; *= 2
+		asl ; *= 4
+		asl ; *= 8
+		asl ; *= 16
+		sta $00
+		lda LevelNumber
+		asl ; *= 2
+		adc $00
+		tax
+		lda BANK_SELECTED
+		cmp #BANK_ORG
+		beq @is_org
+		lda WRAM_LostTimes, x
+		sta $01
+		lda WRAM_LostTimes+1, x
+		sta $02
+		jmp @checktime
+@is_org:
+		lda WRAM_OrgTimes, x
+		sta $01
+		lda WRAM_OrgTimes+1, x
+		sta $02
+@checktime:
+		lda WRAM_Timer
+		cmp $01
+		bcc @new_record
+		beq @checklower
+		rts
+@checklower:
+		lda WRAM_Timer+1
+		cmp $02
+		bcc @new_record
+		beq @new_record
+		rts
+@new_record:
+		ldy #0
+		lda WRAM_Timer
+		sta ($01), y
+		lda WRAM_Timer+1
+		iny
+		sta ($01), y
+		dey
+		sty WRAM_Timer
+		sty WRAM_Timer+1
+		rts
+
+
+N = WRAM_Temp
+CARRY = WRAM_Temp+7
+;
+; Source div32_16_16:
+; http://www.6502.org/source/integers/ummodfix/ummodfix.htm
+;
+div32_16_16:
+		sec
+        lda N+2
+        sbc N
+        lda N+3
+        sbc N+1
+        bcs @oflo
+        ldx #$11
+@loop:
+ 		rol N+4
+        rol N+5
+                        
+        dex
+        beq @end
+
+        rol N+2
+        rol N+3
+        lda #0
+        sta CARRY
+        rol CARRY
+
+        sec
+        lda N+2
+        sbc N
+        sta N+6
+        lda N+3
+        sbc N+1
+        tay
+        lda CARRY
+        sbc #0
+        bcc @loop
+
+        lda N+6
+        sta N+2
+        sty N+3
+        bcs @loop ; always
+ @oflo:
+ 		lda #$FF
+        sta N+2
+        sta N+3
+        sta N+4
+        sta N+5
+@end:
+		rts
+
+PROD = WRAM_Temp+$10
+MULR = WRAM_Temp+$10+8
+MULND = WRAM_Temp+$10+8+4
+
+mult64_32_32:
+		lda     #$00
+		sta     PROD+4   ;Clear upper half of
+		sta     PROD+5   ;product
+		sta     PROD+6
+		sta     PROD+7
+		ldx     #$20     ;Set binary count to 32
+SHIFT_R:
+		lsr     MULR+3   ;Shift multiplyer right
+		ror     MULR+2
+		ror     MULR+1
+		ror     MULR
+		bcc     ROTATE_R ;Go rotate right if c = 0
+		lda     PROD+4   ;Get upper half of product
+		clc              ; and add multiplicand to
+		adc     MULND    ; it
+		sta     PROD+4
+		lda     PROD+5
+		adc     MULND+1
+		sta     PROD+5
+		lda     PROD+6
+		adc     MULND+2
+		sta     PROD+6
+		lda     PROD+7
+		adc     MULND+3
+ROTATE_R:
+		ror
+		sta     PROD+7   ; right
+		ror     PROD+6
+		ror     PROD+5
+		ror     PROD+4
+		ror     PROD+3
+		ror     PROD+2
+		ror     PROD+1
+		ror     PROD
+		dex              ;Decrement bit count and
+		bne     SHIFT_R  ; loop until 32 bits are
+		rts
+
+; https://forums.nesdev.com/viewtopic.php?f=2&t=11341
+HexToBCD:
+		sta  $01
+		lsr
+		adc  $01
+		ror
+		lsr
+		lsr
+		adc  $01
+		ror
+		adc  $01
+		ror
+		lsr
+		and  #$3C
+		sta  $02
+		lsr
+		adc  $02
+		adc  $01
+		rts
+
+FrameToTime:
+		jsr FrameToTimeInner
+		jmp ReturnBank
+
+FrameToTimeInner:
+		lda #0
+		sta CARRY
+		sta MULR+2
+		sta MULR+3
+		sta MULND+2
+		stx MULR
+		sty MULR+1
+		lda #$a0
+		sta MULND
+		lda #$86
+		sta MULND+1
+		lda #$01
+		sta MULND+2
+		jsr mult64_32_32 ; x = frames * 100000
+
+		lda PROD+0
+		sta N+4
+		lda PROD+1
+		sta N+5
+		lda PROD+2
+		sta N+2
+		lda PROD+3
+		sta N+3
+		lda #<60098
+		sta N+0
+		lda #>60098
+		sta N+1
+		jsr div32_16_16 ; x / 60098
+
+		lda #0
+		sta N+2
+		sta N+3
+
+		sta N+1
+		lda #100
+		sta N+0
+		jsr div32_16_16 ; r = x % 100; s = x / 100
+
+		lda N+2
+		jsr HexToBCD
+		sta WRAM_PrettyTimeFrac
+
+		lda #0
+		sta N+2
+		sta N+3
+
+		sta N+1
+		lda #60
+		sta N+0
+		jsr div32_16_16 ; m = s/60 s = s%60
+
+		lda N+2
+		jsr HexToBCD
+		sta WRAM_PrettyTimeSec
+		lda N+4
+		jsr HexToBCD
+		sta WRAM_PrettyTimeMin
+
+		rts

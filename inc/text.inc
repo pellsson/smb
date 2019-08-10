@@ -41,6 +41,8 @@
 .charmap '!', $2b
 .charmap '*', $29
 .charmap ' ', $24
+.charmap '.', $2a
+.charmap ':', $28
 
 .macro text_block at, txt
 	.byte at >> 8

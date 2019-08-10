@@ -657,7 +657,16 @@ PauseMenu:
 		bcc @not_paused
 		lsr
 		jsr RunPauseMenu
+		jmp @continue
 @not_paused:
+		lda WRAM_Timer
+		bmi @continue
+		adc #1
+		sta WRAM_Timer
+		lda #0
+		adc WRAM_Timer+1
+		sta WRAM_Timer+1
+@continue:
 		ldx GamePauseTimer
 		beq @pause_ready
 		dex

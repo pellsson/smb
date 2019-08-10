@@ -4120,6 +4120,7 @@ Hidden1UpCoinAmts:
       .byte $15, $23, $16, $1b, $17, $18, $23, $63
 
 PlayerEndLevel:
+          ; jsr Enter_EndLevel
           lda #$01                  ;force player to walk to the right
           jsr AutoControlPlayer
           lda Player_Y_Position     ;check player's vertical position

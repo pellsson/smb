@@ -4740,14 +4740,13 @@ FlagpoleSlide:
 		bcs SlidePlayer
 		lda #4
 SlidePlayer:
-
 		jmp AutoControlPlayer
 NoFPObj:
-
 		inc GameEngineSubroutine
 		rts
-PlayerEndLevel:
 
+PlayerEndLevel:
+		; jsr Enter_EndLevel
 		lda #1
 		jsr AutoControlPlayer
 		lda SprObject_Y_Position
@@ -4761,7 +4760,6 @@ PlayerEndLevel:
 		sta EventMusicQueue
 		inc byte_7F6
 loc_7E35:
-
 		lda Player_CollisionBits
 		lsr
 		bcs loc_7E48
