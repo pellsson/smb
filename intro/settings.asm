@@ -724,7 +724,7 @@ noinput:
 		rts
 
 exit_settings:
-		jmp Start
+		jmp enter_loader
 
 run_settings:
 		lda RECORD_BUTTONS

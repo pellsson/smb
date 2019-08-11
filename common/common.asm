@@ -31,9 +31,7 @@ NonMaskableInterrupt: ; Dummy
 	.export ForceUpdateSockHash
 	.export PracticeOnFrame
 	.export PracticeTitleMenu
-	.export SoundEngine
-	.export SoundEngineEternal
-	.export LL_SoundEngine
+	.export SoundEngineExternal
 	.export ProcessLevelLoad
 	.export RedrawUserVars
 	.export RedrawAll

@@ -2,7 +2,7 @@
 ; https://wiki.nesdev.com/w/index.php/16-bit_BCD
 ;
 BCD_BITS = 19
-bcdNum = 0
+; bcdNum = 0
 bcdResult = 2
 curDigit = 7
 b = 2
@@ -123,13 +123,13 @@ game_names:
 		.word lost_name
 		.word ext_name
 org_name:
-		.byte "SUPER MARIO BROS.        "
+		.byte "SUPER MARIO BROS.         "
 		.byte 0
 lost_name:
-		.byte "SMB 2 THE LOST LEVELS    "
+		.byte "SMB 2: THE LOST LEVELS    "
 		.byte 0
 ext_name:
-		.byte "SMB 2 THE LOST LEVELS EXT"
+		.byte "SMB 2: THE LOST LEVELS EXT"
 		.byte 0
 
 world_string:
@@ -146,9 +146,33 @@ print_cstring:
 @done_w_title:
 		rts
 
-redraw_all_records:
-		lda PPU_STATUS ; Latch
+song_table:
+	.byte CloudMusic, WaterMusic, UndergroundMusic
 
+redraw_all_records:
+		ldx RECORDS_MODE
+		lda song_table, x
+		sta AreaMusicQueue
+		lda #1
+		sta OperMode ; For Enter_SoundEngine to run
+
+		lda PPU_STATUS
+		ldy #$03
+		ldx #$C0
+		lda #$20
+		sta $2006
+		lda #$00
+		sta $2006
+		lda #$24
+@clear_inner:
+		sta $2007
+		dex
+		bne @clear_inner
+		dey
+		bpl @clear_inner
+
+
+		lda PPU_STATUS ; Latch
 		lda #$20
 		sta $2006
 		lda #$42
@@ -164,6 +188,15 @@ redraw_all_records:
 
 		ldx #0
 		ldy #0
+		lda #8
+		sta $01
+
+		lda RECORDS_MODE
+		cmp #2
+		bne @next_world
+		ldy #8
+		lda #$0D
+		sta $01
 @next_world:
 		lda ppu_world_titles+1, x
 		sta $2006
@@ -182,41 +215,47 @@ redraw_all_records:
 		ldx $00
 		inx
 		inx
-		cpy #8
+		cpy $01
 		bne @next_world
 
 		ldx #0
-		ldy #4*4*2
+		ldy #8*4
 		lda RECORDS_MODE
 		cmp #2
-		bne @not_ext
-@not_ext:
+		bne @more
+		ldy #5*4
 @more:
 		lda PPU_STATUS ; Latch
 		lda ppu_record_vram+1, x
 		sta $2006
 		lda ppu_record_vram, x
 		sta $2006
-
 		txa
 	pha
 		tya
 	pha
 		lda RECORDS_MODE
-		bne @use_lost
+		bne @is_lost
 		lda WRAM_OrgTimes+1, x
 		tay
 		lda WRAM_OrgTimes, x
 		tax
 		jmp @render_it
-@use_lost:
+@is_lost:
+		cmp #2
+		beq @is_ext
 		lda WRAM_LostTimes+1, x
 		tay
 		lda WRAM_LostTimes, x
 		tax
+		jmp @render_it
+@is_ext:
+		lda WRAM_LostTimes+(8*4*2)+1,x
+		tay
+		lda WRAM_LostTimes+(8*4*2), x
+		tax
 @render_it:
 		jsr redraw_time
-
 	pla
 		tay
 	pla
@@ -231,26 +270,8 @@ redraw_all_records:
 records_attr:
 		.incbin "nss/records_attr.bin"
 
-clear_screen:
-		lda #$24
-@clear_more:
-		sta $2007
-		dex
-		bne @clear_more
-		rts
-
-screen_off:
-		ldx PPU_STATUS	; Read PPU status to reset the high/low latch
-		ldx #$00
-		stx PPU_SCROLL_REG ; No scrolling
-		stx PPU_SCROLL_REG
-		stx PPU_CTRL_REG2 ; No rendering
-		stx PPU_CTRL_REG1 ; No NMI
-		rts
-
 enter_records:
 		jsr screen_off
-
 		ldx #0
 		lda #0
 @nuke_sprites:
@@ -258,20 +279,11 @@ enter_records:
 		inx
 		bne @nuke_sprites
 
-		lda #$20
+		lda #$23
 		sta $2006
-		lda #$00
+		lda #$C0
 		sta $2006
 
-		ldx #0
-		jsr clear_screen
-		jsr clear_screen
-		jsr clear_screen
-		ldx #$C0
-		jsr clear_screen
-		;
-		; Now points to attr, just copy
-		;
 @copy_more:
 		lda records_attr, x
 		sta $2007
@@ -289,7 +301,12 @@ enter_records:
 exit_out:
 		rts
 
+exit_records:
+		jmp enter_loader
+
 run_records:
+		jsr Enter_SoundEngine
+
 		lda SavedJoypadBits
 		cmp LAST_INPUT
 		beq exit_out
@@ -299,6 +316,8 @@ run_records:
 		beq @go_left
 		cmp #Right_Dir
 		beq @go_right
+		cmp #Start_Button
+		beq exit_records
 		rts
 @go_right:
 		inx

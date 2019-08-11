@@ -2,7 +2,7 @@
 ;
 ; Bank for all sound-related stuff
 ;
-SoundEngineEternal:
+SoundEngineExternal:
         jsr SoundEngine
         jmp ReturnBank
 

@@ -1463,18 +1463,6 @@ SetHalfway:  sta HalfwayPage          ;store as halfway page for player
 
 ;-------------------------------------------------------------------------------------
 
-SetupGameOver:
-      lda #$00                  ;reset screen routine task control for title screen, game,
-      sta ScreenRoutineTask     ;and game over modes
-      sta Sprite0HitDetectFlag  ;disable sprite 0 check
-      lda #GameOverMusic
-      sta EventMusicQueue       ;put game over music in secondary queue
-      inc DisableScreenFlag     ;disable screen output
-      inc OperMode_Task         ;set secondary mode to 1
-      rts
-
-;-------------------------------------------------------------------------------------
-
 ContinueGame:
            jsr LoadAreaPointer       ;update level pointer with
            lda #$01                  ;actual world and area numbers, then

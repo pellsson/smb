@@ -157,7 +157,7 @@
 	Enter_SoundEngine:
 		lda #BANK_COMMON
 		jsr SetBankFromA
-		jmp SoundEngineEternal
+		jmp SoundEngineExternal
 
 	Enter_LoadChrFromX:
 		lda #BANK_CHR

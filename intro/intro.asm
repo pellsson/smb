@@ -12,6 +12,9 @@ SETTINGS_ATTR = $708
 RECORDS_MODE = $709
 RECORDS_TMP = $70A
 RECORDS_TMP_HI = $70B
+bcdNum = $70C
+; bcdNum+1 = $70D
+
 
 SEL_START_Y = $7e
 LoaderFrameCounter = $30
@@ -58,50 +61,11 @@ dont_wipe_bank_selection:
 		sta $0200, x
 		inx
 		bne clear_memory
-		;
-		; Install nametable
-		;
-		write_nt "nt_data"
-
-		;
-		; Copy static sprite-data over
-		;
-		ldx #$00
-copy_more_sprites:
-		lda static_sprite_data, x
-		sta $200, x
-		inx
-		bne copy_more_sprites
-		;
-		; Install palette
-		;
-		lda PPU_STATUS ; Latch
-		lda #$3F
-		sta PPU_ADDRESS
-		ldx #$00
-		stx PPU_ADDRESS
-next_palette_entry:
-		lda palette_data, x
-		sta PPU_DATA
-		inx
-		cpx #$20
-		bne next_palette_entry
-		;
-		; Init WRAM
-		;
-		jsr Enter_InitializeWRAM
-		;
-		; Enable sound
-		;
-		lda #$01
-		sta OperMode			; Anything but zero and it will play...
-
-		lda #0
-		ldx #0
-		jsr sml_export_init
 
 		ldx #CHR_INTRO
 		jsr Enter_LoadChrFromX
+
+		jsr enter_loader
 
 		ldx #$00
 		stx PPU_SCROLL_REG ; No scrolling
@@ -136,6 +100,58 @@ PortLoop:
 		bne PortLoop
 		sta SavedJoypadBits
 		rts
+
+screen_off:
+		ldx PPU_STATUS	; Read PPU status to reset the high/low latch
+		ldx #$00
+		stx PPU_SCROLL_REG ; No scrolling
+		stx PPU_SCROLL_REG
+		stx PPU_CTRL_REG2 ; No rendering
+		stx PPU_CTRL_REG1 ; No NMI
+		rts
+
+enter_loader:
+		jsr screen_off
+		lda #0 ; for sml_export_init
+		sta SEL_INDEX
+		sta LDR_MODE
+		ldx #0
+		jsr sml_export_init
+		;
+		; Install nametable
+		;
+		write_nt "nt_data"
+
+		;
+		; Copy static sprite-data over
+		;
+		ldx #$00
+copy_more_sprites:
+		lda static_sprite_data, x
+		sta $200, x
+		inx
+		bne copy_more_sprites
+		;
+		; Install palette
+		;
+		lda PPU_STATUS ; Latch
+		lda #$3F
+		sta PPU_ADDRESS
+		ldx #$00
+		stx PPU_ADDRESS
+next_palette_entry:
+		lda palette_data, x
+		sta PPU_DATA
+		inx
+		cpx #$20
+		bne next_palette_entry
+		;
+		; Init WRAM
+		;
+		jsr Enter_InitializeWRAM
+		
+		rts
+
 
 NonMaskableInterrupt:
 		inc LoaderFrameCounter
@@ -234,7 +250,7 @@ dont_update_cursor:
 @disabled:
 		lda SavedJoypadBits
 		cmp LAST_INPUT
-		beq no_select
+		beq no_start
 		cmp #Select_Button
 		bne no_select
 		ldx SEL_INDEX
