@@ -19,14 +19,21 @@ WRAM = inc/wram.inc \
 		wram/full.bin \
 		lost/wram-init.bin
 
-INCS = inc/macros.inc \
+INCS = inc/wram.inc \
+       inc/macros.inc \
        inc/org.inc \
        inc/shared.inc \
        inc/utils.inc
 
 GEN_SCENARIOS = scen/scenario_data.asm
 
-all: test.bin
+all: smb.nes
+
+run: smb.nes
+	wine fceux/fceux.exe smb.nes
+
+smb.nes: smb.bin
+	cat ines.bin smb.bin > smb.nes
 
 inc/wram.inc: wram/ram_layout.asm $(OUT)/ram_layout.map
 	python scripts/genram.py $(OUT)/ram_layout.map inc/wram.inc
@@ -44,7 +51,10 @@ $(GEN_SCENARIOS): scripts/genscenarios.py $(SCENARIOS)
 $(OUT)/intro.o: $(INCS) intro/intro.asm intro/faxsound.asm intro/intro.inc intro/records.asm intro/smlsound.asm intro/nt.asm intro/settings.asm
 	$(AS) $(AFLAGS) -l $(OUT)/intro.map intro/intro.asm -o $@
 
-$(OUT)/chrloader.o: $(INCS) chr/chrloader.asm
+chr/org.chr chr/lost.chr: chr/build_chr.sh
+	(cd chr && sh build_chr.sh)
+
+$(OUT)/chrloader.o: $(INCS) chr/org.chr chr/lost.chr chr/chrloader.asm
 	$(AS) $(AFLAGS) -l $(OUT)/chrloader.map chr/chrloader.asm -o $@
 
 $(OUT)/original.o: $(INCS) org/original.asm
@@ -65,7 +75,7 @@ $(OUT)/lost.o: $(INCS) $(WRAM) lost/lost.asm
 $(OUT)/leveldata.o: lost/leveldata.asm
 	$(AS) $(AFLAGS) -l $(OUT)/leveldata.map lost/leveldata.asm -o $@
 
-test.bin: $(OBJECTS)
+smb.bin: $(OBJECTS)
 	$(LD) -C scripts/link.cfg \
 		$(OUT)/intro.o \
 		$(OUT)/chrloader.o \

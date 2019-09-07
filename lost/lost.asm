@@ -942,6 +942,7 @@ loc_6722:
 loc_6730:
 		lda #0
 		sta $301,y
+		sty VRAM_Buffer1_Offset
 		pla
 		beq EndOfWriteGameText
 		tax
@@ -955,8 +956,6 @@ loc_6730:
 		iny
 		sty byte_316
 EndOfWriteGameText:
-		; TODO VERY INCORRECT. BUT OK ;)
-		sty VRAM_Buffer1_Offset
 		rts
 
 sub_675E:

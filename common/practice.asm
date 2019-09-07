@@ -394,7 +394,7 @@ ExitOutputN:
 
 TopText:
 	text_block $2044, "RULE * FRAME"
-	text_block $2051, " A   B  TIME R "
+	text_block $2051, " X   Y  TIME R "
 	.byte $20, $68, $05, $24, $fe, $24, $2e, $29 ; score trailing digit and coin display
 	.byte $23, $c0, $7f, $aa ; attribute table data, clears name table 0 to palette 2
 	.byte $23, $c2, $01, $ea ; attribute table data, used for coin icon in status bar

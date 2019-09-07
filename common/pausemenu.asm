@@ -697,13 +697,11 @@ PauseMenu:
 		jsr RunPauseMenu
 		jmp @continue
 @not_paused:
-		lda WRAM_Timer
+		lda WRAM_Timer+1
 		bmi @continue
-		adc #1
-		sta WRAM_Timer
-		lda #0
-		adc WRAM_Timer+1
-		sta WRAM_Timer+1
+		inc WRAM_Timer
+		bne @continue
+		inc WRAM_Timer+1
 @continue:
 		ldx GamePauseTimer
 		beq @pause_ready
