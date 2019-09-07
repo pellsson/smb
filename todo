@@ -1,18 +1,14 @@
-For Release 4.2:
+For Release 5.0:
 -- Increase timer always except on title screen...
 -- Slow motion less flicker ploxxx (only remove sprites on WRAM_SlowMotionLeft == 0)
+-- Copy the last few bytes of the characterset... looks ass...
 -- Fix palette on highscores (and describe how to navigate & exit)
--- Save highscores.
+-- Fix highscores for LL
 -- Show highscore in game
--- Show highscore pre levels and at end! (intermediate)
 -- New face :o
 -- Make webpage less tarded
 -- Frame advance (player #2 A)
--- Reset timer on load, restart, exit, enter
-	-- If we reset it on Intermediate IF we are to save the state... Isnt that all there is too it? And brick on load.
-	-- Set it on start somewhere too...
-	-- Always to dt when on intermediate+on save it? Or set it to ffff on load?
-	-- Oh, and simply DONT reset it on death :) That way we dont care for halfway or not.
+-- Make sure WRAM_Timer is reset at start.
 -- Add setting for halfway?
 -- Add setting to show frames or time?
 
@@ -22,12 +18,19 @@ Done for Release:
 -- Slow motion in menu
 -- Fix bugs.
 -- Fix palette flicker when saving.
+-- Show highscore pre levels and at end! (intermediate)
+-- Fix restart level bug in certain levels for Lost.
 -- Add some music or some crap to records...
 -- Render highscores.
+-- Save highscores.
 -- Fix start on second quest.
 -- Indicate that starting on second quest.
 -- Add start on second quest (for smborg).
 -- Rename A & B vars to X & Y, less retarded.
+-- Reset timer on load, restart, exit, enter
+	-- If we reset it on Intermediate IF we are to save the state... Isnt that all there is too it? And brick on load.
+	-- Always to dt when on intermediate+on save it? Or set it to ffff on load?
+	-- Oh, and simply DONT reset it on death :) That way we dont care for halfway or not.
 
 BUGS:
 -- Save-states occationally mute.

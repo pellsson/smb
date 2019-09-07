@@ -1668,10 +1668,11 @@ FrameToTime:
 
 FrameToTimeInner:
 		lda #0
+		sta PROD+3
 		sta CARRY
 		sta MULR+2
 		sta MULR+3
-		sta MULND+2
+		sta MULND+3
 		stx MULR
 		sty MULR+1
 		lda #$a0
