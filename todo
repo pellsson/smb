@@ -1,4 +1,25 @@
-For Release:
+For Release 4.2:
+-- Move WRAM_SlowMotionLeft to CPU ram
+-- Slow motion less flicker ploxxx (only remove sprites on WRAM_SlowMotionLeft == 0)
+-- Fix palette on highscores (and describe how to navigate & exit)
+-- Save highscores.
+-- Show highscore in game
+-- Show highscore pre levels and at end! (intermediate)
+-- Fix loader to actually include records.
+-- New face :o
+-- Make webpage less tarded
+
+Done for Release:
+-- Slow motion
+-- Slow motion in menu
+-- Fix bugs.
+-- Fix palette flicker when saving.
+-- Add some music or some crap to records...
+-- Render highscores.
+-- Fix start on second quest.
+-- Indicate that starting on second quest.
+-- Add start on second quest (for smborg).
+
 
 BUGS:
 -- Save-states occationally mute.
@@ -7,7 +28,6 @@ TODO AT SOME POINT:
 -- Hidden1UpBlocks?
 -- Time all worlds in frames
 -- Contra Code & Faces?
--- Add start on second quest (for smborg).
 -- Make powerup reflect on title screen?
 -- LL Maybe do something about coin-firework-thing?
 -- GamePauseStats | 2 hack? Rework? Also, hit sprite0 when pre-save/-load
@@ -17,7 +37,7 @@ TODO AT SOME POINT:
 -- AreaAddrsLOffset still referenced outside of leveldata
 -- During delay disable sound
 -- Beat world 8 must set IsPlayingExtendedWorlds & Enter_LL_WriteHalfwayPages
--- SM2DATA3 50%?
+-- SM2DATA3 50%? (in hacks. does depend on the FDS audio bs)
 -- Beating the game leaves you without a cursor on menu
 -- Ending is complete fuckery.
 

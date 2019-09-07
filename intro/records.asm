@@ -147,14 +147,13 @@ print_cstring:
 		rts
 
 song_table:
-	.byte CloudMusic, WaterMusic, UndergroundMusic
+	.byte 4, 0, 2
 
 redraw_all_records:
 		ldx RECORDS_MODE
 		lda song_table, x
-		sta AreaMusicQueue
-		lda #1
-		sta OperMode ; For Enter_SoundEngine to run
+		ldx #0
+		jsr fax_load_song
 
 		lda PPU_STATUS
 		ldy #$03
@@ -305,8 +304,10 @@ exit_records:
 		jmp enter_loader
 
 run_records:
-		jsr Enter_SoundEngine
-
+		lda WRAM_DisableMusic
+		bne @nosound
+		jsr fax_update
+@nosound:
 		lda SavedJoypadBits
 		cmp LAST_INPUT
 		beq exit_out

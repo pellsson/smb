@@ -4,7 +4,7 @@
 CustomRow = WRAM_Temp+$10
 
 .define MENU_ROW_LENGTH 16
-.define MENU_ROW_COUNT 13
+.define MENU_ROW_COUNT 14
 
 pm_empty_row:
 	.byte "                "
@@ -31,6 +31,16 @@ pm_show_sock_row:
 
 pm_star_row:
 	.byte $24, " GET STAR   ", $24, $24, $24
+
+pm_slowmo_off_row:
+	.byte $24, " SLOMO NONE ", $24, $24, $24
+
+pm_slowmo_min_row:
+	.byte $24, " SLOMO MIN  ", $24, $24, $24
+
+pm_slowmo_max_row:
+	.byte $24, " SLOMO MAX  ", $24, $24, $24
+
 pm_restart_row:
 	.byte $24, " RESTART LEV", $24, $24, $24
 
@@ -172,35 +182,47 @@ _draw_pm_row_6:
 		rts
 
 _draw_pm_row_7:
-		row_render_data $2160, pm_star_row
+		ldx WRAM_SlowMotion
+		beq @off
+		dex
+		beq @min
+		row_render_data $2160, pm_slowmo_max_row
 		rts
+@min:
+		row_render_data $2160, pm_slowmo_min_row
+		rts
+@off:
+		row_render_data $2160, pm_slowmo_off_row
+		rts
+
 _draw_pm_row_8:
 		row_render_data $23D8, pm_attr_data
 		inc $07
 		jsr draw_prepared_row
-		row_render_data $2180, pm_restart_row
+		row_render_data $2180, pm_star_row
 		rts
 
 _draw_pm_row_9:
-		row_render_data $21A0, pm_save_row
+		row_render_data $21A0, pm_restart_row
 		rts
 
 _draw_pm_row_10:
-		row_render_data $21C0, pm_load_row
+		row_render_data $21C0, pm_save_row
 		rts
 
 _draw_pm_row_11:
-		row_render_data $21E0, pm_title_row
+		row_render_data $21E0, pm_load_row
 		rts
+
 _draw_pm_row_12:
 		row_render_data $23E0, pm_attr_data
 		inc $07
 		jsr draw_prepared_row
-		row_render_data $2200, pm_intro_row
+		row_render_data $2200, pm_title_row
 		rts
 
 _draw_pm_row_13:
-		row_render_data $2220, pm_empty_row
+		row_render_data $2220, pm_intro_row
 		rts
 
 _draw_pm_row_14:
@@ -209,6 +231,10 @@ _draw_pm_row_14:
 
 _draw_pm_row_15:
 		row_render_data $2260, pm_empty_row
+		rts
+
+_draw_pm_row_16:
+		row_render_data $2280, pm_empty_row
 		rts
 
 
@@ -229,6 +255,7 @@ pm_row_initializers:
 		.word _draw_pm_row_13
 		.word _draw_pm_row_14
 		.word _draw_pm_row_15
+		.word _draw_pm_row_16
 
 prepare_draw_row:
 		asl ; *=2
@@ -430,6 +457,16 @@ pm_toggle_show:
 @SockMode:
 		jmp ForceUpdateSockHashInner
 
+pm_slowmo:
+		ldx WRAM_SlowMotion
+		inx
+		cpx #3
+		bne @good
+		ldx #0
+@good:
+		stx WRAM_SlowMotion
+		rts
+
 pm_give_star:
 		lda #$FF
 		sta StarInvincibleTimer
@@ -477,6 +514,7 @@ pm_activation_slots:
 		.word pm_toggle_show
 		.word pm_low_user ; user
 		.word pm_low_user ;
+		.word pm_slowmo
 		.word pm_give_star
 		.word pm_restart_level
 		.word pm_save_state

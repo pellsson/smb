@@ -1,10 +1,3 @@
-        .include "shared.inc"
-        .include "macros.inc"
-        .org $8000
-        .export sml_export_init
-        .export sml_export_play
-        .segment "bank1"
-
 ptr_data_bd2e:
         .word data_bd2e
 ptr_data_bc6e:
@@ -5502,8 +5495,4 @@ data_bd2e:
                  .byte   0
                  .byte   0
                  .byte   0
-
-.res $C000-*, $EA
-
-; init_vectors $8000
 

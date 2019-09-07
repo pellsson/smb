@@ -29,7 +29,7 @@ CURSOR_SPRITE = $f9
 
 	.include "intro.inc"
 
-	.org $c000
+	.org $8000
 	.segment "bank1"
 
 Start:
@@ -513,6 +513,8 @@ bank_table:
 
 	.include "settings.asm"
 	.include "records.asm"
+	.include "smlsound.asm"
+	.include "faxsound.asm"
 
 practice_callgate
 control_bank

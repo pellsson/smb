@@ -33,6 +33,11 @@ WRAM_TitleButtons:
 	.byte $00
 WRAM_RestartButtons:
 	.byte $00
+WRAM_SlowMotion:
+	.byte $00
+WRAM_SlowMotionLeft:
+	.byte $00
+
 
 WRAM_ToSaveFile:
 WRAM_LevelAreaPointer:
@@ -134,6 +139,7 @@ WRAM_PrettyTimeSec:
 	.byte 0
 WRAM_PrettyTimeFrac:
 	.byte 0
+
 ;
 ; Number of stars collected
 ;

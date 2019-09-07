@@ -3,7 +3,6 @@ LD = ld65
 AFLAGS = -W0 -U -I inc
 OUT = build
 OBJECTS = $(OUT)/intro.o \
-          $(OUT)/smlsound.o \
           $(OUT)/chrloader.o \
           $(OUT)/original.o \
           $(OUT)/common.o \
@@ -42,11 +41,8 @@ wram/full.bin $(OUT)/ram_layout.map: wram/ram_layout.asm
 $(GEN_SCENARIOS): scripts/genscenarios.py $(SCENARIOS)
 	python scripts/genscenarios.py $(SCENARIOS) > $(GEN_SCENARIOS)
 
-$(OUT)/intro.o: $(INCS) intro/intro.asm
+$(OUT)/intro.o: $(INCS) intro/intro.asm intro/faxsound.asm intro/intro.inc intro/records.asm intro/smlsound.asm intro/nt.asm intro/settings.asm
 	$(AS) $(AFLAGS) -l $(OUT)/intro.map intro/intro.asm -o $@
-
-$(OUT)/smlsound.o: $(INCS) intro/smlsound.asm
-	$(AS) $(AFLAGS) -l $(OUT)/smlsound.map intro/smlsound.asm -o $@
 
 $(OUT)/chrloader.o: $(INCS) chr/chrloader.asm
 	$(AS) $(AFLAGS) -l $(OUT)/chrloader.map chr/chrloader.asm -o $@
@@ -71,7 +67,7 @@ $(OUT)/leveldata.o: lost/leveldata.asm
 
 test.bin: $(OBJECTS)
 	$(LD) -C scripts/link.cfg \
-		$(OUT)/smlsound.o $(OUT)/intro.o \
+		$(OUT)/intro.o \
 		$(OUT)/chrloader.o \
 		$(OUT)/original.o \
 		$(OUT)/common.o \

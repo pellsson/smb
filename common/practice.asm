@@ -727,11 +727,6 @@ menu_input:
 		sta CurrentPlayer
 		jmp LL_UpdatePlayerChange
 
-nuke_timer:
-		lda #0
-		sta SelectTimer
-		jmp ReturnBank
-
 next_task:
 		ldx #4*4-1
 		lda #0
@@ -782,6 +777,43 @@ WriteRulePointer:
 		sta $05
 		rts
 
+toggle_second_quest:
+		lda BANK_SELECTED
+		cmp #BANK_ORG
+		bne @not_org
+		lda PrimaryHardMode
+		eor #1
+		sta PrimaryHardMode
+		ldx VRAM_Buffer1_Offset
+		lda #$3F
+		sta VRAM_Buffer1,x
+		lda #$00
+		sta VRAM_Buffer1+1,x
+		sta VRAM_Buffer1+4,x
+		lda #$01
+		sta VRAM_Buffer1+2,x
+		lda #$22 ; Original color
+		ldy PrimaryHardMode
+		beq @set_default
+		lda #$05 ; Hardmode color
+@set_default:
+		sta VRAM_Buffer1+3,x
+		inx
+		inx
+		inx
+		inx
+		sta VRAM_Buffer1_Offset
+@not_org:
+		rts
+
+nuke_timer:
+		lda #0
+		sta SelectTimer
+		jmp ReturnBank
+
+next_task_proxy:
+		jmp next_task
+
 PracticeTitleMenu:
 		jsr WriteRulePointer
 		jsr draw_menu
@@ -793,9 +825,9 @@ PracticeTitleMenu:
 		ldx #32
 		stx SelectTimer
 		cmp #Start_Button
-		beq next_task
+		beq next_task_proxy
 		cmp #Select_Button
-		bne @check_input
+		bne @check_b
 		ldx WRAM_MenuIndex
 		inx
 		cpx #5
@@ -803,6 +835,11 @@ PracticeTitleMenu:
 		ldx #0
 @save_menu_index:
 		stx WRAM_MenuIndex
+		jmp @dec_timer
+@check_b:
+		cmp #B_Button
+		bne @check_input
+		jsr toggle_second_quest
 		jmp @dec_timer
 @check_input:
 		ldx WRAM_MenuIndex
@@ -1101,6 +1138,22 @@ SaveState:
 		sta GamePauseStatus
 		rts
 @do_savestate:
+		lda PPU_STATUS
+		lda #$3F
+		sta PPU_ADDRESS
+		lda #$00
+		sta PPU_ADDRESS
+		lda PPU_DATA ; Internal buffer; throw
+
+		ldx #$0
+		ldy #$20
+@copy_pal:
+		lda PPU_DATA
+		sta WRAM_SavePAL, x
+		inx
+		dey
+		bne @copy_pal
+
 		ldx #$7F
 @save_wram:
 		lda WRAM_ToSaveFile, x
@@ -1160,22 +1213,6 @@ SaveState:
 		inx
 		bne @copy_nt
 
-		lda PPU_STATUS
-		lda #$3F
-		sta PPU_ADDRESS
-		lda #$00
-		sta PPU_ADDRESS
-		lda PPU_DATA ; Internal buffer; throw
-
-		ldx #$0
-		ldy #$20
-@copy_pal:
-		lda PPU_DATA
-		sta WRAM_SavePAL, x
-		inx
-		dey
-		bne @copy_pal
-		; todo copy palette
 		lda GamePauseStatus
 		ora #2
 		sta GamePauseStatus
@@ -1391,6 +1428,12 @@ InitializeWRAM:
 		beq RamGoodExit
 		jmp FactoryResetWRAM	
 RamGoodExit:
+		;
+		; Initialize other stuff
+		;
+		lda #0
+		sta WRAM_SlowMotion
+		sta WRAM_SlowMotionLeft
 		jmp ReturnBank
 
 SetDefaultWRAM:

@@ -46,6 +46,50 @@ EndlessLoop: jmp EndlessLoop              ;endless loop, need I say more?
 
 
 ;-----------------------------------------------------------------
+wait_sprite0_hit:
+      lda GamePauseStatus
+      and #$02
+      bne SkipSprite0
+      lda Sprite0HitDetectFlag  ;check for flag here
+      beq SkipSprite0
+Sprite0Clr:
+      lda PPU_STATUS            ;wait for sprite 0 flag to clear, which will
+      and #%01000000            ;not happen until vblank has ended
+      bne Sprite0Clr
+      lda GamePauseStatus       ;if in pause mode, do not bother with sprites at all
+      and #3
+      bne Sprite0Hit
+      jsr MoveSpritesOffscreen
+      jsr SpriteShuffler
+Sprite0Hit:
+      lda PPU_STATUS            ;do sprite #0 hit detection
+      and #%01000000
+      beq Sprite0Hit
+      ldy #$14                  ;small delay, to wait until we hit horizontal blank time
+HBlankDelay:
+      dey
+      bne HBlankDelay
+SkipSprite0:
+      lda HorizontalScroll      ;set scroll registers from variables
+      sta PPU_SCROLL_REG
+      lda VerticalScroll
+      sta PPU_SCROLL_REG
+      rts
+
+throw_frame:
+      lda Mirror_PPU_CTRL_REG2
+      sta PPU_CTRL_REG2
+      jsr wait_sprite0_hit
+      lda ScreenLeft_PageLoc
+      lsr Mirror_PPU_CTRL_REG1
+      and #$01
+      ror
+      rol Mirror_PPU_CTRL_REG1
+      lda Mirror_PPU_CTRL_REG1
+      ora #$80 ; NMI
+      sta PPU_CTRL_REG1
+      jsr Enter_SoundEngine
+      rti
 
 NonMaskableInterrupt:
                lda Mirror_PPU_CTRL_REG1  ;disable NMIs in mirror reg
@@ -68,6 +112,23 @@ ScreenOff:     sta Mirror_PPU_CTRL_REG2  ;save bits for later but not in registe
                sta PPU_SPR_ADDR          ;reset spr-ram address register
                lda #$02                  ;perform spr-ram DMA access on $0200-$02ff
                sta SPR_DMA
+
+               ldx OperMode
+               dex
+               bne @allow_frame
+
+               lda OperMode_Task
+               cmp #3
+               bne @allow_frame
+
+               dec WRAM_SlowMotionLeft
+               bmi @allow_frame
+               jmp throw_frame
+
+      @allow_frame:
+               lda WRAM_SlowMotion
+               sta WRAM_SlowMotionLeft
+
                ldx VRAM_Buffer_AddrCtrl  ;load control for pointer to buffer contents
                lda VRAM_AddrTable_Low,x  ;set indirect at $00 to pointer
                sta $00
@@ -111,29 +172,7 @@ SkipExpTimer:  dex                       ;move onto next timer
 NoDecTimers:   inc FrameCounter          ;increment frame counter
                jsr AdvanceRandom
 PauseSkip:
-               lda GamePauseStatus
-               and #$02
-               bne SkipSprite0
-               lda Sprite0HitDetectFlag  ;check for flag here
-               beq SkipSprite0
-Sprite0Clr:    lda PPU_STATUS            ;wait for sprite 0 flag to clear, which will
-               and #%01000000            ;not happen until vblank has ended
-               bne Sprite0Clr
-               lda GamePauseStatus       ;if in pause mode, do not bother with sprites at all
-               and #3
-               bne Sprite0Hit
-               jsr MoveSpritesOffscreen
-               jsr SpriteShuffler
-Sprite0Hit:    lda PPU_STATUS            ;do sprite #0 hit detection
-               and #%01000000
-               beq Sprite0Hit
-               ldy #$14                  ;small delay, to wait until we hit horizontal blank time
-HBlankDelay:   dey
-               bne HBlankDelay
-SkipSprite0:   lda HorizontalScroll      ;set scroll registers from variables
-               sta PPU_SCROLL_REG
-               lda VerticalScroll
-               sta PPU_SCROLL_REG
+               jsr wait_sprite0_hit
                lda Mirror_PPU_CTRL_REG1  ;load saved mirror of $2000
                pha
                sta PPU_CTRL_REG1
