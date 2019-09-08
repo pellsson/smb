@@ -1941,6 +1941,8 @@ RenderIntermediateTime:
 	    ora $01
 	    bne @checkisrecord
 @newrecord:
+		lda #Sfx_ExtraLife
+		sta Square2SoundQueue
 	    lda BANK_SELECTED
 	    cmp #BANK_ORG
 	    beq @save_org

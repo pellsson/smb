@@ -37,13 +37,6 @@ ThrowFrame:
 		dey
 		bne @HBlankDelay
 @SkipSprite0:
-		lda HorizontalScroll      ;set scroll registers from variables
-		sta PPU_SCROLL_REG
-		lda VerticalScroll
-		sta PPU_SCROLL_REG
-		;
-		; Exit NMI
-		;
 		lda ScreenLeft_PageLoc
 		lsr Mirror_PPU_CTRL_REG1
 		and #$01
@@ -52,6 +45,10 @@ ThrowFrame:
 		lda Mirror_PPU_CTRL_REG1
 		ora #$80 ; NMI
 		sta PPU_CTRL_REG1
+		lda HorizontalScroll      ;set scroll registers from variables
+		sta PPU_SCROLL_REG
+		lda VerticalScroll
+		sta PPU_SCROLL_REG
 		jmp Enter_SoundEngine
 .endmacro
 
