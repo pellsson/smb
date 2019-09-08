@@ -4,7 +4,11 @@ A speedrun practice ROM for Super Mario Bros. and Super Mario Bros 2 - The Lost 
 
 For feature requests or bug reports, please visit the [issue tracker](https://github.com/pellsson/smb/issues).
 
-## Version 5.0
+## Know Issues
+
+- When loading a save state from a different level, you'll sometimes end up in a broken state. Just load again and you should be fine.
+
+## Version 5.1
 
 ### Features 
 
@@ -17,6 +21,7 @@ For feature requests or bug reports, please visit the [issue tracker](https://gi
 
 ### Bug Fixes
 
+- 5.1 adds support for physical hardware and fixes 5.0 bug where save states would break PBs.
 - Remove artifact in the statusbar where the bottom portion of certain letters would jitter with scrolling.
 - There is no longer a horribly ugly flicker when you save or load states (unless you load from a level with a different background color than the save state).
 - Fix "Restart Level" that would glitch Lost Levels in some scenarios.
@@ -56,7 +61,8 @@ it released.**
 
 First download the desired version below:
 
-- [Version 5.0 - IPS](https://github.com/pellsson/smb/raw/master/smb-v5.0.ips)
+- [Version 5.1 - IPS](https://github.com/pellsson/smb/raw/master/smb-v5.1.ips)
+- ~~Version 5.0 - IPS (Too broken)~~
 
 Then simply apply that IPS (using for instance Lunar IPS) to the an original, unmodified version of the Super Mario Bros. (J/World) ROM. *DO NOT* use The Lost Levels. The MD5 checksum for the ROM you should be using is `811b027eaf99c2def7b933c5208636de`.
 

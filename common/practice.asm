@@ -1040,6 +1040,8 @@ LoadState:
 		sta GamePauseStatus
 		rts
 @do_loadstate:
+		lda #$FF
+		sta WRAM_Timer+1 ; Invalidate timer
 		ldx #$7F
 @save_wram:
 		lda WRAM_SaveWRAM, x
@@ -1853,13 +1855,17 @@ YourPB:
 	.byte $22, $4a, $0c
 	.byte "PB   ", $fe, $ff
 NewRecord:
-  .byte $22, $4a, $0c
-  .byte "NEW RECORD! ", $ff
+	.byte $22, $4a, $0c
+	.byte "NEW RECORD! ", $ff
+LoadedGame:
+	.byte $22, $2a, $0c
+	.byte "SAVES USED! ", $ff
 
 PbTextOffsets:
-		.byte YourTime - PersonalBestText
-		.byte YourPB - PersonalBestText
+	.byte YourTime - PersonalBestText
+	.byte YourPB - PersonalBestText
     .byte NewRecord - PersonalBestText
+    .byte LoadedGame - PersonalBestText
 
 WriteTimeText:
 		ldy VRAM_Buffer1_Offset
@@ -1930,6 +1936,12 @@ RenderIntermediateTime:
 	    bne @dontshow
 	    lda WRAM_Timer+1
 	    beq @dontshow
+	    cmp #$FF
+	    bne @no_load
+	    ldx #3
+	    jsr WriteTimeText
+	    jmp @resettimer
+@no_load:
 	    lda WRAM_Timer
 	    sta $00
 	    lda WRAM_Timer+1
