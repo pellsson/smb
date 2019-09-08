@@ -4,15 +4,6 @@ A speedrun practice ROM for Super Mario Bros. and Super Mario Bros 2 - The Lost 
 
 For feature requests or bug reports, please visit the [issue tracker](https://github.com/pellsson/smb/issues).
 
-<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-	<input type="hidden" name="cmd" value="_donations" />
-	<input type="hidden" name="business" value="66GJXJYBSFVB6" />
-	<input type="hidden" name="currency_code" value="USD" />
-	<input type="image" src="https://www.paypalobjects.com/en_US/SE/i/btn/btn_donateCC_LG.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
-	<img alt="" border="0" src="https://www.paypal.com/en_SE/i/scr/pixel.gif" width="1" height="1" />
-</form>
-<br />
-
 ## Version 5.0
 
 ### Features 
@@ -68,6 +59,15 @@ First download the desired version below:
 - [Version 5.0 - IPS](https://github.com/pellsson/smb/raw/master/smb-v5.0.ips)
 
 Then simply apply that IPS (using for instance Lunar IPS) to the an original, unmodified version of the Super Mario Bros. (J/World) ROM. *DO NOT* use The Lost Levels. The MD5 checksum for the ROM you should be using is `811b027eaf99c2def7b933c5208636de`.
+
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+	<input type="hidden" name="cmd" value="_donations" />
+	<input type="hidden" name="business" value="66GJXJYBSFVB6" />
+	<input type="hidden" name="currency_code" value="USD" />
+	<input type="image" src="https://www.paypalobjects.com/en_US/SE/i/btn/btn_donateCC_LG.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+	<img alt="" border="0" src="https://www.paypal.com/en_SE/i/scr/pixel.gif" width="1" height="1" />
+</form>
+<br />
 
 Have fun!
 
