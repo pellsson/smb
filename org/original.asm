@@ -68,10 +68,11 @@ ScreenOff:     sta Mirror_PPU_CTRL_REG2  ;save bits for later but not in registe
                ldx PPU_STATUS            ;reset flip-flop and reset scroll registers to zero
                lda #$00
                jsr InitScroll
-               sta PPU_SPR_ADDR          ;reset spr-ram address register
 
                MACRO_RunSlowMo 3
 
+               lda #0
+               sta PPU_SPR_ADDR          ;reset spr-ram address register
                lda #$02                  ;perform spr-ram DMA access on $0200-$02ff
                sta SPR_DMA
 

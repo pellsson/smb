@@ -123,10 +123,11 @@ ScreenOff:
 		ldx PPU_STATUS
 		lda #0
 		jsr InitScroll
-		sta PPU_SPR_ADDR
 
 		MACRO_RunSlowMo 4
 
+		lda #0
+		sta PPU_SPR_ADDR
 		lda #2
 		sta SPR_DMA
 

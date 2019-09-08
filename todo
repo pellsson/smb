@@ -1,19 +1,19 @@
 For Release 5.0:
--- Make webpage less tarded (Fix gist)
--- PB for extended worlds not saved corrected
--- Frame advance (player #2 A)
--- Add setting to show frames or time?
--- Make sure WRAM_Timer is reset at start & WRAM_LoadedWorld and Level.
--- Disable pausemenu during auto_move? Kind glitches out a bit i think.
-
-
-Done for Release:
--- Starting for a level is instant record :)
--- Test highscores in LL
--- Fix annoying partially floating letter in the menu (smb2)
+-- Loaded from 8-1 to 4-2 warproom. Broke to fuck.
+-- Increase timer always except on title screen...
+-- Slow motion less flicker ploxxx (only remove sprites on WRAM_SlowMotionLeft == 0)
 -- Copy the last few bytes of the characterset... looks ass...
 -- Fix palette on highscores (and describe how to navigate & exit)
+-- Fix highscores for LL
+-- Show highscore in game
 -- New face :o
+-- Make webpage less tarded
+-- Frame advance (player #2 A)
+-- Make sure WRAM_Timer is reset at start.
+-- Add setting for halfway?
+-- Add setting to show frames or time?
+
+Done for Release:
 -- Fix loader to actually include records.
 -- Slow motion
 -- Slow motion in menu
@@ -23,7 +23,6 @@ Done for Release:
 -- Fix restart level bug in certain levels for Lost.
 -- Add some music or some crap to records...
 -- Render highscores.
--- Fix highscores for LL
 -- Save highscores.
 -- Fix start on second quest.
 -- Indicate that starting on second quest.
@@ -33,8 +32,6 @@ Done for Release:
 	-- If we reset it on Intermediate IF we are to save the state... Isnt that all there is too it? And brick on load.
 	-- Always to dt when on intermediate+on save it? Or set it to ffff on load?
 	-- Oh, and simply DONT reset it on death :) That way we dont care for halfway or not.
--- Increase timer always except on title screen...
--- Slow motion less flicker ploxxx (only remove sprites on WRAM_SlowMotionLeft == 0)
 
 BUGS:
 -- Save-states occationally mute.
@@ -168,4 +165,3 @@ DONE:
 -- LL save offset after writing intermediate too!
 -- Load state puts player on bad places sometimes (and doesnt always show intermediate)
 -- Move WRAM_SlowMotionLeft to CPU ram
--- Add setting for halfway?

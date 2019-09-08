@@ -19,11 +19,18 @@ ThrowFrame:
 		;
 		; Wait for sprite 0
 		;
-		lda GamePauseStatus
-		and #$02
-		bne @SkipSprite0
 		lda Sprite0HitDetectFlag  ;check for flag here
 		beq @SkipSprite0
+		ldx #0
+		stx PPU_SPR_ADDR
+		lda Sprite0Data
+		sta PPU_SPR_DATA
+		lda Sprite0Data+1
+		sta PPU_SPR_DATA
+		lda Sprite0Data+2
+		sta PPU_SPR_DATA
+		lda Sprite0Data+3
+		sta PPU_SPR_DATA
 @Sprite0Clr:
 		lda PPU_STATUS            ;wait for sprite 0 flag to clear, which will
 		and #%01000000            ;not happen until vblank has ended
@@ -55,6 +62,8 @@ ThrowFrame:
 .macro MACRO_RunSlowMo gm
 		dec WRAM_SlowMotionLeft
 		bmi @allow_frame
+		lda DisableScreenFlag
+		bne @allow_frame
 		ldx OperMode
 		dex
 		bne @allow_frame
