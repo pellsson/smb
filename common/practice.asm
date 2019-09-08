@@ -1373,6 +1373,7 @@ ProcessLevelLoad:
 PracticeInit:
 		lda #0
 		sta WRAM_Timer
+		sta WRAM_Timer+1
 		sta WRAM_SlowMotion
 		sta WRAM_SlowMotionLeft
 		sta WRAM_MenuIndex
