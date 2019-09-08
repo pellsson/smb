@@ -201,7 +201,7 @@ Sprite0Hit:
 		lda PPU_STATUS
 		and #$40
 		beq Sprite0Hit
-		ldy #$8
+		ldy #$10
 HBlankDelay:
 		dey
 		bne HBlankDelay
@@ -822,6 +822,7 @@ DisplayIntermediate:
 		jsr DrawPlayer_Intermediate
 		lda #1
 		jsr WriteTextAndResetTimers
+		jsr Enter_RenderIntermediateTime
 		lda WorldNumber
 		cmp #8
 		bne IncSubtask

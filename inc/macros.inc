@@ -20,6 +20,11 @@
 .macro practice_callgate
 	.res $FE00 - *, $EA
 
+	Enter_RenderIntermediateTime:
+		lda #BANK_COMMON
+		jsr SetBankFromA
+		jmp RenderIntermediateTime
+
 	Enter_FrameToTime:
 		lda #BANK_COMMON
 		jsr SetBankFromA

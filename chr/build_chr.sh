@@ -1,4 +1,4 @@
-cat intro/smb.chr intro/megaman.chr intro/kosmic.chr intro/somewes.chr intro/roylt.chr intro/andrewg.chr intro/kappa.chr intro/custom.chr > /tmp/intro_flat.chr && \
+cat intro/smb.chr intro/megaman.chr intro/tavenwebb2002.chr intro/somewes.chr intro/kosmic.chr intro/roylt.chr intro/kappa.chr intro/custom.chr > /tmp/intro_flat.chr && \
 truncate --size 4096 /tmp/intro_flat.chr  && \
 python ../scripts/chr2copylayout.py /tmp/intro_flat.chr intro/intro.chr && \
 cat intro/intro.chr intro/intro.chr > intro.chr && \

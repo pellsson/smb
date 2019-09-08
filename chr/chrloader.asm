@@ -28,7 +28,7 @@
 	lda name+$200, x
 	sta PPU_DATA
 	inx
-	cpx #$40
+	cpx #$C0
 	bne @block2
 .endmacro
 

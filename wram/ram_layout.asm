@@ -37,7 +37,10 @@ WRAM_SlowMotion:
 	.byte $00
 WRAM_SlowMotionLeft:
 	.byte $00
-
+WRAM_LoadedLevel:
+	.byte $00
+WRAM_LoadedWorld:
+	.byte $00
 
 WRAM_ToSaveFile:
 WRAM_LevelAreaPointer:

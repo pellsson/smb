@@ -114,18 +114,15 @@ ScreenOff:     sta Mirror_PPU_CTRL_REG2  ;save bits for later but not in registe
                lda #$02                  ;perform spr-ram DMA access on $0200-$02ff
                sta SPR_DMA
 
+               dec WRAM_SlowMotionLeft
+               bmi @allow_frame
                ldx OperMode
                dex
                bne @allow_frame
-
                lda OperMode_Task
                cmp #3
                bne @allow_frame
-
-               dec WRAM_SlowMotionLeft
-               bmi @allow_frame
                jmp throw_frame
-
       @allow_frame:
                lda WRAM_SlowMotion
                sta WRAM_SlowMotionLeft
@@ -626,219 +623,6 @@ WriteTopStatusLine:
     jsr Enter_WritePracticeTop
     jmp IncSubtask
 
-BCD_BITS = 19
-bcdNum = WRAM_Timer
-bcdResult = 2
-curDigit = 7
-b = 2
-
-TimerToDecimal:
-		lda #$80 >> ((BCD_BITS - 1) & 3)
-		sta curDigit
-		ldx #(BCD_BITS - 1) >> 2
-		ldy #BCD_BITS - 5
-@loop:
-		; Trial subtract this bit to A:b
-		sec
-		lda bcdNum
-		sbc bcdTableLo,y
-		sta b
-		lda bcdNum+1
-		sbc bcdTableHi,y
-
-		; If A:b > bcdNum then bcdNum = A:b
-		bcc @trial_lower
-		sta bcdNum+1
-		lda b
-		sta bcdNum
-@trial_lower:
-		; Copy bit from carry into digit and pick up 
-		; end-of-digit sentinel into carry
-		rol curDigit
-		dey
-		bcc @loop
-
-		; Copy digit into result
-		lda curDigit
-		sta bcdResult,x
-		lda #$10  ; Empty digit; sentinel at 4 bits
-		sta curDigit
-		; If there are digits left, do those
-		dex
-		bne @loop
-		lda bcdNum
-		sta bcdResult
-		rts
-
-bcdTableLo:
-		.byte <10, <20, <40, <80
-		.byte <100, <200, <400, <800
-		.byte <1000, <2000, <4000, <8000
-		.byte <10000, <20000, <40000
-
-bcdTableHi:
-		.byte >10, >20, >40, >80
-		.byte >100, >200, >400, >800
-		.byte >1000, >2000, >4000, >8000
-		.byte >10000, >20000, >40000
-
-DrawTimeDigit:
-	pha
-		lsr
-		lsr
-		lsr
-		lsr
-		sta VRAM_Buffer1, y
-		iny
-	pla
-		and #$0F
-		sta VRAM_Buffer1, y
-		iny
-		rts
-
-WriteTime:
-	tya
-	pha
-    ldx $00
-    ldy $01
-		jsr Enter_FrameToTime
-	pla
-	tay
-		lda WRAM_PrettyTimeMin
-		and #$0F
-		sta VRAM_Buffer1, y
-		iny
-		lda #$AF ; .
-		sta VRAM_Buffer1, y
-		iny
-
-		lda WRAM_PrettyTimeSec
-		jsr DrawTimeDigit
-		lda #$AF ; .
-		sta VRAM_Buffer1, y
-		iny
-
-		lda WRAM_PrettyTimeFrac
-		jsr DrawTimeDigit
-  .if 0
-		lda #$29 ; x
-		sta VRAM_Buffer1, y
-		iny
-	tya
-	pha
-		jsr TimerToDecimal
-	pla
-	tay
-		ldx #4
-@writeframe:
-		lda bcdResult,x
-		sta VRAM_Buffer1,y
-		iny
-		dex
-		bpl @writeframe
-  .endif
-		rts
-
-PersonalBestText:
-YourTime:
-	.byte $22, $2a, $0c
-	.byte "TIME ", $fe, $ff
-YourPB:
-	.byte $22, $4a, $0c
-	.byte "PB   ", $fe, $ff
-NewRecord:
-  .byte $22, $4a, $0c
-  .byte "NEW RECORD! ", $ff
-
-PbTextOffsets:
-		.byte YourTime - PersonalBestText
-		.byte YourPB - PersonalBestText
-    .byte NewRecord - PersonalBestText
-
-WriteTimeText:
-		ldy VRAM_Buffer1_Offset
-		lda PbTextOffsets, x
-		tax
-@copy_more:
-		lda PersonalBestText, x
-		sta VRAM_Buffer1, y
-		cmp #$ff
-		beq @done
-		cmp #$fe
-		bne @no_time
-		txa
-	pha
-		jsr WriteTime
-	pla
-		tax
-		inx
-		bne @copy_more ; Always...
-@no_time:
-		iny
-		inx
-		bne @copy_more
-@done:
-		lda #0
-		sta VRAM_Buffer1, y
-		sty VRAM_Buffer1_Offset
-		rts
-
-Enter_RenderIntermediateTime:
-    lda WRAM_PracticeFlags
-    and #PF_LevelEntrySaved
-    bne @dontshow
-    lda LevelNumber
-    ora WorldNumber
-    beq @dontshow
-    lda WRAM_Timer
-    sta $00
-    lda WRAM_Timer+1
-    sta $01
-		ldx #0
-		jsr WriteTimeText
-
-    lda WorldNumber
-    asl
-    asl
-    asl
-    sta $00
-    lda LevelNumber
-    asl
-    adc $00
-    tax
-    lda WRAM_OrgTimes, x
-    ora WRAM_OrgTimes+1, x
-    bne @checkisrecord
-@newrecord:
-    lda WRAM_Timer
-    sta WRAM_OrgTimes, x
-    lda WRAM_Timer+1
-    sta WRAM_OrgTimes+1, x
-    ldx #2
-    jsr WriteTimeText
-    jmp @resettimer
-@checkisrecord:
-    lda WRAM_Timer+1
-    cmp WRAM_OrgTimes+1, x
-    bmi @newrecord
-    bne @notarecord
-    lda WRAM_Timer
-    cmp WRAM_OrgTimes, x
-    bmi @newrecord
-@notarecord:
-    lda WRAM_OrgTimes, x
-    sta $00
-    lda WRAM_OrgTimes+1, x
-    sta $01
-		ldx #1
-		jsr WriteTimeText
-@resettimer:
-    lda #0
-    sta WRAM_Timer
-    sta WRAM_Timer+1
-@dontshow:
-    rts ; will be jump
-
 DisplayIntermediate:
                lda OperMode                 ;check primary mode of operation
                beq NoInter                  ;if in title screen mode, skip this
@@ -854,8 +638,8 @@ DisplayIntermediate:
 PlayerInter:   jsr DrawPlayer_Intermediate  ;put player in appropriate place for
                lda #$01                     ;lives display, then output lives display to buffer
 OutputInter:   
-				jsr WriteGameText
-				jsr Enter_RenderIntermediateTime
+      				jsr WriteGameText
+      				jsr Enter_RenderIntermediateTime
 
                jsr ResetScreenTimer
                lda #$00

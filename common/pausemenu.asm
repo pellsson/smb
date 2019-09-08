@@ -156,7 +156,7 @@ _draw_pm_row_5:
 @save:
 		sta $00
 		stx $01
-		lda #$0A
+		lda #$21 ; X
 		sta $02
 		jsr copy_user_row
 		row_render_data $2120, CustomRow
@@ -175,7 +175,7 @@ _draw_pm_row_6:
 @save:
 		sta $00
 		stx $01
-		lda #$0B
+		lda #$22 ; Y
 		sta $02
 		jsr copy_user_row
 		row_render_data $2140, CustomRow

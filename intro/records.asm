@@ -269,8 +269,30 @@ redraw_all_records:
 records_attr:
 		.incbin "nss/records_attr.bin"
 
+records_palette:
+		.byte $0F, $30, $0f, $0f
+		.byte $0F, $16, $0f, $0f
+		.byte $0F, $11, $0f, $0f
+		.byte $0F, $27, $0f, $0f
 enter_records:
 		jsr screen_off
+		;
+		; Retarded.
+		;
+		lda PPU_STATUS
+		lda #$3F
+		sta $2006
+		lda #$00
+		sta $2006
+		ldy #$10
+		ldx #$00
+@more_pal:
+		lda records_palette, x
+		sta $2007
+		inx
+		dey
+		bne @more_pal
+
 		ldx #0
 		lda #0
 @nuke_sprites:
