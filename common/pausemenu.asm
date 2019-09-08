@@ -36,7 +36,10 @@ pm_slowmo_off_row:
 	.byte $24, " SLOMO NONE ", $24, $24, $24
 
 pm_slowmo_min_row:
-	.byte $24, " SLOMO MIN  ", $24, $24, $24
+	.byte $24, " SLOMO LOW  ", $24, $24, $24
+
+pm_slowmo_mid_row:
+	.byte $24, " SLOMO MID  ", $24, $24, $24
 
 pm_slowmo_max_row:
 	.byte $24, " SLOMO MAX  ", $24, $24, $24
@@ -186,7 +189,12 @@ _draw_pm_row_7:
 		beq @off
 		dex
 		beq @min
+		dex
+		beq @mid
 		row_render_data $2160, pm_slowmo_max_row
+		rts
+@mid:
+		row_render_data $2160, pm_slowmo_mid_row
 		rts
 @min:
 		row_render_data $2160, pm_slowmo_min_row
@@ -460,7 +468,7 @@ pm_toggle_show:
 pm_slowmo:
 		ldx WRAM_SlowMotion
 		inx
-		cpx #3
+		cpx #4
 		bne @good
 		ldx #0
 @good:

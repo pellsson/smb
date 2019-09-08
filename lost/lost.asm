@@ -11584,69 +11584,67 @@ loc_A928:
 
 		lda SprObject_Y_Position
 		cmp PlayerBGUpperExtent,x
-		bcc loc_A964
+		bcc DoFootCheck
 		jsr BlockBufferColli_Head
-		beq loc_A964
+		beq DoFootCheck
 		jsr CheckForCoinMTiles
-		bcs loc_A988
+		bcs AwardTouchedCoin
 		ldy Player_Y_Speed
-		bpl loc_A964
+		bpl DoFootCheck
 		ldy byte_4
 		cpy #4
-		bcc loc_A964
+		bcc DoFootCheck
 		jsr sub_AC18
-		bcs loc_A958
+		bcs SolidOrClimb
 		ldy AreaType
-		beq loc_A960
+		beq NYSpd
 		ldy BlockBounceTimer
-		bne loc_A960
+		bne NYSpd
 		jsr sub_88AE
-		jmp loc_A964
-loc_A958:
+		jmp DoFootCheck
 
+SolidOrClimb:
 		cmp #$23
-		beq loc_A960
+		beq NYSpd
 		lda #2
 		sta Square1SoundQueue
-loc_A960:
-
+NYSpd:
 		lda #1
 		sta Player_Y_Speed
-loc_A964:
-
+DoFootCheck:
 		ldy byte_EB
 		lda SprObject_Y_Position
 		cmp #$CF
-		bcs loc_A9CC
-		jsr sub_B086
+		bcs DoPlayerSideCheck
+		jsr BlockBufferColli_Feet
 		jsr CheckForCoinMTiles
-		bcs loc_A988
+		bcs AwardTouchedCoin
 		pha
-		jsr sub_B086
+		jsr BlockBufferColli_Feet
 		sta TMP_0
 		pla
 		sta TMP_1
-		bne loc_A98B
+		bne ChkFootMTile
 		lda TMP_0
-		beq loc_A9CC
+		beq DoPlayerSideCheck
 		jsr CheckForCoinMTiles
-		bcc loc_A98B
-loc_A988:
+		bcc ChkFootMTile
 
+AwardTouchedCoin:
 		jmp loc_AA73
-loc_A98B:
 
+ChkFootMTile:
 		jsr CheckForClimbMTiles
-		bcs loc_A9CC
+		bcs DoPlayerSideCheck
 		ldy Player_Y_Speed
-		bmi loc_A9CC
+		bmi DoPlayerSideCheck
 		cmp #$C6
 		bne loc_A99B
-		jmp loc_AA7C
-loc_A99B:
+		jmp HandleAxeMetatile
 
+loc_A99B:
 		jsr sub_AB40
-		beq loc_A9CC
+		beq DoPlayerSideCheck
 		ldy JumpspringAnimCtrl
 		bne loc_A9C8
 		ldy byte_4
@@ -11670,7 +11668,7 @@ loc_A9C8:
 
 		lda #0
 		sta Player_State
-loc_A9CC:
+DoPlayerSideCheck:
 
 		ldy byte_EB
 		iny
@@ -11784,8 +11782,9 @@ loc_AA73:
 		jsr sub_AA8D
 		inc CoinTallyFor1Ups
 		jmp GiveOneCoin
-loc_AA7C:
 
+HandleAxeMetatile:
+		jsr Enter_EndOfCastle
 		lda #0
 		sta OperMode_Task
 		sta CurrentPlayer
@@ -12835,7 +12834,7 @@ BlockBuffer_Y_Adder:
 		.byte 6
 		.byte 8
 		.byte $10
-sub_B086:
+BlockBufferColli_Feet:
 
 		iny
 BlockBufferColli_Head:

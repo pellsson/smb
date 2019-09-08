@@ -1931,6 +1931,10 @@ GetPbTimeX:
 
 
 RenderIntermediateTime:
+		jsr RenderIntermediateTimeInner
+		jmp ReturnBank
+
+RenderIntermediateTimeInner:
 	    lda WRAM_PracticeFlags
 	    and #PF_LevelEntrySaved
 	    bne @dontshow
@@ -1988,5 +1992,27 @@ RenderIntermediateTime:
 	    sta WRAM_Timer
 	    sta WRAM_Timer+1
 @dontshow:
-    	jmp ReturnBank
+    	rts
+
+EndOfCastle:
+		ldx WorldNumber
+		cpx #World8
+		bne @not_end
+@is_end:
+		PF_SetToLevelEnd_A
+		jsr RenderIntermediateTimeInner
+		lda WRAM_PracticeFlags
+		ora #PF_LevelEntrySaved
+		sta WRAM_PracticeFlags
+		beq @is_org ; jmp
+@not_end:
+		lda BANK_SELECTED
+		cmp #BANK_ORG
+		beq @is_org
+		lda IsPlayingExtendedWorlds
+		beq @is_org
+		cpx #3 ; World D
+		beq @is_end
+@is_org:
+		jmp RedrawAll
 

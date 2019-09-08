@@ -397,7 +397,6 @@ IncMsgCounter: lda SecondaryMsgCounter
                sta PrimaryMsgCounter
                cmp #$07                      ;check primary counter one more time
 SetEndTimer:   bcc ExitMsgs                  ;if not reached value yet, branch to leave
-               jsr Enter_RedrawAll
                lda #$06
                sta WorldEndTimer             ;otherwise set world end timer
 IncModeTask_A: inc OperMode_Task             ;move onto next task in mode
@@ -1222,17 +1221,13 @@ MushroomRetainerSaved:
 
 PrincessSaved1:
 ;"YOUR QUEST IS OVER."
-  .byte $25, $a3, $12
-  .byte $1e, $11, $11, $11, $11, $24, $17, $18
-  .byte $24, $12, $0d, $0e, $0a, $24, $20, $11, $0a, $1d
+  text_block $25a3, "VILKEN SNABB MARIO!"
   .byte $00
 
 
 PrincessSaved2:
 ;"WE PRESENT YOU A NEW QUEST."
-  .byte $25, $e3, $13
-  .byte $1d, $18, $24, $20, $1b, $12, $1d, $0e
-  .byte $24, $11, $0e, $1b, $0e, $24, $24, $10, $10, $1c, $2b
+  text_block $25e3, "BRA JOBBAT KOMPIS!"
   .byte $00
 
 WorldSelectMessage1:
@@ -10560,6 +10555,7 @@ HandleCoinMetatile:
       jmp GiveOneCoin       ;update coin amount and tally on the screen
 
 HandleAxeMetatile:
+       jsr Enter_EndOfCastle
        lda #$00
        sta OperMode_Task   ;reset secondary mode
        lda #$02
