@@ -1372,6 +1372,9 @@ ProcessLevelLoad:
 
 PracticeInit:
 		lda #0
+		sta WRAM_Timer
+		sta WRAM_SlowMotion
+		sta WRAM_SlowMotionLeft
 		sta WRAM_MenuIndex
 		sta WRAM_SaveStateBank
 		lda WRAM_PracticeFlags
@@ -1420,10 +1423,10 @@ ValidWRAMMagic:
 		cmp #$65 ; E
 		bne @exit
 		lda WRAM_Magic+2
-		cmp #$6C ; L
+		cmp #$35 ; 5
 		bne @exit
 		lda WRAM_Magic+3
-		cmp #$6C ; L
+		cmp #$30 ; 0
 @exit:
 		rts
 
@@ -1432,12 +1435,6 @@ InitializeWRAM:
 		beq RamGoodExit
 		jmp FactoryResetWRAM	
 RamGoodExit:
-		;
-		; Initialize other stuff
-		;
-		lda #0
-		sta WRAM_SlowMotion
-		sta WRAM_SlowMotionLeft
 		jmp ReturnBank
 
 SetDefaultWRAM:
@@ -1448,9 +1445,9 @@ SetDefaultWRAM:
 		sta WRAM_Magic+0
 		lda #$65 ; E
 		sta WRAM_Magic+1
-		lda #$6C ; L
+		lda #$35 ; 5
 		sta WRAM_Magic+2
-		lda #$6C ; L
+		lda #$30 ; 0
 		sta WRAM_Magic+3
 
 		lda #<Player_Rel_XPos
@@ -1892,7 +1889,16 @@ WriteTimeText:
 		rts
 
 GetPbTimeX:
-	    lda WRAM_LoadedWorld
+		lda WRAM_LoadedWorld
+		ldx BANK_SELECTED
+		cpx #BANK_ORG
+		beq @not_ext
+		ldx IsPlayingExtendedWorlds
+		beq @not_ext
+		and #$03
+		clc
+		adc #$09
+@not_ext:
 	    asl
 	    asl
 	    asl
@@ -1921,8 +1927,7 @@ RenderIntermediateTime:
 	    lda WRAM_PracticeFlags
 	    and #PF_LevelEntrySaved
 	    bne @dontshow
-	    lda LevelNumber
-	    ora WorldNumber
+	    lda WRAM_Timer+1
 	    beq @dontshow
 	    lda WRAM_Timer
 	    sta $00

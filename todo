@@ -1,12 +1,14 @@
 For Release 5.0:
--- Slow motion less flicker ploxxx (only remove sprites on WRAM_SlowMotionLeft == 0)
--- Make webpage less tarded
+-- Make webpage less tarded (Fix gist)
+-- PB for extended worlds not saved corrected
 -- Frame advance (player #2 A)
 -- Add setting to show frames or time?
 -- Make sure WRAM_Timer is reset at start & WRAM_LoadedWorld and Level.
 -- Disable pausemenu during auto_move? Kind glitches out a bit i think.
 
+
 Done for Release:
+-- Starting for a level is instant record :)
 -- Test highscores in LL
 -- Fix annoying partially floating letter in the menu (smb2)
 -- Copy the last few bytes of the characterset... looks ass...
@@ -32,6 +34,7 @@ Done for Release:
 	-- Always to dt when on intermediate+on save it? Or set it to ffff on load?
 	-- Oh, and simply DONT reset it on death :) That way we dont care for halfway or not.
 -- Increase timer always except on title screen...
+-- Slow motion less flicker ploxxx (only remove sprites on WRAM_SlowMotionLeft == 0)
 
 BUGS:
 -- Save-states occationally mute.

@@ -102,6 +102,8 @@ VRAM_Buffer_Offset:
 		.byte 0
 		.byte $40
 
+MACRO_ThrowFrameImpl
+
 NonMaskableInterrupt:
 		lda Mirror_PPU_CTRL_REG1
 		and #$7E
@@ -122,8 +124,12 @@ ScreenOff:
 		lda #0
 		jsr InitScroll
 		sta PPU_SPR_ADDR
+
+		MACRO_RunSlowMo 4
+
 		lda #2
 		sta SPR_DMA
+
 		lda VRAM_Buffer_AddrCtrl
 		asl
 		tax
@@ -184,29 +190,28 @@ PauseSkip:
 		;
 		lda Sprite0HitDetectFlag
 		beq SkipSprite0
-
 Sprite0Clr:
 		lda PPU_STATUS
 		and #$40
 		bne Sprite0Clr
-
 		lda GamePauseStatus
 		and #3
 		bne Sprite0Hit
-
 		jsr MoveSpritesOffscreen
 		jsr SpriteShuffler
-
 Sprite0Hit:
 		lda PPU_STATUS
 		and #$40
 		beq Sprite0Hit
-		ldy #$10
+		ldy #$14
 HBlankDelay:
 		dey
 		bne HBlankDelay
-
 SkipSprite0:
+		lda HorizontalScroll
+		sta PPU_SCROLL_REG
+		lda VerticalScroll
+		sta PPU_SCROLL_REG
 		;
 		; XXX - In smb2j-fds, this is effectively done AFTER the OperModeExecTree has ran.
 		;       If vert-/horizontalscroll is changed (and they are) in OperMode, we are showing wrong px i think
@@ -217,10 +222,7 @@ SkipSprite0:
 		ora UseNtBase2400
 		sta Mirror_PPU_CTRL_REG1
 		sta PPU_CTRL_REG1
-		lda HorizontalScroll
-		sta PPU_SCROLL_REG
-		lda VerticalScroll
-		sta PPU_SCROLL_REG
+
 		; todo xxx is this retarded?
 		;lda WorldNumber
 		;cmp #9
