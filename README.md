@@ -17,16 +17,16 @@ For feature requests or bug reports, please visit the [issue tracker](https://gi
 
 ### Features 
 
-- Add [tavenwebb2002](https://twitch.tv/tavenwebb2002) to the loader. Huge congratulations on the world record.
-- Add **real-time counter** for each level (Records saved in WRAM).
-	- Your time & PB is presented at the end of each level.
-	- All PBs for each level and game can be viewed from the loader menu.
-- Allow you to **start** directly on **Second Quest** in Super Mario Bros (Press B on title).
+- Added [tavenwebb2002](https://twitch.tv/tavenwebb2002) to the loader. Huge congratulations on the world record.
+- Added **real-time counter** for each level (Records saved in WRAM).
+	- Your **time & PB** is presented at the **end of each level**.
+	- All **PBs** for each level and game can be viewed from the **loader menu**.
+- Allows you to **start** directly on **Second Quest** in Super Mario Bros (Press B on title).
 - Added **Slow Motion** feature (accessible from pause menu). Kinda conceptual and experimental at this point.
 
 ### Bug Fixes
 
-- Remove articat in the statusbar where the bottom portion of certain letters would jitter with scrolling.
+- Remove artifact in the statusbar where the bottom portion of certain letters would jitter with scrolling.
 - There is no longer a horribly ugly flicker when you save or load states (unless you load from a level with a different background color than the save state).
 - Fix "Restart Level" that would glitch Lost Levels in some scenarios.
 - Fix bug where only parts of the font-set was copied if using a custom one.
