@@ -12,11 +12,9 @@ For feature requests or bug reports, please visit the [issue tracker](https://gi
 	<img alt="" border="0" src="https://www.paypal.com/en_SE/i/scr/pixel.gif" width="1" height="1" />
 </form>
 
-## Releases
+## Version 5.0
 
-### Version 5.0
-
-#### Features 
+### Features 
 
 - Add [tavenwebb2002](https://twitch.tv/tavenwebb2002) to the loader. Huge congratulations on the world record.
 - Add **real-time counter** for each level (Records saved in WRAM).
@@ -25,7 +23,7 @@ For feature requests or bug reports, please visit the [issue tracker](https://gi
 - Allow you to **start** directly on **Second Quest** in Super Mario Bros (Press B on title).
 - Added **Slow Motion** feature (accessible from pause menu). Kinda conceptual and experimental at this point.
 
-#### Bug Fixes
+### Bug Fixes
 
 - Remove articat in the statusbar where the bottom portion of certain letters would jitter with scrolling.
 - There is no longer a horribly ugly flicker when you save or load states (unless you load from a level with a different background color than the save state).
@@ -62,4 +60,7 @@ it released.**
 - Practice with **Slow Motion**.
 - And a lot more...
 
-For questions, contact @pellsson in the Super Mario Bros. discord channel.
+## Download
+
+- [Version 5.0 - IPS](https://github.com/pellsson/smb/smb-v5.0.ips)
+
