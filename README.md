@@ -63,5 +63,5 @@ it released.**
 
 ## Download
 
-- [Version 5.0 - IPS](https://github.com/pellsson/smb/smb-v5.0.ips)
+- [Version 5.0 - IPS](https://github.com/pellsson/smb/raw/master/smb-v5.0.ips)
 
