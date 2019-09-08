@@ -21,7 +21,7 @@ For feature requests or bug reports, please visit the [issue tracker](https://gi
 
 ### Bug Fixes
 
-- 5.1 adds support for physical hardware and fixes 5.0 bug where save states would break PBs.
+- 5.1 fixes bugs in 5.0. Support for physical hardware; Save states won't break PBs; Slow motion in Original doesn't brick Top Loader.
 - Remove artifact in the statusbar where the bottom portion of certain letters would jitter with scrolling.
 - There is no longer a horribly ugly flicker when you save or load states (unless you load from a level with a different background color than the save state).
 - Fix "Restart Level" that would glitch Lost Levels in some scenarios.
