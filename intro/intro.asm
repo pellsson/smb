@@ -84,12 +84,11 @@ ReadJoypads:
 		lda #$01
 		sta JOYPAD_PORT
 		lsr
-		tax
 		sta JOYPAD_PORT
 		ldy #$08
 PortLoop:
 		pha
-		lda JOYPAD_PORT,x
+		lda JOYPAD_PORT
 		sta $00
 		lsr
 		ora $00
