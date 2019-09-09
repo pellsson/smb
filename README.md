@@ -8,9 +8,9 @@ For feature requests or bug reports, please visit the [issue tracker](https://gi
 
 - When loading a save state from a different level, you'll sometimes end up in a broken state. Just load again and you should be fine.
 
-## Version 5.1
+## Major Version 5 (Current 5.2)
 
-### Features 
+### New Features 
 
 - Added [tavenwebb2002](https://twitch.tv/tavenwebb2002) to the loader. Huge congratulations on the world record.
 - Added **real-time counter** for each level (Records saved in WRAM).
@@ -18,10 +18,18 @@ For feature requests or bug reports, please visit the [issue tracker](https://gi
 	- All **PBs** for each level and game can be viewed from the **loader menu**.
 - Allows you to **start** directly on **Second Quest** in Super Mario Bros (Press B on title).
 - Added **Slow Motion** feature (accessible from pause menu). Kinda conceptual and experimental at this point.
+- Added **Frame Advance**. Set `SLOMO` in pause menu to `ADV`. To advance frame, press **A** on **controller two**. **If you dont have two controllers you will softlock :)**
 
 ### Bug Fixes
 
-- 5.1 fixes bugs in 5.0. Support for physical hardware; Save states won't break PBs; Slow motion in Original doesn't brick Top Loader.
+- 5.2 fixes bugs in 5.1.
+	- The 8-4s and D-4 records are tracked and shown @ Axe grab.
+	- Slowmotion doesn't crash arbitrarily (I think)
+	- Now possible to save while in slow motion mode.
+- 5.1 fixes bugs in 5.0.
+	- Support for physical hardware.
+	- Save states won't break PBs
+	- Slow motion in Original doesn't brick Top Loader.
 - Remove artifact in the statusbar where the bottom portion of certain letters would jitter with scrolling.
 - There is no longer a horribly ugly flicker when you save or load states (unless you load from a level with a different background color than the save state).
 - Fix "Restart Level" that would glitch Lost Levels in some scenarios.
@@ -34,9 +42,6 @@ To keep settings, frame rules and stuff persistent; configure your game
 system (emulator, PowerPAK, EverDrive etc.) to allow the SMB Practice ROM
 battery-backed WRAM. Essentially, figure out how to make it so that you can
 save in Zelda (without savestates), power off the system, and load (without using save states). Then do the same for the SMB Practice ROM.
-
-**I'll describe more indepth about new features tomorrow. Right now I just want
-it released.**
 
 ## Feature list
 - Practice both **SMB** and **SMB Lost Levels**
@@ -55,13 +60,15 @@ it released.**
 - **Real-time** counter for each level, and persistent records.
 - Start directly on the **Second Quest** in SMB1.
 - Practice with **Slow Motion**.
+- Practice with **Frame Advance** (A on second controller to advance. Start on second to exit.).
 - And a lot more...
 
 ## Download & Installation
 
 First download the desired version below:
 
-- [Version 5.1 - IPS](https://github.com/pellsson/smb/raw/master/smb-v5.1.ips)
+- [Version 5.2 - IPS](https://github.com/pellsson/smb/raw/master/smb-v5.2.ips)
+- ~~Version 5.1 - IPS (Equally broken)~~
 - ~~Version 5.0 - IPS (Too broken)~~
 
 Then simply apply that IPS (using for instance Lunar IPS) to the an original, unmodified version of the Super Mario Bros. (J/World) ROM. *DO NOT* use The Lost Levels. The MD5 checksum for the ROM you should be using is `811b027eaf99c2def7b933c5208636de`.
