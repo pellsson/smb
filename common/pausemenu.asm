@@ -690,7 +690,7 @@ RunPauseMenu:
 @no_wrap_up:
 		jmp @save_exit
 @check_a:
-		and #(B_Button|A_Button)
+		and #A_Button
 		beq @exit
 		jmp pause_menu_activate
 @save_exit:
