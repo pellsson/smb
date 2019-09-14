@@ -353,6 +353,11 @@ RedrawFramesRemaningInner:
 		sta VRAM_Buffer1_Offset
 		rts
 
+RedrawAllInner:
+		jsr RedrawFramesRemaningInner
+		jsr RedrawFrameNumbersInner
+		rts
+
 RedrawAll:
 		jsr RedrawFramesRemaningInner
 		jsr RedrawFrameNumbersInner
@@ -1971,12 +1976,10 @@ RenderIntermediateTimeInner:
 
 EndOfCastle:
 		lda WRAM_Timer+1
-		bpl @not_second_time
-		jmp ReturnBank
-@not_second_time:
+		bmi @exit
 		ldx WorldNumber
 		cpx #World8
-		bne @not_end
+		bne @check_ext
 @is_end:
 		PF_SetToLevelEnd_A
 		jsr RenderIntermediateTimeInner
@@ -1985,16 +1988,19 @@ EndOfCastle:
 		sta WRAM_PracticeFlags
 		lda #$FF
 		sta WRAM_Timer+1
-		bne @done ; jmp
-@not_end:
+		jsr RedrawAllInner
+		ldx #1
+		jmp ReturnBank
+@check_ext:
 		lda BANK_SELECTED
 		cmp #BANK_ORG
-		beq @done
+		beq @exit
 		lda IsPlayingExtendedWorlds
-		beq @done
+		beq @exit
 		cpx #3 ; World D
 		beq @is_end
-@done:
-		jsr RedrawFramesRemaningInner
+@exit:
+		jsr RedrawAllInner
+		ldx #0
 		jmp ReturnBank
 

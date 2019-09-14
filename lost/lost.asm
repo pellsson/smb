@@ -11785,6 +11785,13 @@ loc_AA73:
 
 HandleAxeMetatile:
 		jsr Enter_EndOfCastle
+		cpx #1
+		bne @not_end_of_game
+		;
+		; ############### WARNING THIS ADDS A FRAME!!! #####################
+		;
+		rts
+@not_end_of_game:
 		lda #0
 		sta OperMode_Task
 		sta CurrentPlayer

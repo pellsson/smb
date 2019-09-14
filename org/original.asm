@@ -10557,6 +10557,13 @@ HandleCoinMetatile:
 
 HandleAxeMetatile:
        jsr Enter_EndOfCastle
+       cpx #1
+       bne @not_end_of_game
+       ;
+       ; ############### WARNING THIS ADDS A FRAME!!! #####################
+       ;
+       rts
+@not_end_of_game:
        lda #$00
        sta OperMode_Task   ;reset secondary mode
        lda #$02
