@@ -1055,10 +1055,16 @@ LoadState:
 		inx
 		bne @save_level
 
+		lda OperMode
+		cmp WRAM_SaveRAM+OperMode
+		bne @restore_pal
+		lda OperMode_Task
+		cmp WRAM_SaveRAM+OperMode_Task
+		bne @restore_pal
 		lda AreaType
 		cmp WRAM_SaveRAM+AreaType
 		beq @copy_ram
-
+@restore_pal:
 		lda PPU_STATUS
 		lda #$3F
 		sta PPU_ADDRESS
