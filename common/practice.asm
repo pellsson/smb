@@ -1074,7 +1074,7 @@ LoadState:
 		inx
 		dey
 		bne @copy_pal
-
+		ldx #0
 @copy_ram:
 		lda WRAM_SaveRAM, x
 		sta $000, x
