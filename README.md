@@ -8,7 +8,7 @@ For feature requests or bug reports, please visit the [issue tracker](https://gi
 
 - When loading a save state from a different level, you'll sometimes end up in a broken state. Just load again and you should be fine.
 
-## Major Version 5 (Current 5.2)
+## Major Version 5 (Current 5.3)
 
 ### New Features 
 
@@ -21,12 +21,15 @@ For feature requests or bug reports, please visit the [issue tracker](https://gi
 - Added **Frame Advance**. Set `SLOMO` in pause menu to `ADV`. To advance frame, press **A** on **controller two**. **If you dont have two controllers you will softlock :)**
 
 ### Bug Fixes
-
-- 5.2 fixes bugs in 5.1.
+- 5.3 bug fixes
+	- Disabled **B** in pause menu.
+	- Fixed a million bugs related to save states
+	- Fix rendering issue when showing RTA time @ 8-4s and D-4
+- 5.2 bugs fixes
 	- The 8-4s and D-4 records are tracked and shown @ Axe grab.
 	- Slowmotion doesn't crash arbitrarily (I think)
 	- Now possible to save while in slow motion mode.
-- 5.1 fixes bugs in 5.0.
+- 5.1 bugs fixes
 	- Support for physical hardware.
 	- Save states won't break PBs
 	- Slow motion in Original doesn't brick Top Loader.
