@@ -10557,6 +10557,12 @@ HandleCoinMetatile:
 
 HandleAxeMetatile:
        jsr Enter_EndOfCastle
+       lda #$00
+       sta OperMode_Task   ;reset secondary mode
+       lda #$02
+       sta OperMode        ;set primary mode to autoctrl mode
+       lda #$18
+       sta Player_X_Speed  ;set horizontal speed and continue to erase axe metatile
        cpx #1
        bne @not_end_of_game
        ;
@@ -10564,12 +10570,7 @@ HandleAxeMetatile:
        ;
        rts
 @not_end_of_game:
-       lda #$00
-       sta OperMode_Task   ;reset secondary mode
-       lda #$02
-       sta OperMode        ;set primary mode to autoctrl mode
-       lda #$18
-       sta Player_X_Speed  ;set horizontal speed and continue to erase axe metatile
+
 ErACM: ldy $02             ;load vertical high nybble offset for block buffer
        lda #$00            ;load blank metatile
        sta ($06),y         ;store to remove old contents from block buffer

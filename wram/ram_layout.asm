@@ -147,8 +147,6 @@ WRAM_PrettyTimeFrac:
 ; Number of stars collected
 ;
 WRAM_LostStart:
-WRAM_NumberOfStars:
-		.byte $08
 
 WRAM_LeafY:
 		.byte $30
@@ -242,14 +240,10 @@ WRAM_HalfwayPageNybbles:
 		.byte $00, $00
 		.byte $00, $00
 
-;
-; Thank you mario buffer
-;
-WRAM_PatchMarioName1:
-		.byte "MARIO"
-		.byte $00
-
 WRAM_LostEnd:
+
+WRAM_SaveLost:
+		.res WRAM_LostEnd - WRAM_LostStart, $00
 
 WRAM_SaveRAM:
 		.res $800, $00

@@ -1035,6 +1035,9 @@ LoadState:
 		lda OperMode_Task
 		cmp WRAM_SaveRAM+OperMode_Task
 		bne @restore_pal
+		lda CurrentPlayer
+		cmp WRAM_SaveRAM+CurrentPlayer
+		bne @restore_pal
 		lda AreaType
 		cmp WRAM_SaveRAM+AreaType
 		beq @copy_ram
@@ -1100,6 +1103,14 @@ LoadState:
 		sta PPU_DATA
 		inx
 		bne @copy_nt
+
+		ldx #(WRAM_LostEnd - WRAM_LostStart)-1
+@copy_lost:
+		lda WRAM_SaveLost, x
+		sta WRAM_LostStart, x
+		dex
+		bpl @copy_lost
+
 
 		; todo copy palette
 		lda GamePauseStatus
@@ -1194,6 +1205,14 @@ SaveState:
 		sta WRAM_SaveNT+$700, x
 		inx
 		bne @copy_nt
+
+		ldx #(WRAM_LostEnd - WRAM_LostStart)-1
+@copy_lost:
+		lda WRAM_LostStart, x
+		sta WRAM_SaveLost, x
+		dex
+		bpl @copy_lost
+
 
 		lda GamePauseStatus
 		ora #2
@@ -1409,7 +1428,7 @@ ValidWRAMMagic:
 		cmp #$35 ; 5
 		bne @exit
 		lda WRAM_Magic+3
-		cmp #$30 ; 0
+		cmp #$33 ; 0
 @exit:
 		rts
 
@@ -1430,7 +1449,7 @@ SetDefaultWRAM:
 		sta WRAM_Magic+1
 		lda #$35 ; 5
 		sta WRAM_Magic+2
-		lda #$30 ; 0
+		lda #$33 ; 3
 		sta WRAM_Magic+3
 
 		lda #<Player_Rel_XPos
@@ -1976,7 +1995,8 @@ RenderIntermediateTimeInner:
 
 EndOfCastle:
 		lda WRAM_Timer+1
-		bmi @exit
+		cmp #$EE ; FUCK HACK
+		beq @exit
 		ldx WorldNumber
 		cpx #World8
 		bne @check_ext
@@ -1986,7 +2006,7 @@ EndOfCastle:
 		lda WRAM_PracticeFlags
 		ora #PF_LevelEntrySaved
 		sta WRAM_PracticeFlags
-		lda #$FF
+		lda #$EE
 		sta WRAM_Timer+1
 		jsr RedrawAllInner
 		ldx #1
