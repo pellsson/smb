@@ -142,7 +142,8 @@ CHR_LOST	= 3
 
 SavedRule = $07d9
 RuleIndex = $0717 ; Previously DemoAction (can be changed to temp?)
-PowerUps = $07e3 ; Previously unused?
+PowerUps = $07e3 ; Previously unused
+CurrentRule = $7df
 
 .ifndef RESTART_LEVEL_BUTTONS
 	.define RESTART_LEVEL_BUTTONS Select_Button|Up_Dir

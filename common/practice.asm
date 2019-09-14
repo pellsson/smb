@@ -320,78 +320,6 @@ SaveFrameCounter:
 		;
 		rts
 
-;-------------------------------------------------------------------------------------
-
-StatusBarData:
-		.byte $cb, $04 ; top score display on title screen
-		.byte $64, $04 ; player score
-		.byte $64, $06
-		.byte $6d, $03 ; coin tally
-		.byte $6d, $03
-		.byte $7a, $03 ; game timer
-		.byte $75, $03 ; POS
-		.byte $7E, $02 ; RM
-
-StatusBarOffset:
-		.byte $06, $0c, $12, FRAME_NUMBER_OFFSET+1, $1e, $24
-		.byte POSITION_OFFSET+1, FRAMES_REMAIN_OFFSET+1
-
-PrintStatusBarNumbers:
-		sta $00            ;store player-specific offset
-		jsr OutputNumbers  ;use first nybble to print the coin display
-		lda $00            ;move high nybble to low
-		lsr                ;and print to score display
-		lsr
-		lsr
-		lsr
-OutputNumbers:
-		clc                      ;add 1 to low nybble
-		adc #$01
-		and #%00001111           ;mask out high nybble
-		cmp #$08
-		bcs ExitOutputN
-		pha                      ;save incremented value to stack for now and
-		asl                      ;shift to left and use as offset
-		tay
-		ldx VRAM_Buffer1_Offset  ;get current buffer pointer
-		lda #$20                 ;put at top of screen by default
-		cpy #$00                 ;are we writing top score on title screen?
-		bne SetupNums
-		lda #$22                 ;if so, put further down on the screen
-SetupNums:
-		sta VRAM_Buffer1,x
-		lda StatusBarData,y      ;write low vram address and length of thing
-		sta VRAM_Buffer1+1,x     ;we're printing to the buffer
-		lda StatusBarData+1,y
-		sta VRAM_Buffer1+2,x
-		sta $03                  ;save length byte in counter
-		stx $02                  ;and buffer pointer elsewhere for now
-		pla                      ;pull original incremented value from stack
-		tax
-		lda StatusBarOffset,x    ;load offset to value we want to write
-		sec
-		sbc StatusBarData+1,y    ;subtract from length byte we read before
-		tay                      ;use value as offset to display digits
-		ldx $02
-DigitPLoop:
-		lda DisplayDigits,y      ;write digits to the buffer
-		sta VRAM_Buffer1+3,x    
-		inx
-		iny
-		dec $03                  ;do this until all the digits are written
-		bne DigitPLoop
-		lda #$00                 ;put null terminator at end
-		sta VRAM_Buffer1+3,x
-		inx                      ;increment buffer pointer by 3
-		inx
-		inx
-		stx VRAM_Buffer1_Offset  ;store it in case we want to use it again
-ExitOutputN:
-		rts
-
-;-------------------------------------------------------------------------------------
-
-
 TopText:
 	text_block $2044, "RULE * FRAME"
 	text_block $2051, " X   Y  TIME R "
@@ -404,38 +332,79 @@ WritePracticeTop:
 	inline_write_block TopText
 	jmp ReturnBank
 
-RedrawAll:
+RedrawFramesRemaningInner:
+		ldy VRAM_Buffer1_Offset
+		lda #$20
+		sta VRAM_Buffer1, y
+		lda #$7E
+		sta VRAM_Buffer1+1, y
+		lda #$02
+		sta VRAM_Buffer1+2, y
 		lda IntervalTimerControl
 		jsr DivByTen
-		sta DisplayDigits+FRAMES_REMAIN_OFFSET
-		stx DisplayDigits+FRAMES_REMAIN_OFFSET-1
-		lda #$a6
-		jsr PrintStatusBarNumbers
+		sta VRAM_Buffer1+4, y
+		txa
+		sta VRAM_Buffer1+3, y
+		lda #0
+		sta VRAM_Buffer1+5, y
+		clc
+		tya
+		adc #5
+		sta VRAM_Buffer1_Offset
+		rts
+
+RedrawAll:
+		jsr RedrawFramesRemaningInner
 		jsr RedrawFrameNumbersInner
 		jmp ReturnBank
 
 RedrawFrameNumbersInner:
-		;
-		; Update frame
-		; 
+		ldy VRAM_Buffer1_Offset
+		lda #$20
+		sta VRAM_Buffer1, y
+		lda #$6d
+		sta VRAM_Buffer1+1, y
+		lda #$03
+		sta VRAM_Buffer1+2, y
 		lda FrameCounter
 		jsr DivByTen
-		sta DisplayDigits+FRAME_NUMBER_OFFSET
+		sta VRAM_Buffer1+5, y
 		txa
 		jsr DivByTen
-		sta DisplayDigits+FRAME_NUMBER_OFFSET-1
-		stx DisplayDigits+FRAME_NUMBER_OFFSET-2
-		;
-		; Print it i think...
-		;
+		sta VRAM_Buffer1+4, y
+		txa
+		sta VRAM_Buffer1+3, y
+		lda #0
+		sta VRAM_Buffer1+6, y
+
 		lda WRAM_PracticeFlags
 		and #PF_SockMode
-		beq @no_sockmode
-		lda #$80
-@no_sockmode:
-		ora #$02
-		jsr PrintStatusBarNumbers ;print status bar numbers based on nybbles, whatever they be
-		ldx ObjectOffset          ;get enemy object buffer offset
+		bne @dont_draw_rule
+		lda #$20
+		sta VRAM_Buffer1+6, y ; Offset for RULE (if any)
+		lda #$64
+		sta VRAM_Buffer1+7, y
+		lda #$04
+		sta VRAM_Buffer1+8, y
+		ldx #0
+@copy_rule:
+		lda CurrentRule, x
+		sta VRAM_Buffer1+9, y
+		iny
+		inx
+		cpx #4
+		bne @copy_rule
+		lda #0
+		sta VRAM_Buffer1+9, y
+		iny
+		iny
+		iny
+@dont_draw_rule:
+		tya
+		clc
+		adc #6
+		sta VRAM_Buffer1_Offset
+		ldx ObjectOffset
 		rts
 
 RedrawFrameNumbers:
@@ -2001,6 +1970,10 @@ RenderIntermediateTimeInner:
     	rts
 
 EndOfCastle:
+		lda WRAM_Timer+1
+		bpl @not_second_time
+		jmp ReturnBank
+@not_second_time:
 		ldx WorldNumber
 		cpx #World8
 		bne @not_end
@@ -2010,15 +1983,18 @@ EndOfCastle:
 		lda WRAM_PracticeFlags
 		ora #PF_LevelEntrySaved
 		sta WRAM_PracticeFlags
-		beq @is_org ; jmp
+		lda #$FF
+		sta WRAM_Timer+1
+		bne @done ; jmp
 @not_end:
 		lda BANK_SELECTED
 		cmp #BANK_ORG
-		beq @is_org
+		beq @done
 		lda IsPlayingExtendedWorlds
-		beq @is_org
+		beq @done
 		cpx #3 ; World D
 		beq @is_end
-@is_org:
-		jmp RedrawAll
+@done:
+		jsr RedrawFramesRemaningInner
+		jmp ReturnBank
 
