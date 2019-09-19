@@ -308,6 +308,15 @@ NoPowerUpFrames:
 		;
 		ldy #$0e
 		ldx #$a2
+
+		lda BANK_SELECTED
+		cmp #BANK_ORG
+		beq @is_org
+		dex
+		dex
+		dey
+		dey
+@is_org:
 		lda LevelNumber
 		bne SaveFrameCounter
 		inx
