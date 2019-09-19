@@ -1387,7 +1387,10 @@ PracticeInit:
 		sta WRAM_SlowMotion
 		sta WRAM_SlowMotionLeft
 		sta WRAM_MenuIndex
-		sta WRAM_SaveStateBank
+		;
+		; Dont reset the SaveStateBank right?
+		;
+		; sta WRAM_SaveStateBank
 		lda WRAM_PracticeFlags
 		and #((PF_SaveState|PF_LoadState|PF_RestartLevel|PF_LevelEntrySaved)^$ff)
 		sta WRAM_PracticeFlags
