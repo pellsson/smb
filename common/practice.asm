@@ -934,7 +934,7 @@ PracticeOnFrameInner:
 @check_pause:
 		; TODO RENABLE
 		; jsr HandleRestarts ; Wont return if it did something
-		jsr PauseMenu
+		jmp PauseMenu
 @exit:
 		rts
 

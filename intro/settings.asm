@@ -741,6 +741,8 @@ ResetRecords:
 		iny
 		dex
 		bne @memset_next
+		pla
+		pla ; Ghetto. We should have the intro properly copy data to the screen :()
 @nope:
 		rts
 
@@ -763,14 +765,13 @@ _reset_records_input:
 @set_selection:
 		lda records_offsets, x
 		sta SETTINGS_X
+@done:
 		rts
 @checkab:
 		lda SavedJoypadBits
 		and #(B_Button|A_Button)
 		beq @done
 		jmp ResetRecords
-@done:
-		rts
 
 _reset_wram_input:
 		lda SavedJoypadBits
@@ -823,7 +824,7 @@ dispatch_input:
 run_option_inputs:
 		jsr dispatch_input
 		jsr redraw_setting
-		jsr redraw_selection
+		jmp redraw_selection
 noinput:
 		rts
 
