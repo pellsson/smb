@@ -1429,18 +1429,23 @@ RedrawSockTimer:
 		stx VRAM_Buffer1_Offset
 		jmp RedrawFrameNumbers
 
+MagicByte0 = $70 ; P
+MagicByte1 = $65 ; E
+MagicByte2 = $36 ; 6
+MagicByte3 = $30 ; 0
+
 ValidWRAMMagic:
 		lda WRAM_Magic+0
-		cmp #$70 ; P
+		cmp #MagicByte0
 		bne @exit
 		lda WRAM_Magic+1
-		cmp #$65 ; E
+		cmp #MagicByte1
 		bne @exit
 		lda WRAM_Magic+2
-		cmp #$35 ; 5
+		cmp #MagicByte2
 		bne @exit
 		lda WRAM_Magic+3
-		cmp #$33 ; 0
+		cmp #MagicByte3
 @exit:
 		rts
 
@@ -1455,13 +1460,13 @@ SetDefaultWRAM:
 		jsr ValidWRAMMagic
 		beq RamGoodExit
 
-		lda #$70 ; P
+		lda #MagicByte0
 		sta WRAM_Magic+0
-		lda #$65 ; E
+		lda #MagicByte1
 		sta WRAM_Magic+1
-		lda #$35 ; 5
+		lda #MagicByte2
 		sta WRAM_Magic+2
-		lda #$33 ; 3
+		lda #MagicByte3
 		sta WRAM_Magic+3
 
 		lda #<Player_Rel_XPos

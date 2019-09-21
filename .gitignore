@@ -1,3 +1,7 @@
+smb.bin
+fceux
+*.deb
+*.nes
 chr/org.chr
 chr/lost.chr
 chr/intro.chr
