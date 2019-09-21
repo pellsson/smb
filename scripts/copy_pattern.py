@@ -9,5 +9,4 @@ dst_off = dst_idx*(8*2)
 
 src_pattern = open(src, 'rb').read()[src_off:src_off+8*2]
 dst_chr = open(dst, 'rb').read()
-print(src_pattern)
-open('sss', 'wb').write(dst_chr[0:dst_off] + bytearray(src_pattern) + dst_chr[dst_off+8*2:])
+open('copied.chr', 'wb').write(dst_chr[0:dst_off] + bytearray(src_pattern) + dst_chr[dst_off+8*2:])
