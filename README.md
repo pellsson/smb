@@ -39,7 +39,7 @@ For feature requests or bug reports, please visit the [issue tracker](https://gi
 - Fix bug where only parts of the font-set was copied if using a custom one.
 - Lots of other smaller things...
 
-## Persistancy
+## Persistence
 
 To keep settings, frame rules and stuff persistent; configure your game
 system (emulator, PowerPAK, EverDrive etc.) to allow the SMB Practice ROM
@@ -76,7 +76,7 @@ First download the desired version below:
 
 - [Version 5.4 - IPS](https://github.com/pellsson/smb/raw/master/smb-v5.4.ips)
 
-Then simply apply that IPS (using for instance Lunar IPS) to the an original, unmodified version of the Super Mario Bros. (J/World) ROM. *DO NOT* use The Lost Levels. The MD5 checksum for the ROM you should be using is `811b027eaf99c2def7b933c5208636de`.
+Then simply apply that IPS (using for instance Lunar IPS) to the an original, unmodified version of the Super Mario Bros. (US/World) ROM. *DO NOT* use The Lost Levels. The MD5 checksum for the ROM you should be using is `811b027eaf99c2def7b933c5208636de`.
 
 <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
 	<input type="hidden" name="cmd" value="_donations" />
