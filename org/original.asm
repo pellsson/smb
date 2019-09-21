@@ -1194,18 +1194,11 @@ BowserPaletteData:
 
 MarioThanksMessage:
 ;"THANK YOU MARIO!"
-  .byte $25, $48, $10
-  .byte $1d, $11, $0a, $17, $14, $24
-  .byte $22, $18, $1e, $24
-  .byte $16, $0a, $1b, $12, $18, $2b
-  .byte $00
+   text_block $2548, "THANK YOU BIRDO!"
+    .byte 0
 
 LuigiThanksMessage:
     text_block $2548, "THANK YOU ERROR!"
-    .byte 0
-
-ThankYouMario:
-    text_block $2548, "THANK YOU BIRDO!"
     .byte 0
 
 MushroomRetainerSaved:

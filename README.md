@@ -4,14 +4,10 @@ A speedrun practice ROM for Super Mario Bros. and Super Mario Bros 2 - The Lost 
 
 For feature requests or bug reports, please visit the [issue tracker](https://github.com/pellsson/smb/issues).
 
-## Know Issues
-
-- When loading a save state from a different level, you'll sometimes end up in a broken state. Just load again and you should be fine.
-
-## Major Version 5 (Current 5.3)
+## Major Version 5 (Current 5.4)
 
 ### New Features 
-
+- Ability to **wipe SMB/LL/LL-EXT records** under settings.
 - Added [tavenwebb2002](https://twitch.tv/tavenwebb2002) to the loader. Huge congratulations on the world record.
 - Added **real-time counter** for each level (Records saved in WRAM).
 	- Your **time & PB** is presented at the **end of each level**.
@@ -21,6 +17,10 @@ For feature requests or bug reports, please visit the [issue tracker](https://gi
 - Added **Frame Advance**. Set `SLOMO` in pause menu to `ADV`. To advance frame, press **A** on **controller two**. **If you dont have two controllers you will softlock :)**
 
 ### Bug Fixes
+- 5.4 bug fixes
+	- When starting on a specific rule in Lost Levels the frame counter was set incorrectly, which could cause rule-deviations vs. vanilla.
+	- Use the coin-sprite for sprite0 (no more glitchy garbage under the coin).
+	- The Save-state is no longer invalidated as you power the machine on and off.
 - 5.3 bug fixes
 	- Disabled **B** in pause menu.
 	- Fixed a million bugs related to save states
@@ -52,6 +52,10 @@ save in Zelda (without savestates), power off the system, and load (without usin
 - **Start** on **any level**.
 - Keeps **track of prefered start rule** for each level.
 - **Battery backed WRAM** for persistent memory.
+	- Level rules.
+	- One save state.
+	- Personal bests.
+	- Settings.
 - **Restart the level** from the **frame-rule** you entered.
 - Monitor **two user-defined RAM addresses**.
 - Built-in **save-states**.
@@ -70,9 +74,7 @@ save in Zelda (without savestates), power off the system, and load (without usin
 
 First download the desired version below:
 
-- [Version 5.2 - IPS](https://github.com/pellsson/smb/raw/master/smb-v5.2.ips)
-- ~~Version 5.1 - IPS (Equally broken)~~
-- ~~Version 5.0 - IPS (Too broken)~~
+- [Version 5.4 - IPS](https://github.com/pellsson/smb/raw/master/smb-v5.4.ips)
 
 Then simply apply that IPS (using for instance Lunar IPS) to the an original, unmodified version of the Super Mario Bros. (J/World) ROM. *DO NOT* use The Lost Levels. The MD5 checksum for the ROM you should be using is `811b027eaf99c2def7b933c5208636de`.
 

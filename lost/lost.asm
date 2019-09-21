@@ -2221,7 +2221,7 @@ CopyMoreSprite0Data:
 		rts
 
 Sprite0Data:
-		.byte $17, $6b, $23, $58
+		.byte $18, $EE, $23, $58
 
 InitializeMemory:
 		ldx #7
@@ -13594,8 +13594,8 @@ byte_B3F0:
 		.byte $EC
 		.byte $ED
 		.byte $ED
-		.byte $EE
-		.byte $EE
+		.byte $EB
+		.byte $EB
 		.byte $FC
 		.byte $FC
 		.byte $D0

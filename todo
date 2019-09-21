@@ -1,3 +1,7 @@
+For 5.4:
+-- Make sure that the mushroom messages dont fuck up (ll & org)
+
+
 For Release 5.0:
 -- Loaded from 8-1 to 4-2 warproom. Broke to fuck.
 -- Increase timer always except on title screen...
