@@ -116,6 +116,7 @@ WRAM_OrgTimes:
 	.word 0, 0, 0, 0 ; World 6
 	.word 0, 0, 0, 0 ; World 7
 	.word 0, 0, 0, 0 ; World 8
+WRAM_OrgTimesEnd:
 
 WRAM_LostTimes:
 	.word 0, 0, 0, 0 ; World 1
@@ -126,11 +127,14 @@ WRAM_LostTimes:
 	.word 0, 0, 0, 0 ; World 6
 	.word 0, 0, 0, 0 ; World 7
 	.word 0, 0, 0, 0 ; World 8
+WRAM_LostTimesEnd:
+WRAM_ExtTimes:
 	.word 0, 0, 0, 0 ; World 9
 	.word 0, 0, 0, 0 ; World A
 	.word 0, 0, 0, 0 ; World B
 	.word 0, 0, 0, 0 ; World C
 	.word 0, 0, 0, 0 ; World D
+WRAM_ExtTimesEnd:
 
 WRAM_Timer:
 	.word 0

@@ -1,8 +1,8 @@
 ;
 ; This hack is just inlined into intro.asm
 ;
-SETTINGS_MENU_PPU = $2013
-MAX_SETTING = 13
+SETTINGS_MENU_PPU = $1FF3
+MAX_SETTING = 14
 
 .macro draw_simple_at at, txt
 		.local @copy
@@ -229,8 +229,11 @@ _draw_button_load_opt:
 		lda WRAM_LoadButtons
 		draw_button_opt 18
 
+_draw_reset_records_opt:
+		draw_simple_at 19, "NO ORG LL EXT"
+
 _draw_reset_wram_opt:
-		draw_simple_at 19, "NO YES"
+		draw_simple_at 20, "NO YES"
 
 
 settings_renderers:
@@ -247,6 +250,7 @@ settings_renderers:
 		.word _draw_button_title_opt
 		.word _draw_button_save_opt
 		.word _draw_button_load_opt
+		.word _draw_reset_records_opt
 		.word _draw_reset_wram_opt
 
 redraw_setting:
@@ -272,7 +276,7 @@ set_selection_sprites:
 		asl ; *=4
 		asl ; *=8
 		clc
-		adc #47
+		adc #$27
 		sta $01
 
 		lda SETTINGS_X
@@ -366,8 +370,19 @@ _select_reset_wram:
 		ldx #2
 		lda SETTINGS_X
 		beq @no
-		ldx #3
+		inx
 @no:
+		jmp set_selection_sprites
+
+_select_reset_records:
+		; NO ORG LL EXT
+		jsr get_setting_idx
+		txa
+		ldx #2
+		and #1
+		beq @is_two
+		inx
+@is_two:
 		jmp set_selection_sprites
 
 select_option:
@@ -384,6 +399,7 @@ select_option:
 		.word _select_title_buttons
 		.word _select_save_buttons
 		.word _select_load_buttons
+		.word _select_reset_records
 		.word _select_reset_wram
 
 selection_changed:
@@ -669,6 +685,93 @@ _loadbuttons_input:
 		sta $01
 		jmp recordbuttons_input
 
+records_offsets:
+		.byte $00, $03, $07, $0A
+
+get_setting_idx:
+		ldx SETTINGS_X
+		beq @done
+		cpx #3
+		bne @not_one
+		ldx #1
+		rts
+@not_one:
+		cpx #7
+		bne @not_two
+		ldx #2
+		rts
+@not_two:
+		ldx #3
+@done:
+		rts
+
+ResetRecords:
+		jsr get_setting_idx
+		beq @nope
+		dex
+		bne @not_org
+		lda #<WRAM_OrgTimes
+		sta $00
+		lda #>WRAM_OrgTimes
+		sta $01
+		ldx #(WRAM_OrgTimesEnd-WRAM_OrgTimes)
+		bne @memset
+@not_org:
+		dex
+		bne @not_ll
+		lda #<WRAM_LostTimes
+		sta $00
+		lda #>WRAM_LostTimes
+		sta $01
+		ldx #(WRAM_LostTimesEnd-WRAM_LostTimes)
+		bne @memset
+@not_ll:
+		dex
+		bne @nope ; this is fucked
+		lda #<WRAM_ExtTimes
+		sta $00
+		lda #>WRAM_ExtTimes
+		sta $01
+		ldx #(WRAM_ExtTimesEnd-WRAM_ExtTimes)
+@memset:
+		ldy #0
+		lda #0
+@memset_next:
+		sta ($00),y
+		iny
+		dex
+		bne @memset_next
+@nope:
+		rts
+
+_reset_records_input:
+		lda SavedJoypadBits
+		and #(Left_Dir|Right_Dir)
+		beq @checkab
+		jsr get_setting_idx
+		cmp #Left_Dir
+		bne @not_left
+		dex
+		bpl @set_selection
+		ldx #3
+		bne @set_selection ; jmp
+@not_left:
+		inx
+		cpx #4
+		bne @set_selection
+		ldx #0
+@set_selection:
+		lda records_offsets, x
+		sta SETTINGS_X
+		rts
+@checkab:
+		lda SavedJoypadBits
+		and #(B_Button|A_Button)
+		beq @done
+		jmp ResetRecords
+@done:
+		rts
+
 _reset_wram_input:
 		lda SavedJoypadBits
 		and #(Left_Dir|Right_Dir)
@@ -683,9 +786,9 @@ _reset_wram_input:
 		and #(B_Button|A_Button)
 		beq @nothing
 		jsr Enter_FactoryResetWRAM
-		lda #0
-		sta LDR_MODE
-		jmp Start
+		pla
+		pla ; Ghetto-attack
+		jmp enter_loader
 @nothing:
 		rts
 
@@ -703,6 +806,7 @@ option_inputs:
 		.word _titlebuttons_input
 		.word _savebuttons_input
 		.word _loadbuttons_input
+		.word _reset_records_input
 		.word _reset_wram_input
 
 dispatch_input:
