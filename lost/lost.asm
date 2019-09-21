@@ -1976,7 +1976,7 @@ ThankYouMario:
 
 ButOurPrincess:
 		text_block $25C5, "BUT OUR MARIO IS IN"
-		text_block $2605, "ANOTHER ZELDA!"
+		text_block $2605, "ANOTHER GANON!"
 		.byte 0
 
 JumpEngine:
@@ -6006,9 +6006,9 @@ loc_8641:
 		jsr PlayerEnemyCollision
 		jmp EnemyGfxHandler
 loc_8650:
-
 		jsr EraseEnemyObject
 		rts
+
 HammerEnemyOfsData:
 		.byte 4
 		.byte 4
@@ -6023,14 +6023,12 @@ HammerXSpdData:
 		.byte $10
 		.byte $F0
 SpawnHammerObj:
-
 		lda PseudoRandomBitReg+1
 		and #7
 		bne SetMOfs
 		lda PseudoRandomBitReg+1
 		and #8
 SetMOfs:
-
 		tay
 		lda Misc_State,y
 		bne NoHammer
@@ -6047,12 +6045,11 @@ SetMOfs:
 		sec
 		rts
 NoHammer:
-
 		ldx ObjectOffset
 		clc
 		rts
-ProcHammerObj:
 
+ProcHammerObj:
 		lda TimerControl
 		bne loc_86F6
 		lda Misc_State,x
@@ -6279,29 +6276,28 @@ PowerUpObjHandler:
 		lda byte_23
 		beq locret_88AB
 		asl
-		bcc loc_8874
+		bcc GrowThePowerUp
 		lda TimerControl
-		bne loc_8899
+		bne RunPUSubs
 		lda PowerUpType
-		beq loc_886B
+		beq ShroomM
 		cmp #3
-		beq loc_886B
+		beq ShroomM
 		cmp #4
-		beq loc_886B
+		beq ShroomM
 		cmp #5
-		beq loc_886B
+		beq ShroomM
 		cmp #2
-		bne loc_8899
+		bne RunPUSubs
 		jsr MoveJumpingEnemy
 		jsr sub_ADF9
-		jmp loc_8899
-loc_886B:
-
+		jmp RunPUSubs
+ShroomM:
 		jsr MoveNormalEnemy
 		jsr EnemyToBGCollisionDet
-		jmp loc_8899
-loc_8874:
+		jmp RunPUSubs
 
+GrowThePowerUp:
 		lda FrameCounter
 		and #3
 		bne loc_8893
@@ -6323,7 +6319,7 @@ loc_8893:
 		lda byte_23
 		cmp #6
 		bcc locret_88AB
-loc_8899:
+RunPUSubs:
 
 		jsr RelativeEnemyPosition
 		jsr GetEnemyOffscreenBits
@@ -8520,20 +8516,19 @@ RevivedXSpeed:
 		.byte $F8
 		.byte $C
 		.byte $F4
-ProcHammerBro:
 
+ProcHammerBro:
 		lda Enemy_State,x
 		and #$20
-		beq loc_9616
-		jmp loc_971A
-loc_9616:
-
+		beq ChkJH
+		jmp MoveDefeatedEnemy
+ChkJH:
 		lda HammerBroJumpTimer,x
 		beq loc_9647
 		dec HammerBroJumpTimer,x
 		lda Enemy_OffscreenBits
 		and #$C
-		bne loc_968D
+		bne MoveHammerBroXDir
 		lda $3A2,x
 		bne loc_963F
 		ldy SecondaryHardMode
@@ -8544,11 +8539,11 @@ loc_9616:
 		lda $1E,x
 		ora #8
 		sta $1E,x
-		jmp loc_968D
+		jmp MoveHammerBroXDir
 loc_963F:
-
 		dec $3A2,x
-		jmp loc_968D
+		jmp MoveHammerBroXDir
+
 HammerBroJumpLData:
 		.byte $20, $37
 loc_9647:
@@ -8556,7 +8551,7 @@ loc_9647:
 		lda $1E,x
 		and #7
 		cmp #1
-		beq loc_968D
+		beq MoveHammerBroXDir
 		lda #0
 		sta TMP_0
 		ldy #$FA
@@ -8590,7 +8585,7 @@ loc_9680:
 		lda $7A8,x
 		ora #$C0
 		sta $3C,x
-loc_968D:
+MoveHammerBroXDir:
 
 		ldy #$FC
 		lda FrameCounter
@@ -8622,7 +8617,7 @@ MoveNormalEnemy:
 		bcs loc_96E9
 		lda $1E,x
 		and #$20
-		bne loc_971A
+		bne MoveDefeatedEnemy
 		lda $1E,x
 		and #7
 		beq loc_96E9
@@ -8685,7 +8680,7 @@ loc_9714:
 		lda RevivedXSpeed,y
 		sta $58,x
 		rts
-loc_971A:
+MoveDefeatedEnemy:
 
 		jsr sub_8B34
 		jmp MoveEnemyHorizontally

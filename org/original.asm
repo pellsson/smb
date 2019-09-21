@@ -1201,23 +1201,17 @@ MarioThanksMessage:
   .byte $00
 
 LuigiThanksMessage:
-;"THANK YOU LUIGI!"
-  .byte $25, $48, $10
-  .byte $1d, $11, $0a, $17, $14, $24
-  .byte $22, $18, $1e, $24
-  .byte $15, $1e, $12, $10, $12, $2b
-  .byte $00
+    text_block $2548, "THANK YOU ERROR!"
+    .byte 0
+
+ThankYouMario:
+    text_block $2548, "THANK YOU BIRDO!"
+    .byte 0
 
 MushroomRetainerSaved:
-;"BUT OUR PRINCESS IS IN"
-  .byte $25, $c5, $16
-  .byte $0b, $1e, $1d, $24, $18, $1e, $1b, $24
-  .byte $19, $1b, $12, $17, $0c, $0e, $1c, $1c, $24
-  .byte $12, $1c, $24, $12, $17
-;"ANOTHER CASTLE!"
-  .byte $26, $05, $0f
-  .byte $0a, $17, $18, $1d, $11, $0e, $1b, $24
-  .byte $0c, $0a, $1c, $1d, $15, $0e, $2b, $00
+    text_block $25C5, "BUT OUR CASTLE IS IN"
+    text_block $2605, "ANOTHER MEGAMAN!"
+    .byte 0
 
 PrincessSaved1:
 ;"YOUR QUEST IS OVER."
