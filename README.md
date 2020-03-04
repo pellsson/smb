@@ -4,6 +4,8 @@ A speedrun practice ROM for Super Mario Bros. and Super Mario Bros 2 - The Lost 
 
 For feature requests or bug reports, please visit the [issue tracker](https://github.com/pellsson/smb/issues).
 
+Looking to practice on PAL? [Try out threecreepio's independent PAL-conversion.](https://github.com/threecreepio/pallsson)
+
 ## Major Version 5 (Current 5.4)
 
 ### New Features 
@@ -87,16 +89,4 @@ Then simply apply that IPS (using for instance Lunar IPS) to the an original, un
 </form>
 
 Have fun!
-
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-147548917-1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'UA-147548917-1');
-</script>
-
-
 
