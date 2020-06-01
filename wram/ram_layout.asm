@@ -65,7 +65,8 @@ WRAM_EnemyData:
 	.res $80-(WRAM_EnemyData-WRAM_ToSaveFile), $00
 WRAM_LevelData:
 	.res $100, $00
-
+WRAM_IsContraMode:
+	.word 0
 
 WRAM_Temp:
 	.res $64, $00

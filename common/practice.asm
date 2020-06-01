@@ -473,6 +473,11 @@ GetSelectedValue:
 		lda PowerUps
 		rts
 @get_player:
+		cmp WRAM_IsContraMode
+		beq @not_peach
+		lda #$19
+		rts
+@not_peach:
 		lda #$16 ; M
 		sec
 		sbc CurrentPlayer ; M / L
@@ -701,8 +706,11 @@ menu_input:
 		adc $00
 		and #$03
 		sta PowerUps
+@keep_peach:
 		rts
 @hero_selected:
+		lda WRAM_IsContraMode
+		bne @keep_peach
 		lda CurrentPlayer
 		clc
 		adc $01

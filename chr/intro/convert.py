@@ -30,7 +30,8 @@ if 0 != (width % 8) or 0 != (height % 8):
 # colormap = [ 3, 0, 2, 1 ] # Roylt
 # colormap = [ 3, 0, 1, 2 ] # Kosmic?
 # colormap = [ 3, 0, 2, 1 ] # Taven
-colormap = [ 3, 2, 1, 0 ] # taven
+# colormap = [ 3, 2, 1, 0 ] # taven
+colormap = [ 0, 1, 2, 3 ] # Leontoast
 
 tiles = []
 ty = 0

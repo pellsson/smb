@@ -74,6 +74,9 @@ copy_next:
 intro_tiles:
 	.incbin "intro.chr"
 
+peach_tiles:
+	.incbin "peach.chr"
+
 org_tiles:
 	.incbin "org.chr"
 
@@ -162,11 +165,21 @@ copy_lost:
 	rts
 
 copy_original:
+	lda WRAM_IsContraMode
+	beq @no_contra
+	jmp copy_peach
+@no_contra:
 	ldx #0
 	copy_chr org_tiles
+copy_org_back:
 	ldx #0
 	copy_chr org_tiles+$1000
 	rts
+
+copy_peach:
+	ldx #0
+	copy_chr peach_tiles
+	jmp copy_org_back
 
 control_bank
 

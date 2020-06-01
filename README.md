@@ -90,3 +90,5 @@ Then simply apply that IPS (using for instance Lunar IPS) to the an original, un
 
 Have fun!
 
+## Credits
+Sprites for peach shamelessly stolen from [Super Mario Bros.: Peach Edition](https://www.romhacking.net/hacks/1229)

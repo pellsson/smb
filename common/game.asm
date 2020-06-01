@@ -61,7 +61,15 @@ SetMarioPalette:
 		bne @draw_pal
 		ldx #$0E
 @draw_pal:
+		lda WRAM_IsContraMode
+		beq @normal
+		cpx #5 
+		bne @normal
+		lda #$30 ; Peach dress is white
+		bne @write_it 
+@normal:
 		lda mario_colors, x
+@write_it:
 		sta VRAM_Buffer1, y
 		beq @copy_done
 		inx

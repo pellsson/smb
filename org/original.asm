@@ -13482,6 +13482,9 @@ PlayerColors:
       .byte $22, $16, $27, $18 ;mario's colors
       .byte $22, $30, $27, $19 ;luigi's colors
       .byte $22, $37, $27, $16 ;fiery (used by both)
+PeachColors:
+      .byte $22, $16, $27, $30 ; peach colors
+      .byte $22, $16, $27, $37 ; peach fire colors
 
 GetBackgroundColor:
            ldy BackgroundColorCtrl   ;check background color control
@@ -13491,42 +13494,55 @@ GetBackgroundColor:
 NoBGColor: inc ScreenRoutineTask     ;increment to next subtask and plod on through
       
 GetPlayerColors:
-               ldx VRAM_Buffer1_Offset  ;get current buffer offset
-               ldy #$00
-               lda CurrentPlayer        ;check which player is on the screen
-               beq ChkFiery
-               ldy #$04                 ;load offset for luigi
-ChkFiery:      lda PlayerStatus         ;check player status
-               cmp #$02
-               bne StartClrGet          ;if fiery, load alternate offset for fiery player
-               ldy #$08
-StartClrGet:   lda #$03                 ;do four colors
-               sta $00
-ClrGetLoop:    lda PlayerColors,y       ;fetch player colors and store them
-               sta VRAM_Buffer1+3,x     ;in the buffer
-               iny
-               inx
-               dec $00
-               bpl ClrGetLoop
-               ldx VRAM_Buffer1_Offset  ;load original offset from before
-               ldy BackgroundColorCtrl  ;if this value is four or greater, it will be set
-               bne SetBGColor           ;therefore use it as offset to background color
-               ldy AreaType             ;otherwise use area type bits from area offset as offset
-SetBGColor:    lda BackgroundColors,y   ;to background color instead
-               sta VRAM_Buffer1+3,x
-               lda #$3f                 ;set for sprite palette address
-               sta VRAM_Buffer1,x       ;save to buffer
-               lda #$10
-               sta VRAM_Buffer1+1,x
-               lda #$04                 ;write length byte to buffer
-               sta VRAM_Buffer1+2,x
-               lda #$00                 ;now the null terminator
-               sta VRAM_Buffer1+7,x
-               txa                      ;move the buffer pointer ahead 7 bytes
-               clc                      ;in case we want to write anything else later
-               adc #$07
-SetVRAMOffset: sta VRAM_Buffer1_Offset  ;store as new vram buffer offset
-               rts
+            ldx VRAM_Buffer1_Offset  ;get current buffer offset
+            ldy #$00
+            lda CurrentPlayer        ;check which player is on the screen
+            beq ChkFiery
+            ldy #$04                 ;load offset for luigi
+ChkFiery:
+            lda PlayerStatus         ;check player status
+            cmp #$02
+            bne StartClrGet          ;if fiery, load alternate offset for fiery player
+            ldy #$08
+StartClrGet:
+            lda WRAM_IsContraMode
+            beq @ok_copy
+            ldy #(PeachColors - PlayerColors)
+            lda PlayerStatus
+            cmp #2
+            bne @ok_copy
+            ldy #((PeachColors - PlayerColors)+4)
+@ok_copy:
+            lda #$03                 ;do four colors
+            sta $00
+ClrGetLoop:
+            lda PlayerColors,y       ;fetch player colors and store them
+            sta VRAM_Buffer1+3,x     ;in the buffer
+            iny
+            inx
+            dec $00
+            bpl ClrGetLoop
+            ldx VRAM_Buffer1_Offset  ;load original offset from before
+            ldy BackgroundColorCtrl  ;if this value is four or greater, it will be set
+            bne SetBGColor           ;therefore use it as offset to background color
+            ldy AreaType             ;otherwise use area type bits from area offset as offset
+SetBGColor:
+            lda BackgroundColors,y   ;to background color instead
+            sta VRAM_Buffer1+3,x
+            lda #$3f                 ;set for sprite palette address
+            sta VRAM_Buffer1,x       ;save to buffer
+            lda #$10
+            sta VRAM_Buffer1+1,x
+            lda #$04                 ;write length byte to buffer
+            sta VRAM_Buffer1+2,x
+            lda #$00                 ;now the null terminator
+            sta VRAM_Buffer1+7,x
+            txa                      ;move the buffer pointer ahead 7 bytes
+            clc                      ;in case we want to write anything else later
+            adc #$07
+SetVRAMOffset:
+            sta VRAM_Buffer1_Offset  ;store as new vram buffer offset
+            rts
 
 ;-------------------------------------------------------------------------------------
 

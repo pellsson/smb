@@ -14,7 +14,8 @@ RECORDS_TMP = $70A
 RECORDS_TMP_HI = $70B
 bcdNum = $70C
 ; bcdNum+1 = $70D
-
+ContraCodeX = $710
+ContraSoundFrames = $711
 
 SEL_START_Y = $7e
 LoaderFrameCounter = $30
@@ -70,6 +71,7 @@ dont_wipe_bank_selection:
 		ldx #$00
 		stx PPU_SCROLL_REG ; No scrolling
 		stx PPU_SCROLL_REG
+		stx WRAM_IsContraMode ; Reset contra mode on restart
 		;
 		; Enable NMI
 		;
@@ -151,8 +153,24 @@ next_palette_entry:
 		
 		rts
 
+ContraCode:
+	.byte Up_Dir, Up_Dir, Down_Dir, Down_Dir, Left_Dir, Right_Dir, Left_Dir, Right_Dir, B_Button, A_Button, Start_Button
+ContraCodeEnd:
+
+ContraFinishSound:
+		dex
+		stx ContraSoundFrames
+		bne @wait_more
+		inc WRAM_IsContraMode
+		lda #BANK_ORG
+		jmp StartBank
+@wait_more:
+		jsr fax_update
+		rti
 
 NonMaskableInterrupt:
+		ldx ContraSoundFrames
+		bne ContraFinishSound
 		inc LoaderFrameCounter
 		lda #$00
 		sta PPU_CTRL_REG1
@@ -250,6 +268,30 @@ dont_update_cursor:
 		lda SavedJoypadBits
 		cmp LAST_INPUT
 		beq no_start
+		cmp #0
+		beq @handlein
+		;
+		; Check contra code
+		;
+		ldx SEL_INDEX
+		bne @resetcode
+		ldx ContraCodeX
+		cmp ContraCode, X
+		bne @resetcode
+		inx
+		stx ContraCodeX
+		cpx #(ContraCodeEnd-ContraCode)
+		bne @handlein
+		ldx #$4F
+		stx ContraSoundFrames
+		ldx #0
+		lda #41
+		jsr fax_load_song
+		jmp no_start
+@resetcode:
+		ldx #0
+		stx ContraCodeX
+@handlein:
 		cmp #Select_Button
 		bne no_select
 		ldx SEL_INDEX
@@ -487,7 +529,7 @@ static_sprite_data:
 	;
 	.byte $ff,	$f4, $03, $90
 	.byte $ff,	$f5, $03, $90+8
-	.byte $ff,	 $f6, $03, $90+16
+	.byte $ff,	$f6, $03, $90+16
 	;
 	; 0x100 bytes here...
 	;

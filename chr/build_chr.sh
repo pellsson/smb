@@ -1,7 +1,8 @@
-cat intro/smb.chr intro/megaman.chr intro/tavenwebb2002.chr intro/somewes.chr intro/kosmic.chr intro/roylt.chr intro/kappa.chr intro/custom.chr > /tmp/intro_flat.chr && \
+cat intro/smb.chr intro/megaman.chr intro/kosmic.chr intro/tavenwebb2002.chr intro/somewes.chr intro/leontoast.chr intro/kappa.chr intro/custom.chr > /tmp/intro_flat.chr && \
 truncate --size 4096 /tmp/intro_flat.chr  && \
 python ../scripts/chr2copylayout.py /tmp/intro_flat.chr intro/intro.chr && \
 cat intro/intro.chr intro/intro.chr > intro.chr && \
+python ../scripts/chr2copylayout.py smb/peach-sprites.chr peach.chr && \
 python ../scripts/chr2copylayout.py smb/smborg-sprites.chr /tmp/org-sprites.chr && \
 python ../scripts/chr2copylayout.py smb/smborg-back.chr /tmp/org-back.chr && \
 cat /tmp/org-sprites.chr /tmp/org-back.chr > org.chr
