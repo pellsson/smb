@@ -6,7 +6,7 @@ For feature requests or bug reports, please visit the [issue tracker](https://gi
 
 Looking to practice on PAL? [Try out threecreepio's independent PAL-conversion.](https://github.com/threecreepio/pallsson)
 
-## Major Version 5 (Current 5.4)
+## Major Version 5 (Current 5.5)
 
 ### New Features 
 - Ability to **wipe SMB/LL/LL-EXT records** under settings.
