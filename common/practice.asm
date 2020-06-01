@@ -1438,9 +1438,9 @@ RedrawSockTimer:
 		jmp RedrawFrameNumbers
 
 MagicByte0 = $70 ; P
-MagicByte1 = $65 ; E
-MagicByte2 = $36 ; 6
-MagicByte3 = $30 ; 0
+MagicByte1 = $56 ; V
+MagicByte2 = $35 ; 5
+MagicByte3 = $35 ; 5
 
 ValidWRAMMagic:
 		lda WRAM_Magic+0
