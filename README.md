@@ -20,6 +20,7 @@ Looking to practice on PAL? [Try out threecreepio's independent PAL-conversion.]
 
 ### Bug Fixes
 - 5.5 bug fixes
+	- Fix bug where early input to pause menu would overflow ppubuffer.
 	- Updated faces to reflect new leader board.
 	- Fixed bugs relating to save states.
 	- Fixed buts relating to physical carts.

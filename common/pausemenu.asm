@@ -658,6 +658,7 @@ RunPauseMenu:
 		and #$81
 		ora $00
 		sta GamePauseStatus
+		rts
 @draw_cursor:
 		lda WRAM_MenuIndex
 		asl
@@ -673,9 +674,13 @@ RunPauseMenu:
 		lda #$04
 		sta $2FF
 
+		lda LastInputBits
+		bne @no_input
 		lda SavedJoypad1Bits
+		ora JoypadBitMask
 		cmp LastInputBits
 		bne @input_changed
+@no_input:
 		rts
 @input_changed:
 		cmp #Select_Button
