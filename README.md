@@ -20,10 +20,10 @@ Looking to practice on PAL? [Try out threecreepio's independent PAL-conversion.]
 
 ### Bug Fixes
 - 5.5 bug fixes
-	- Fix bug where early input to pause menu would overflow ppubuffer.
-	- Updated faces to reflect new leader board.
+	- Fixed bug where early input to pause menu would overflow ppubuffer.
+	- Fixed bugs relating to running it on physical carts.
 	- Fixed bugs relating to save states.
-	- Fixed buts relating to physical carts.
+	- Updated faces to reflect new leader board.
 - 5.4 bug fixes
 	- When starting on a specific rule in Lost Levels the frame counter was set incorrectly, which could cause rule-deviations vs. vanilla.
 	- Use the coin-sprite for sprite0 (no more glitchy garbage under the coin).
