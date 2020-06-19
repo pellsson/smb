@@ -473,7 +473,7 @@ GetSelectedValue:
 		lda PowerUps
 		rts
 @get_player:
-		lda WRAM_IsContraMode
+		lda WRAM_IsContraMode ;
 		beq @not_peach
 		lda #$19
 		rts
