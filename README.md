@@ -6,7 +6,7 @@ For feature requests or bug reports, please visit the [issue tracker](https://gi
 
 Looking to practice on PAL? [Try out threecreepio's independent PAL-conversion.](https://github.com/threecreepio/pallsson)
 
-## Major Version 5 (Current 5.5)
+## Major Version 5 (Current 5.6)
 
 ### New Features 
 - Ability to **wipe SMB/LL/LL-EXT records** under settings.
@@ -19,6 +19,10 @@ Looking to practice on PAL? [Try out threecreepio's independent PAL-conversion.]
 - Added **Frame Advance**. Set `SLOMO` in pause menu to `ADV`. To advance frame, press **A** on **controller two**. **If you dont have two controllers you will softlock :)**
 
 ### Bug Fixes
+- 5.6 bug fixes
+	- Fixed bug where loading state would cause a subsequence save if select was still held.
+	- Fixed sprite & WRAM corruption.
+	- Sanity check settings.
 - 5.5 bug fixes
 	- Fixed bug where early input to pause menu would overflow ppubuffer.
 	- Fixed bugs relating to running it on physical carts.
@@ -81,7 +85,7 @@ save in Zelda (without savestates), power off the system, and load (without usin
 
 First download the desired version below:
 
-- [Version 5.5 - IPS](https://github.com/pellsson/smb/raw/master/smb-v5.5.ips)
+- [Version 5.6 - IPS](https://github.com/pellsson/smb/raw/master/smb-v5.6.ips)
 
 Then simply apply that IPS (using for instance Lunar IPS) to the an original, unmodified version of the Super Mario Bros. (US/World) ROM. *DO NOT* use The Lost Levels. The MD5 checksum for the ROM you should be using is `811b027eaf99c2def7b933c5208636de`.
 
