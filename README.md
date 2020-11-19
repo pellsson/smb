@@ -20,7 +20,7 @@ Looking to practice on PAL? [Try out threecreepio's independent PAL-conversion.]
 
 ### Bug Fixes
 - 5.6 bug fixes
-	- Fixed bug where loading state would cause a subsequence save if select was still held.
+	- Fixed bug where loading state would cause a subsequent save if select was still held.
 	- Fixed sprite & WRAM corruption.
 	- Sanity check settings.
 - 5.5 bug fixes
