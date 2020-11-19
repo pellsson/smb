@@ -829,6 +829,15 @@ noinput:
 		rts
 
 exit_settings:
+		ldx #1
+		lda WRAM_DelayUserFrames
+		bne @user_frames_ok
+		stx WRAM_DelayUserFrames
+@user_frames_ok:
+		lda WRAM_DelaySaveFrames
+		bne @save_frames_ok
+		stx WRAM_DelaySaveFrames
+@save_frames_ok:
 		jmp enter_loader
 
 run_settings:

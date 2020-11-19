@@ -483,8 +483,7 @@ GetSelectedValue:
 		sbc CurrentPlayer ; M / L
 		rts 
 @get_world:
-		jsr PrintableWorldNumber
-		rts
+		jmp PrintableWorldNumber
 
 DrawRuleNumber:
 		ldx VRAM_Buffer1_Offset
@@ -1127,9 +1126,6 @@ LoadState:
 		sta WRAM_LostStart, x
 		dex
 		bpl @copy_lost
-
-
-		; todo copy palette
 		lda GamePauseStatus
 		ora #2
 		sta GamePauseStatus
@@ -1138,6 +1134,9 @@ LoadState:
 		sta WRAM_PracticeFlags
 		lda #0
 		sta DisableScreenFlag
+		; Controllers will be read again this frame. Reset them (very buggy otherwise ;)).
+		sta SavedJoypad1Bits
+		sta JoypadBitMask
 		rts
 
 SaveState:
