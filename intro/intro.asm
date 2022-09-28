@@ -17,6 +17,8 @@ bcdNum = $70C
 ContraCodeX = $710
 ContraSoundFrames = $711
 
+CreditsIndex = $712
+
 SEL_START_Y = $7e
 LoaderFrameCounter = $30
 CurrentHead = $31
@@ -208,6 +210,11 @@ NonMaskableInterrupt:
 		bne @no_rotate_stars
 		jsr rotate_star_palette
 @no_rotate_stars:
+		lda LoaderFrameCounter
+		and #$3f
+		bne @no_update_credits
+		jsr update_credits
+@no_update_credits:
 		;
 		; Change head
 		;
@@ -434,6 +441,60 @@ move_more:
 		sta $02
 		dey
 		bne next_col
+		rts
+
+credits_start:
+credits_pellsson:
+	.byte "BY: PELLSSON            "
+credits_threecreepio:
+	.byte "BY: THREECREEPIO        "
+credits_simplistic_memes:
+	.byte "BY: SIMPLISTIC MEMES    "
+credits_reset:
+	.byte "CATCH THEM WITH PRACTICE"
+credits_end:
+
+credits_length:
+	.byte credits_threecreepio-credits_pellsson
+	.byte credits_simplistic_memes-credits_threecreepio
+	.byte credits_reset-credits_simplistic_memes
+	.byte credits_end-credits_reset
+credits_offset:
+	.byte credits_pellsson-credits_start
+	.byte credits_threecreepio-credits_start
+	.byte credits_simplistic_memes-credits_start
+	.byte credits_reset-credits_start
+
+update_credits:
+		lda $2002
+		;
+		; Copycopycopycopy
+		;
+		lda PPU_STATUS
+		lda #$21
+		sta PPU_ADDRESS
+		lda #$A4
+		sta PPU_ADDRESS
+
+		ldx CreditsIndex
+		ldy credits_length, x
+		lda credits_offset, x
+		tax
+@more:
+		lda credits_start, x
+		sta PPU_DATA
+		inx
+		dey
+		bne @more
+		sty PPU_SCROLL_REG ; No scrolling
+		sty PPU_SCROLL_REG
+		ldx CreditsIndex
+		inx
+		cpx #4
+		bne @done
+		ldx #0
+@done:
+		stx CreditsIndex
 		rts
 
 sine_curve:
