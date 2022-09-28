@@ -1,6 +1,6 @@
 AS = ca65
 LD = ld65
-AFLAGS = -W0 -U -I inc
+AFLAGS = -W0 -U -I inc -g --create-dep "$@.dep"
 OUT = build
 OBJECTS = $(OUT)/intro.o \
           $(OUT)/chrloader.o \
@@ -9,7 +9,8 @@ OBJECTS = $(OUT)/intro.o \
           $(OUT)/scenarios.o \
           $(OUT)/scenario_data.o \
           $(OUT)/lost.o \
-          $(OUT)/leveldata.o
+          $(OUT)/leveldata.o \
+          $(OUT)/ines.o
 
 SCENARIOS = scen/templates/1-2g_hi.json \
 			scen/templates/1-2g_lo.json \
@@ -31,9 +32,6 @@ all: smb.nes
 
 run: smb.nes
 	wine fceux/fceux.exe smb.nes
-
-smb.nes: smb.bin
-	cat ines.bin smb.bin > smb.nes
 
 patch.zip: patch.ips
 	zip patch.zip patch.ips README.md
@@ -66,6 +64,9 @@ $(OUT)/chrloader.o: $(INCS) chr/org.chr chr/lost.chr chr/chrloader.asm
 $(OUT)/original.o: $(INCS) org/original.asm
 	$(AS) $(AFLAGS) -l $(OUT)/original.map org/original.asm -o $@
 
+$(OUT)/ines.o: $(INCS) common/ines.asm
+	$(AS) $(AFLAGS) -l $(OUT)/ines.map common/ines.asm -o $@
+
 $(OUT)/common.o: common/common.asm common/sound.asm common/sound-ll.asm common/practice.asm
 	$(AS) $(AFLAGS) -l $(OUT)/common.map common/common.asm -o $@
 
@@ -81,8 +82,9 @@ $(OUT)/lost.o: $(INCS) $(WRAM) lost/lost.asm
 $(OUT)/leveldata.o: lost/leveldata.asm
 	$(AS) $(AFLAGS) -l $(OUT)/leveldata.map lost/leveldata.asm -o $@
 
-smb.bin: $(OBJECTS)
+smb.nes: $(OBJECTS)
 	$(LD) -C scripts/link.cfg \
+		$(OUT)/ines.o \
 		$(OUT)/intro.o \
 		$(OUT)/chrloader.o \
 		$(OUT)/original.o \
@@ -91,9 +93,12 @@ smb.bin: $(OBJECTS)
 		$(OUT)/scenario_data.o \
 		$(OUT)/lost.o \
 		$(OUT)/leveldata.o \
+		--dbgfile "smb.dbg" \
 		-o $@
 
 .PHONY: clean
 
 clean:
 	rm -f build/*
+
+include $(wildcard build/*.dep)
