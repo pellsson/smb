@@ -1,0 +1,56 @@
+name: "Build release"
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: install build tools
+        run: sudo apt-get update && sudo apt-get -y install cc65
+      - uses: actions/checkout@v2
+      - name: mkdir build
+        run: mkdir -p build
+      - name: create version number
+        run: |
+          VERSION=$(echo $GITHUB_REF | cut -d / -f 3)
+          printf '.byte "%-5s"' ${VERSION^^} > version.asm
+      - name: clean
+        run: make clean
+      - name: prepare ntsc
+        run: gpg --quiet --batch --yes --decrypt --passphrase="${{ secrets.SECRET }}" --output original.nes game_ntsc.gpg
+      - name: build ntsc
+        run: make patch.ips
+      - name: zip
+        run: zip "pellsson_${GITHUB_REF#refs/*/}.zip" README.md patch.ips
+      - name: upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: files
+          path: "*.zip"
+
+  upload:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: get tag name
+        id: get_version
+        run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
+      - name: get assets
+        uses: actions/download-artifact@v2
+        with:
+          name: files
+          path: files
+      - name: create release
+        uses: ncipollo/release-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: "${{ steps.get_version.outputs.VERSION }}"
+          bodyFile: README.md
+          artifacts: "files/*"
+          token: ${{ secrets.GITHUB_TOKEN }}
