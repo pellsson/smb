@@ -1,114 +1,12 @@
 	.include "org.inc"
 	.include "lost.inc"
 	.include "wram.inc"
+	.include "quickresume.inc"
 
 ;
 ; Practice stuff
 ;
-quick_resume_0:
-	.byte $A5, $00, $00, $00, $00, $00, $00, $00 ; Base for 0
-	.byte $26, $90, $DD, $FC, $47, $BF, $30, $00 ; Base for 100
-	.byte $81, $98, $9B, $AA, $9D, $C8, $F3, $00 ; Base for 200
-	.byte $2A, $A2, $F7, $B2, $5D, $39, $83, $00 ; Base for 300
-	.byte $9F, $14, $2A, $02, $56, $52, $FE, $00 ; Base for 400
-	.byte $9F, $4A, $74, $E0, $09, $C9, $DA, $00 ; Base for 500
-	.byte $F2, $E9, $0C, $DE, $C7, $7A, $F4, $00 ; Base for 600
-	.byte $18, $00, $30, $30, $50, $30, $90, $00 ; Base for 700
-	.byte $02, $AC, $A9, $F0, $A3, $42, $04, $00 ; Base for 800
-	.byte $00, $B8, $B9, $C8, $BB, $2A, $5C, $00 ; Base for 900
-	.byte $BD, $A0, $DB, $9A, $2D, $19, $43, $00 ; Base for 1000
-	.byte $CF, $C8, $57, $C7, $68, $E6, $37, $00 ; Base for 1100
-	.byte $12, $B4, $91, $F8, $DB, $2A, $9C, $00 ; Base for 1200
-	.byte $55, $DB, $70, $C6, $27, $AB, $E4, $00 ; Base for 1300
-	.byte $E1, $2C, $EE, $B7, $6A, $04, $D0, $00 ; Base for 1400
-	.byte $36, $9A, $F7, $C2, $2D, $A9, $F2, $00 ; Base for 1500
-	.byte $7C, $10, $E8, $C9, $18, $8A, $BB, $00 ; Base for 1600
-	.byte $13, $4B, $6D, $FB, $20, $D6, $97, $00 ; Base for 1700
-	.byte $6A, $06, $D2, $DF, $7A, $C4, $31, $00 ; Base for 1800
-	.byte $1E, $DA, $E7, $52, $9C, $39, $01, $00 ; Base for 1900
-	.byte $15, $87, $AC, $A3, $FA, $BD, $48, $00 ; Base for 2000
-	.byte $B3, $20, $46, $06, $8A, $87, $92, $00 ; Base for 2100
-	.byte $D2, $3D, $99, $E2, $D1, $14, $B6, $00 ; Base for 2200
-	.byte $51, $B7, $14, $7A, $52, $A6, $03, $00 ; Base for 2300
-	.byte $93, $98, $BF, $8E, $F1, $EC, $0F, $00 ; Base for 2400
-	.byte $69, $F3, $20, $C6, $87, $0A, $04, $00 ; Base for 2500
-	.byte $9F, $DE, $E1, $5C, $9E, $27, $1B, $00 ; Base for 2600
-	.byte $D3, $52, $F4, $51, $B9, $1A, $68, $00 ; Base for 2700
-	.byte $29, $37, $65, $0B, $C1, $D6, $55, $00 ; Base for 2800
-	.byte $47, $43, $CD, $4A, $D0, $45, $E5, $00 ; Base for 2900
-	.byte $28, $EC, $BD, $64, $1E, $D6, $EB, $00 ; Base for 3000
-	.byte $29, $49, $1B, $89, $BE, $AD, $D0, $00 ; Base for 3100
-quick_resume_32:
-	.byte $1D, $D1, $EA, $49, $9D, $0E, $34, $00 ; Base for 3200
-	.byte $12, $D4, $F1, $58, $BA, $0B, $7F, $00 ; Base for 3300
-	.byte $0C, $88, $91, $80, $A3, $A2, $E5, $00 ; Base for 3400
-	.byte $90, $5F, $7F, $C1, $3E, $BC, $C1, $00 ; Base for 3500
-	.byte $77, $2D, $C3, $98, $1F, $2F, $11, $00 ; Base for 3600
-	.byte $EC, $BF, $66, $18, $D4, $E5, $4C, $00 ; Base for 3700
-	.byte $7A, $68, $9C, $4D, $75, $EF, $04, $00 ; Base for 3800
-	.byte $DC, $E7, $5E, $90, $2D, $0D, $57, $00 ; Base for 3900
-	.byte $47, $07, $89, $86, $95, $98, $B3, $00 ; Base for 4000
-	.byte $20, $68, $28, $F8, $A9, $58, $0A, $00 ; Base for 4100
-	.byte $92, $F1, $D4, $37, $9F, $F0, $CF, $00 ; Base for 4200
-	.byte $44, $E6, $6F, $A3, $7C, $3A, $C2, $00 ; Base for 4300
-	.byte $5C, $12, $AA, $8F, $DA, $C5, $70, $00 ; Base for 4400
-	.byte $26, $56, $1A, $B6, $83, $EE, $E9, $00 ; Base for 4500
-	.byte $66, $AA, $67, $33, $FD, $9A, $61, $00 ; Base for 4600
-	.byte $DF, $52, $EC, $49, $91, $02, $20, $00 ; Base for 4700
-	.byte $A8, $61, $31, $F3, $90, $77, $57, $00 ; Base for 4800
-	.byte $47, $1F, $91, $AE, $8D, $D0, $CB, $00 ; Base for 4900
-	.byte $76, $3C, $D0, $A9, $08, $5A, $4A, $00 ; Base for 5000
-	.byte $CE, $AD, $30, $6A, $0A, $DE, $CB, $00 ; Base for 5100
-	.byte $94, $8B, $A2, $B5, $F0, $9B, $7A, $00 ; Base for 5200
-	.byte $B8, $39, $49, $3B, $A9, $DE, $8D, $00 ; Base for 5300
-	.byte $7C, $1E, $E6, $DB, $16, $A0, $8D, $00 ; Base for 5400
-	.byte $8B, $12, $04, $20, $28, $68, $38, $00 ; Base for 5500
-	.byte $49, $25, $B7, $FC, $93, $6A, $4C, $00 ; Base for 5600
-	.byte $E5, $1A, $D0, $E5, $44, $8E, $07, $00 ; Base for 5700
-	.byte $4F, $6B, $F5, $22, $C8, $8D, $1C, $00 ; Base for 5800
-	.byte $D3, $8A, $2D, $39, $63, $11, $D7, $00 ; Base for 5900
-	.byte $CD, $C4, $5F, $D7, $68, $C6, $17, $00 ; Base for 6000
-	.byte $F9, $F8, $0B, $FB, $EC, $1B, $C3, $00 ; Base for 6100
-	.byte $7B, $EF, $18, $C6, $F7, $7A, $94, $00 ; Base for 6200
-	.byte $EC, $3D, $E5, $9E, $55, $69, $C3, $00 ; Base for 6300
-quick_resume_64:
-	.byte $95, $DE, $F5, $48, $A2, $33, $77, $00 ; Base for 6400
-	.byte $92, $AF, $8A, $D5, $C0, $6B, $EB, $00 ; Base for 6500
-	.byte $29, $45, $17, $9D, $B2, $89, $EC, $00 ; Base for 6600
-	.byte $B6, $FB, $96, $61, $4D, $8F, $14, $00 ; Base for 6700
-	.byte $3C, $FA, $83, $76, $70, $9C, $7D, $00 ; Base for 6800
-	.byte $64, $BE, $77, $0B, $E5, $F2, $39, $00 ; Base for 6900
-	.byte $62, $4A, $8E, $1B, $07, $31, $3F, $00 ; Base for 7000
-	.byte $DA, $09, $BD, $AE, $D5, $88, $23, $00 ; Base for 7100
-	.byte $9A, $63, $57, $91, $3E, $1C, $60, $00 ; Base for 7200
-	.byte $31, $53, $31, $97, $F4, $DB, $32, $00 ; Base for 7300
-	.byte $7A, $5A, $AE, $1B, $47, $71, $FF, $00 ; Base for 7400
-	.byte $43, $3D, $BB, $C0, $B7, $36, $58, $00 ; Base for 7500
-	.byte $F2, $B3, $56, $30, $9C, $FD, $C4, $00 ; Base for 7600
-	.byte $13, $45, $63, $E9, $2E, $FC, $A1, $00 ; Base for 7700
-	.byte $F2, $5F, $BB, $04, $72, $7A, $9E, $00 ; Base for 7800
-	.byte $3D, $F9, $82, $71, $75, $97, $7C, $00 ; Base for 7900
-	.byte $EE, $47, $9B, $14, $22, $0A, $4E, $00 ; Base for 8000
-	.byte $E9, $CC, $1F, $87, $B8, $B7, $C6, $00 ; Base for 8100
-	.byte $B2, $97, $F2, $DD, $38, $82, $F3, $00 ; Base for 8200
-	.byte $4E, $4E, $D2, $4F, $EB, $74, $A2, $00 ; Base for 8300
-	.byte $3B, $D7, $A0, $0F, $4F, $51, $CF, $00 ; Base for 8400
-	.byte $81, $84, $87, $8E, $81, $9C, $9F, $00 ; Base for 8500
-	.byte $1A, $10, $24, $04, $4C, $44, $DC, $00 ; Base for 8600
-	.byte $D9, $52, $E0, $45, $85, $0E, $04, $00 ; Base for 8700
-	.byte $68, $CA, $1B, $8F, $B8, $A7, $D6, $00 ; Base for 8800
-	.byte $47, $31, $BF, $DC, $A3, $1A, $5C, $00 ; Base for 8900
-	.byte $D9, $54, $E6, $4F, $83, $1C, $1A, $00 ; Base for 9000
-	.byte $3D, $5F, $25, $9B, $D0, $E7, $46, $00 ; Base for 9100
-	.byte $50, $26, $86, $CB, $C6, $51, $DD, $00 ; Base for 9200
-	.byte $6D, $4F, $95, $0A, $20, $34, $74, $00 ; Base for 9300
-	.byte $C4, $55, $DD, $76, $CC, $21, $B9, $00 ; Base for 9400
-	.byte $06, $B4, $B9, $D0, $A3, $02, $44, $00 ; Base for 9500
-quick_resume_96:
-	.byte $D6, $21, $8D, $CE, $D5, $48, $E2, $00 ; Base for 9600
-	.byte $E1, $C8, $0B, $9B, $8C, $BB, $A2, $00 ; Base for 9700
-	.byte $D5, $EA, $41, $95, $16, $3C, $10, $00 ; Base for 9800
-	.byte $54, $3C, $94, $ED, $C4, $1F, $97, $00 ; Base for 9900
+QUICKRESUME
 
 do_quick_resume:
 	asl ; *= 2
@@ -176,7 +74,11 @@ prac_quick_using_64:
 	stx $01
 	jmp do_quick_resume
 
+.ifdef PAL
+SMALL_FIRE_FRAMES = $10c
+.else
 SMALL_FIRE_FRAMES = $1b3
+.endif
 
 AdvanceToRule:
 		;
@@ -186,11 +88,19 @@ AdvanceToRule:
 		ldy #0
 		ldx PowerUps
 		beq NoPowerups
+.ifdef PAL
+		lda #$4D
+.else
 		lda #$3B
+.endif
 		iny
 		dex
 		beq BigMarioPowerup
+.ifdef PAL
+		lda #$8C
+.else
 		lda #$7A
+.endif
 		iny 
 		dex
 		beq BigMarioPowerup
@@ -219,7 +129,11 @@ NoPowerups:
 		rts
 StartAdvance:
 		lda IntervalTimerControl
+.ifdef PAL
+		cmp #0
+.else
 		cmp #3
+.endif
 DeadLock:
 		bne DeadLock
 		;
@@ -267,9 +181,11 @@ RunRandomAdvance:
 		jsr AdvanceRandom
 		jsr AdvanceRandom
 		jsr AdvanceRandom
+.ifndef PAL
 		jsr AdvanceRandom
 		jsr AdvanceRandom
 		jsr AdvanceRandom
+.endif
 		jmp AdvanceFurther
 RuleContinue:
 		lda #0
@@ -278,8 +194,13 @@ RuleContinue:
 		;
 		; Advance to correct place within this rule
 		;
+.ifdef PAL
+		lda #0
+.else
 		lda #18
+.endif
 		sta $02
+.ifndef PAL
 AdvanceWithin:
 		jsr AdvanceRandom
 		dec $02
@@ -287,6 +208,7 @@ AdvanceWithin:
 		;
 		; Advance powerup frames
 		;
+.endif
 		lda PowerUpFrames
 		cmp #<SMALL_FIRE_FRAMES
 		bne StartFramePrecision
@@ -307,7 +229,11 @@ NoPowerUpFrames:
 		; Set the correct framecounter
 		;
 		ldy #$0e
+.ifdef PAL
+		ldx #$8D
+.else
 		ldx #$a2
+.endif
 
 		lda BANK_SELECTED
 		cmp #BANK_ORG
@@ -426,7 +352,11 @@ RedrawFrameNumbers:
 		jmp ReturnBank
 
 UpdateFrameRule:
+.ifdef PAL
+		lda #$11
+.else
 		lda #$14
+.endif
 		cmp IntervalTimerControl
 		bne NotEvenFrameRule
 		lda #$01
@@ -960,7 +890,50 @@ DoNibble:
 DontUpdateSockHash:
 		rts
 
+;
+; Sockfolder works by taking:
+; (YPosition / MaxYSpeed) * (MaxXSpeed)
+; and adding it to the players current position
+;
+; that way you can see pixel mario would land on.
+; (except it shows the pixel at $FF, which doesn't technically exist)
+;
 ForceUpdateSockHashInner:
+		ldx VRAM_Buffer1_Offset
+		bne DontUpdateSockHash
+.ifdef PAL
+		lda Player_Y_HighPos             ; check if player is vertically on screen
+		beq @nosock                      ; no - skip updating sockfolder
+		lda SprObject_Y_Position         ; get player y position
+		cmp #$B1                         ; are we close to the ground?
+		bcc @yessock                     ; no - we're in a good range to show sockfolder
+		clc                              ; yes - no need to update sockfolder, we're probably dying. :(
+@nosock:
+		rts                              ; skip updating sockfolder
+@yessock:
+		tay
+		cmp #$A0                         ; is the player closer to the ground than A0?
+		bcc :+                           ; no - farther up, skip ahead
+		lda @Lookup-$A0,y                ; yes - load the correct value from the lookup table
+		clc                              ;
+		bcc @Set                         ; and skip ahead to calculate the value
+:		cmp #$50                         ; is the player in the middle range of the screen?
+		bcc :+                           ; no - the player is high up, skip ahead
+		lda @Lookup-$50,y                ; yes - load the midrange value from the lookup table
+		clc                              ;
+		adc #$30                         ; add offset the value based on this "groups" height
+		bcc @Set                         ; and skip ahead to calculate the value
+:		lda @Lookup,y                    ; we are the top of the screen! load the top range value
+		adc #$60                         ; add offset the value based on this "groups" height
+@Set:
+		adc SprObject_X_Position         ; now we can add the players x position
+		sta $2                           ; which is what we'll display in sockfolder
+		lda SprObject_PageLoc            ; then add any carry value onto the page location
+		adc #0                           ;
+		sta $1                           ; and store that to be displayed in sockfolder as well
+		lda SprObject_X_MoveForce        ; and set our moveforce in sockfolder
+		sta $3
+.else
 		lda SprObject_X_MoveForce ; Player force
 		sta $3
 		lda SprObject_X_Position ; Player X
@@ -995,9 +968,8 @@ something_or_other:
 		lda $1
 		adc #0
 		sta $1
-		ldx VRAM_Buffer1_Offset 
-		bne skip_sock_hash
-draw_sock_hash:
+.endif
+@Draw:
 		lda #$20
 		sta VRAM_Buffer1
 		lda #$62 ;
@@ -1015,8 +987,17 @@ draw_sock_hash:
 		sta VRAM_Buffer1+3, x
 		lda #$09
 		sta VRAM_Buffer1_Offset
-skip_sock_hash:
 		rts
+.ifdef PAL
+@Lookup:
+; this is a lookup used to calculate (Y/5)*48, which is the number of
+; X pixels the player will travel based on their current height.
+.byte $39,$36,$36,$36,$36,$36,$33,$33,$33,$33,$33,$30,$30,$30,$30,$30
+.byte $2d,$2d,$2d,$2d,$2d,$2a,$2a,$2a,$2a,$2a,$27,$27,$27,$27,$27,$24
+.byte $24,$24,$24,$24,$21,$21,$21,$21,$21,$1e,$1e,$1e,$1e,$1e,$1b,$1b
+.byte $1b,$1b,$1b,$18,$18,$18,$18,$18,$15,$15,$15,$15,$15,$12,$12,$12
+.byte $12,$12,$0f,$0f,$0f,$0f,$0f,$0c,$0c,$0c,$0c,$0c,$09,$09,$09,$09
+.endif
 
 ForceUpdateSockHash:
 		jsr ForceUpdateSockHashInner
@@ -1718,11 +1699,19 @@ FrameToTimeInner:
 		sta N+2
 		lda PROD+3
 		sta N+3
+.ifdef PAL
+		lda #<50007
+.else
 		lda #<60098
+.endif
 		sta N+0
-		lda #>60098
+.ifdef PAL
+		lda #>50007
+.else
+		lda #<60098
+.endif
 		sta N+1
-		jsr div32_16_16 ; x / 60098
+		jsr div32_16_16 ; x / framerate
 
 		lda #0
 		sta N+2

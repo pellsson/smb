@@ -1,6 +1,10 @@
 AS = ca65
 LD = ld65
 AFLAGS = -W0 -U -I inc -g --create-dep "$@.dep"
+ifdef PAL
+AFLAGS += -DPAL
+endif
+
 OUT = build
 OBJECTS = $(OUT)/intro.o \
           $(OUT)/chrloader.o \
@@ -37,7 +41,14 @@ patch.zip: patch.ips
 	zip patch.zip patch.ips README.md
 
 patch.ips: smb.nes
+ifdef PAL
+	python scripts/ips.py create --output patch.ips original_pal.nes smb.nes
+else
 	python scripts/ips.py create --output patch.ips original.nes smb.nes
+endif
+
+inc/quickresume.inc:
+	python scripts/mariorand.py > inc/quickresume.inc
 
 inc/wram.inc: wram/ram_layout.asm $(OUT)/ram_layout.map
 	python scripts/genram.py $(OUT)/ram_layout.map inc/wram.inc
@@ -67,7 +78,7 @@ $(OUT)/original.o: $(INCS) org/original.asm
 $(OUT)/ines.o: $(INCS) common/ines.asm
 	$(AS) $(AFLAGS) -l $(OUT)/ines.map common/ines.asm -o $@
 
-$(OUT)/common.o: common/common.asm common/sound.asm common/sound-ll.asm common/practice.asm
+$(OUT)/common.o: inc/quickresume.inc common/common.asm common/sound.asm common/sound-ll.asm common/practice.asm
 	$(AS) $(AFLAGS) -l $(OUT)/common.map common/common.asm -o $@
 
 $(OUT)/scenario_data.o: $(INCS) $(GEN_SCENARIOS) scen/scen_exports.asm

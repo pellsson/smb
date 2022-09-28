@@ -304,7 +304,11 @@ dont_update_cursor:
 		ldx SEL_INDEX
 		lda $200
 		inx 
+.ifdef PAL
+		cpx #3
+.else
 		cpx #5
+.endif
 		bne no_loop_around
 		ldx #0
 		lda #SEL_START_Y-16
@@ -317,9 +321,17 @@ no_select:
 		cmp #Start_Button
 		bne no_start
 		ldx SEL_INDEX
+.ifdef PAL
+		cpx #1
+.else
 		cpx #3
+.endif
 		beq @settings
+.ifdef PAL
+		cpx #2
+.else
 		cpx #4
+.endif
 		beq @showrecords
 		lda bank_table, x
 		jmp StartBank

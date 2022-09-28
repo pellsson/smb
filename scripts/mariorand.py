@@ -1,4 +1,6 @@
 import sys
+import binascii
+import re
 
 def _ror(val, carry):
 	next_carry	= bool(val & 1)
@@ -18,36 +20,40 @@ def random_advance(seed):
 
 	return seed
 
-def is_seed(s, needle):
-	for i in range(0, len(s)):
-		if s[i] != needle[i]:
-			return False
-	return True
-
 find = [ ]
-seed = random_init()
-total = 0
 
-#while True:
-for i in range(0, 100000):
-	seed = random_advance(seed)
+def generate_quick_resume(framerule_frames):
+	seed = random_init()
+	for base_i in range(0, 5):
+		base = base_i * 32
+		print("quick_resume_" + str(base) + ":")
+		for i in range(0, 32):
+			rngbase = (base + i)  * 100
+			print('	.byte ' + ', '.join('${:02x}'.format(x) for x in seed) + ', $00 ; Base for ' + str(rngbase))
+			if rngbase >= 9900:
+				return
+			for u in range(0, (100 * framerule_frames)):
+				seed = random_advance(seed)
 
-	# xxx = [ 0x8C, 0xDD, 0xC4, 0x7F, 0xF7, 0x08, 0xE6 ]
-	# xxx = [ 0xEA, 0x91, 0x44, 0x66, 0xEE, 0x23, 0xFF ]
-	# xxx = [0x6F, 0x5D, 0x83, 0x38, 0x3E, 0x4E, 0x32]
-	# xxx = [0x1E, 0x2A, 0x16, 0x42, 0x6E, 0xEA, 0x37]
-	# xxx = [0xF3, 0x24, 0xC2, 0x8B, 0x0E, 0x18, 0x04 ]
-	# xxx = [ 0x60, 0x10, 0xD0, 0xF1, 0x50, 0xB2, 0x13 ]
-	# xxx = [ 0x1E, 0x6C, 0x50, 0x88, 0x29, 0x39, 0x6B ]
-	xxx = [ 0xAE, 0x61, 0x3D, 0xFF, 0x84, 0x7B, 0x73 ]
-	# xxx = [ 0xED, 0xCE, 0x15, 0x89, 0xA2, 0xB1, 0xF4 ]
-	if is_seed(seed, xxx):
-		rule = int(i / 21)
-		off = int(i % 21)
-		print('%d: %d, %d' % (i, rule, off))
-		# sys.exit(1)
+def generate_quick_resume_both():
+	print(".macro QUICKRESUME")
+	print(".ifdef PAL")
+	generate_quick_resume(18)
+	print(".else")
+	generate_quick_resume(21)
+	print(".endif")
+	print(".endmacro")
 
-	#if seed in find:
-	#	print('[%d] Found block!' % (i))
-	#	print('#' * 60)
-	total += 1
+def locate_seed_frame(framerule_frames, needle):
+	needle_ary = list(map(int, bytearray.fromhex(re.sub("[^0-9a-fA-F]", "", needle))))
+	seed = random_init()
+	for i in range(0, 100000):
+		seed = random_advance(seed)
+		if seed != needle_ary:
+			continue
+		rule = int(i / framerule_frames)
+		off = int(i % framerule_frames)
+		print('found on frame: %d, framerule: %d, framerule offset: %d' % (i, rule, off))
+
+generate_quick_resume_both()
+#locate_seed_frame(21, "E9E635F9926145")
