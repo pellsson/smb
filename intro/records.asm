@@ -335,12 +335,17 @@ run_records:
 		beq exit_out
 
 		ldx RECORDS_MODE
+.ifdef PAL
+		cmp #0
+		bne exit_records
+.else
 		cmp #Left_Dir
 		beq @go_left
 		cmp #Right_Dir
 		beq @go_right
 		cmp #Start_Button
 		beq exit_records
+.endif
 		rts
 @go_right:
 		inx

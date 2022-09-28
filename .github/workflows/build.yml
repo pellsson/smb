@@ -15,6 +15,10 @@ jobs:
       - uses: actions/checkout@v2
       - name: mkdir build
         run: mkdir -p build
+      - name: prepare pal
+        run: gpg --quiet --batch --yes --decrypt --passphrase="${{ secrets.SECRET }}" --output original_pal.nes game_pal.gpg
+      - name: build pal
+        run: PAL=1 make patch.ips && mv patch.ips patch_pal.ips
       - name: clean
         run: make clean
       - name: prepare ntsc
@@ -27,4 +31,5 @@ jobs:
           name: pellsson
           path: |
             patch.ips
+            patch_pal.ips
             README.md
