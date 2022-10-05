@@ -150,11 +150,10 @@ song_table:
 	.byte 4, 0, 2
 
 redraw_all_records:
-		ldx RECORDS_MODE
-		lda song_table, x
-		ldx #0
-		jsr fax_load_song
-
+		;ldx RECORDS_MODE
+		;lda song_table, x
+		;ldx #0
+		;jsr fax_load_song
 		lda PPU_STATUS
 		ldy #$03
 		ldx #$C0
@@ -261,9 +260,23 @@ redraw_all_records:
 		tax
 		inx
 		inx
+		jsr hack_update_music
 		dey
 		bne @more
+		rts
 
+hack_update_music:
+	stx $00
+	sty $01
+	sta $02
+		tya
+		and #3
+		bne @no_update
+		jsr fax_update		
+@no_update:
+	ldx $00
+	ldy $01
+	lda $02
 		rts
 
 records_attr:
@@ -276,6 +289,10 @@ records_palette:
 		.byte $0F, $27, $0f, $0f
 enter_records:
 		jsr screen_off
+		; Load sound
+		lda #4
+		ldx #0
+		jsr fax_load_song
 		;
 		; Retarded.
 		;
@@ -357,8 +374,7 @@ run_records:
 @save_mode:
 		stx RECORDS_MODE
 		jsr screen_off
-		jsr redraw_all_records
-		rts
+		jmp redraw_all_records
 
 
 
