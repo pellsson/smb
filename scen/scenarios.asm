@@ -46,8 +46,9 @@ ColdBoot:    jsr InitializeMemory         ;clear memory using pointer in Y
              sta SND_DELTA_REG+1          ;reset delta counter load register
              sta OperMode                 ;reset primary mode of operation
 
-             ldx #CHR_SCEN
-             jsr Enter_LoadChrFromX
+             lda #CHR_ORG_SPR
+             ldx #CHR_ORG_BG
+             jsr SetChrBanksFromAX
 
              lda #$a5                     ;set warm boot flag
              sta PseudoRandomBitReg       ;set seed for pseudorandom register

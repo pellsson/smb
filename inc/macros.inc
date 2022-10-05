@@ -157,7 +157,6 @@
 
 .endmacro
 
-
 ;
 ; Lower banks
 ; 
@@ -169,14 +168,38 @@
 		jsr SetBankFromA
 		jmp SoundEngineExternal
 
-	Enter_LoadChrFromX:
-		lda #BANK_CHR
-		jsr SetBankFromA
-		jmp LoadChrFromX
-
 	ReturnBank:
 		lda BANK_SELECTED
 		jmp SetBankFromA
+
+	SetChrBank0FromA:
+		sta $A000
+		lsr
+		sta $A000
+		lsr
+		sta $A000
+		lsr
+		sta $A000
+		lsr
+		sta $A000
+		rts
+
+	SetChrBank1FromA:
+		sta $C000
+		lsr
+		sta $C000
+		lsr
+		sta $C000
+		lsr
+		sta $C000
+		lsr
+		sta $C000
+		rts
+
+	SetChrBanksFromAX:
+		jsr SetChrBank0FromA
+		txa
+		jmp SetChrBank1FromA
 
 	SetBankFromA:
 		sta $E000
@@ -199,9 +222,9 @@
 		txs
 		stx $8000
 		;
-		; Set 32kb bank switch
+		; Set 32kb prg bank switch, 4KB chr ram switch, vertical mirroring 
 		;
-		lda #$02
+		lda #$12
 		sta $8000
 		lsr
 		sta $8000
@@ -211,6 +234,7 @@
 		sta $8000
 		lsr
 		sta $8000
+		lsr
 	StartBank:
 		;
 		; 0 Bank selected

@@ -30,8 +30,9 @@ ColdBoot:    jsr InitializeMemory         ;clear memory using pointer in Y
 
              jsr Enter_PracticeInit
 
-             ldx #CHR_ORG
-             jsr Enter_LoadChrFromX
+             lda #CHR_ORG_SPR
+             ldx #CHR_ORG_BG
+             jsr SetChrBanksFromAX
 
              lda #%00001111
              sta SND_MASTERCTRL_REG       ;enable all sound channels except dmc

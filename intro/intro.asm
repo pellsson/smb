@@ -18,11 +18,14 @@ ContraCodeX = $710
 ContraSoundFrames = $711
 
 CreditsIndex = $712
+CursorY = $713
+
+MirrorPPUCTRL = $720
 
 SEL_START_Y = $7e
 LoaderFrameCounter = $30
 CurrentHead = $31
-CURSOR_SPRITE = $f9
+CURSOR_SPRITE = $0A
 
 	.include "mario.inc"
 	.include "shared.inc"
@@ -36,7 +39,8 @@ CURSOR_SPRITE = $f9
 	.segment "bank1"
 
 Start:
-		lda #$10	; Use 0x1000 for background (not that it matters, same in both)
+		lda #$00
+		sta MirrorPPUCTRL
 		sta PPU_CTRL_REG1
 		;
 		; Wait for stable ppu state
@@ -65,8 +69,9 @@ dont_wipe_bank_selection:
 		inx
 		bne clear_memory
 
-		ldx #CHR_INTRO
-		jsr Enter_LoadChrFromX
+		lda #CHR_INTRO_SPR0
+		ldx #CHR_INTRO_BG
+		jsr SetChrBanksFromAX
 
 		jsr enter_loader
 
@@ -77,7 +82,8 @@ dont_wipe_bank_selection:
 		;
 		; Enable NMI
 		;
-		lda #$80
+		lda #$90
+		sta MirrorPPUCTRL
 		sta PPU_CTRL_REG1
 hang:
 		jmp hang
@@ -110,20 +116,24 @@ screen_off:
 		stx PPU_SCROLL_REG ; No scrolling
 		stx PPU_SCROLL_REG
 		stx PPU_CTRL_REG2 ; No rendering
-		stx PPU_CTRL_REG1 ; No NMI
+		lda MirrorPPUCTRL
+		and #$7F
+		sta PPU_CTRL_REG1 ; No NMI
 		rts
 
 enter_loader:
 		jsr screen_off
+		lda #SEL_START_Y
+		sta CursorY
 		lda #0 ; for sml_export_init
 		sta SEL_INDEX
 		sta LDR_MODE
-		ldx #0
+		tax
 		jsr sml_export_init
 		;
 		; Install nametable
 		;
-		write_nt "nt_data"
+		write_nt "intro_data"
 
 		;
 		; Copy static sprite-data over
@@ -174,7 +184,8 @@ NonMaskableInterrupt:
 		ldx ContraSoundFrames
 		bne ContraFinishSound
 		inc LoaderFrameCounter
-		lda #$00
+		lda MirrorPPUCTRL
+		and #$7F
 		sta PPU_CTRL_REG1
 		;
 		; Turn on rendering (Sprites, background)
@@ -255,15 +266,15 @@ NoChangeHead:
 		lda LoaderFrameCounter
 		and #$07
 		bne dont_update_cursor
-		lda $201
-		cmp #CURSOR_SPRITE
-		beq hide_cursor
-		lda #CURSOR_SPRITE
-		sta $201
+		lda $200
+		cmp #$ff
+		bne hide_cursor
+		lda CursorY
+		sta $200
 		jmp dont_update_cursor
 hide_cursor:
-		lda #$24
-		sta $201
+		lda #$ff
+		sta $200
 dont_update_cursor:
 		;
 		; Update sound
@@ -301,8 +312,10 @@ dont_update_cursor:
 @handlein:
 		cmp #Select_Button
 		bne no_select
+		lda CursorY
+		cmp #$ff
+		beq cursor_off_screen
 		ldx SEL_INDEX
-		lda $200
 		inx 
 		cpx #5
 		bne no_loop_around
@@ -311,6 +324,8 @@ dont_update_cursor:
 no_loop_around:
 		clc
 		adc #16
+		sta CursorY
+cursor_off_screen:
 		sta $200
 		stx SEL_INDEX
 no_select:
@@ -339,7 +354,7 @@ no_start:
 		lda #$00
 		sta PPU_SCROLL_REG ; No scrolling
 		sta PPU_SCROLL_REG
-		lda #$80
+		lda MirrorPPUCTRL
 		sta PPU_CTRL_REG1	; Make sure NMI is on...
 		rti
 
@@ -507,28 +522,28 @@ static_sprite_data:
 	;
 	; Mario
 	;
-	.byte $7f,	$32, $00, $D0
-	.byte $7f,	$33, $00, $D0+8
-	.byte $7f+8,	$34, $00, $D0
-	.byte $7f+8,	$35, $00, $D0+8
+	.byte $7f,		$06, $00, $D0
+	.byte $7f,		$07, $00, $D0+8
+	.byte $7f+8,	$08, $00, $D0
+	.byte $7f+8,	$09, $00, $D0+8
 	;
 	; Left Window
 	;
-	.byte $c8,	$36, $02, $c0
-	.byte $c8,	$37, $02, $c0+8
-	.byte $c8+8,	$38, $02, $c0
-	.byte $c8+8,	$39, $02, $c0+8
-	.byte $c8+16,	$3a, $02, $c0
-	.byte $c8+16,	$3b, $02, $c0+8
+	.byte $c8,		$00, $02, $c0
+	.byte $c8,		$01, $02, $c0+8
+	.byte $c8+8,	$02, $02, $c0
+	.byte $c8+8,	$03, $02, $c0+8
+	.byte $c8+16,	$04, $02, $c0
+	.byte $c8+16,	$05, $02, $c0+8
 	;
 	; Right Window
 	;
-	.byte $c8,	$36, $02, $e0
-	.byte $c8,	$37, $02, $e0+8
-	.byte $c8+8,	$38, $02, $e0
-	.byte $c8+8,	$39, $02, $e0+8
-	.byte $c8+16,	$3a, $02, $e0
-	.byte $c8+16,	$3b, $02, $e0+8
+	.byte $c8,		$00, $02, $e0
+	.byte $c8,		$01, $02, $e0+8
+	.byte $c8+8,	$02, $02, $e0
+	.byte $c8+8,	$03, $02, $e0+8
+	.byte $c8+16,	$04, $02, $e0
+	.byte $c8+16,	$05, $02, $e0+8
 	;
 	; Leader face
 	;

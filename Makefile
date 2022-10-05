@@ -3,13 +3,13 @@ LD = ld65
 AFLAGS = -W0 -U -I inc -g --create-dep "$@.dep"
 OUT = build
 OBJECTS = $(OUT)/intro.o \
-          $(OUT)/chrloader.o \
           $(OUT)/original.o \
           $(OUT)/common.o \
           $(OUT)/scenarios.o \
           $(OUT)/scenario_data.o \
           $(OUT)/lost.o \
           $(OUT)/leveldata.o \
+          $(OUT)/dummy.o \
           $(OUT)/ines.o
 
 SCENARIOS = scen/templates/1-2g_hi.json \
@@ -55,11 +55,11 @@ $(GEN_SCENARIOS): scripts/genscenarios.py $(SCENARIOS)
 $(OUT)/intro.o: $(INCS) intro/intro.asm intro/faxsound.asm intro/intro.inc intro/records.asm intro/smlsound.asm intro/nt.asm intro/settings.asm
 	$(AS) $(AFLAGS) -l $(OUT)/intro.map intro/intro.asm -o $@
 
-chr/org.chr chr/lost.chr: chr/build_chr.sh
+chr/full.chr: chr/build_chr.sh
 	(cd chr && sh build_chr.sh)
 
-$(OUT)/chrloader.o: $(INCS) chr/org.chr chr/lost.chr chr/chrloader.asm
-	$(AS) $(AFLAGS) -l $(OUT)/chrloader.map chr/chrloader.asm -o $@
+$(OUT)/dummy.o: $(INCS) dummy.asm
+	$(AS) $(AFLAGS) -l $(OUT)/dummy.map dummy.asm -o $@
 
 $(OUT)/original.o: $(INCS) org/original.asm
 	$(AS) $(AFLAGS) -l $(OUT)/original.map org/original.asm -o $@
@@ -86,7 +86,7 @@ smb.nes: $(OBJECTS)
 	$(LD) -C scripts/link.cfg \
 		$(OUT)/ines.o \
 		$(OUT)/intro.o \
-		$(OUT)/chrloader.o \
+		$(OUT)/dummy.o \
 		$(OUT)/original.o \
 		$(OUT)/common.o \
 		$(OUT)/scenarios.o \
@@ -94,7 +94,9 @@ smb.nes: $(OBJECTS)
 		$(OUT)/lost.o \
 		$(OUT)/leveldata.o \
 		--dbgfile "smb.dbg" \
-		-o $@
+		-o smb.tmp
+	cat smb.tmp chr/full.chr > smb.nes
+
 
 .PHONY: clean
 

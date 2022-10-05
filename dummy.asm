@@ -3,7 +3,7 @@
 	.include "macros.inc"
 	.include "text.inc"
 	.org $8000
-	.segment "bank8"
+	.segment "bank2"
 
 Start:
 NonMaskableInterrupt:

@@ -35,8 +35,9 @@ Start:
 		pha
 
 		jsr Enter_PracticeInit
-		ldx #CHR_LOST
-		jsr Enter_LoadChrFromX
+		lda #CHR_LOST_SPR
+		ldx #CHR_LOST_BG
+		jsr SetChrBanksFromAX
 		jsr Initialize_WRAM
 
 		ldy #$FE

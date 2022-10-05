@@ -11,3 +11,5 @@ wram/full.bin
 lost/wram-init.bin
 test.*
 smb.dbg
+chr/*.chr
+smb.tmp

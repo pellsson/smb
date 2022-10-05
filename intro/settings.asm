@@ -431,7 +431,7 @@ settings_pal:
 enter_settings:
 		lda #0
 		sta SND_MASTERCTRL_REG
-		write_nt "settings_nt_data"
+		write_nt "settings_data"
 		ldx #0
 		lda #0
 @nuke_sprites:
