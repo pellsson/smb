@@ -234,7 +234,7 @@ NonMaskableInterrupt:
 		bne NoChangeHead
 		ldx CurrentHead
 		inx
-		cpx #4
+		cpx #5
 		bne NoLooparoundHead
 		ldx #0
 NoLooparoundHead:
@@ -396,7 +396,7 @@ no_loop:
 
 
 head_sprite_indexes:
-		.byte $5f, $82, $a5, $c8
+		.byte $0b, $2E, $51, $74, $97
 
 set_leader_head_sprite:
 		lda #35
@@ -547,47 +547,47 @@ static_sprite_data:
 	;
 	; Leader face
 	;
-	.byte $40,	$5f, $01, $40
-	.byte $40,	$60, $01, $40+8
-	.byte $40,	$61, $01, $40+16
-	.byte $40,	$62, $01, $40+24
-	.byte $40,	$63, $01, $40+32
+	.byte $40,	$0B, $01, $40
+	.byte $40,	$0C, $01, $40+8
+	.byte $40,	$0D, $01, $40+16
+	.byte $40,	$0E, $01, $40+24
+	.byte $40,	$0F, $01, $40+32
 	;
-	.byte $FF,	$64, $01, $40
-	.byte $FF,	$65, $01, $40+8
-	.byte $FF,	$66, $01, $40+16
-	.byte $FF,	$67, $01, $40+24
-	.byte $FF,	$68, $01, $40+32
+	.byte $FF,	$10, $01, $40
+	.byte $FF,	$11, $01, $40+8
+	.byte $FF,	$12, $01, $40+16
+	.byte $FF,	$13, $01, $40+24
+	.byte $FF,	$14, $01, $40+32
 	;
-	.byte $ff,	$69, $01, $40
-	.byte $ff,	$6a, $01, $40+8
-	.byte $ff,	$6b, $01, $40+16
-	.byte $ff,	$6c, $01, $40+24
-	.byte $ff,	$6d, $01, $40+32
+	.byte $ff,	$15, $01, $40
+	.byte $ff,	$16, $01, $40+8
+	.byte $ff,	$17, $01, $40+16
+	.byte $ff,	$18, $01, $40+24
+	.byte $ff,	$19, $01, $40+32
 	;
-	.byte $ff,	$6e, $01, $40
-	.byte $ff,	$6f, $01, $40+8
-	.byte $ff,	$70, $01, $40+16
-	.byte $ff,	$71, $01, $40+24
-	.byte $ff,	$72, $01, $40+32
+	.byte $ff,	$1a, $01, $40
+	.byte $ff,	$1b, $01, $40+8
+	.byte $ff,	$1c, $01, $40+16
+	.byte $ff,	$1d, $01, $40+24
+	.byte $ff,	$1e, $01, $40+32
 	;
-	.byte $ff,	$73, $01, $40
-	.byte $ff,	$74, $01, $40+8
-	.byte $ff,	$75, $01, $40+16
-	.byte $ff,	$76, $01, $40+24
-	.byte $ff,	$77, $01, $40+32
+	.byte $ff,	$1f, $01, $40
+	.byte $ff,	$20, $01, $40+8
+	.byte $ff,	$21, $01, $40+16
+	.byte $ff,	$22, $01, $40+24
+	.byte $ff,	$23, $01, $40+32
 	;
-	.byte $ff,	$78, $01, $40
-	.byte $ff,	$79, $01, $40+8
-	.byte $ff,	$7a, $01, $40+16
-	.byte $ff,	$7b, $01, $40+24
-	.byte $ff,	$7c, $01, $40+32
+	.byte $ff,	$24, $01, $40
+	.byte $ff,	$25, $01, $40+8
+	.byte $ff,	$26, $01, $40+16
+	.byte $ff,	$27, $01, $40+24
+	.byte $ff,	$28, $01, $40+32
 	;
-	.byte $ff,	$7d, $01, $40
-	.byte $ff,	$7e, $01, $40+8
-	.byte $ff,	$7f, $01, $40+16
-	.byte $ff,	$80, $01, $40+24
-	.byte $ff,	$81, $01, $40+32
+	.byte $ff,	$29, $01, $40
+	.byte $ff,	$2a, $01, $40+8
+	.byte $ff,	$2b, $01, $40+16
+	.byte $ff,	$2c, $01, $40+24
+	.byte $ff,	$2d, $01, $40+32
 	;
 	; Kappa
 	;
