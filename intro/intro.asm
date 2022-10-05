@@ -1,5 +1,6 @@
 LEADER_HEAD_SPRITE = 17*4
-KAPPA_SPRITE = 52*4
+PRINCESS_SPRITE = 54*4
+PRINCESS_HAND_SPRITE = 52*4
 STAR_INDEX = $700
 SEL_INDEX = $701
 LDR_MODE = $702 ; ?
@@ -19,13 +20,24 @@ ContraSoundFrames = $711
 
 CreditsIndex = $712
 CursorY = $713
+PrincessThrowingTimer = $714
+PrincessNextThrow = $715
 
 MirrorPPUCTRL = $720
+
+Heart0X = $721 ; and 722
+Heart0Y = $723 ; and 724
+Heart0VX = $725 ; and 726
+Heart0VY = $727 ; and 728
+
+RndSeed = $730
 
 SEL_START_Y = $7e
 LoaderFrameCounter = $30
 CurrentHead = $31
 CURSOR_SPRITE = $0A
+FIRST_HEAD_TILE = $2E
+
 
 	.include "mario.inc"
 	.include "shared.inc"
@@ -42,6 +54,22 @@ Start:
 		lda #$00
 		sta MirrorPPUCTRL
 		sta PPU_CTRL_REG1
+		;
+		; Init Random
+		;
+		ldx #0
+@more_random:
+		lda $000, x
+		adc $100, x
+		adc $200, x
+		adc $300, x
+		adc $400, x
+		adc $500, x
+		adc $600, x
+		adc $700, x
+		sta RndSeed
+		dex
+		bne @more_random
 		;
 		; Wait for stable ppu state
 		;
@@ -79,6 +107,9 @@ dont_wipe_bank_selection:
 		stx PPU_SCROLL_REG ; No scrolling
 		stx PPU_SCROLL_REG
 		stx WRAM_IsContraMode ; Reset contra mode on restart
+
+		lda #30
+		sta PrincessNextThrow
 		;
 		; Enable NMI
 		;
@@ -109,6 +140,17 @@ PortLoop:
 		bne PortLoop
 		sta SavedJoypadBits
 		rts
+
+get_random:
+	    lda RndSeed
+	    asl
+	    asl
+	    clc
+	    adc RndSeed
+	    clc
+	    adc #17
+	    sta RndSeed
+	    rts
 
 screen_off:
 		ldx PPU_STATUS	; Read PPU status to reset the high/low latch
@@ -234,7 +276,7 @@ NonMaskableInterrupt:
 		bne NoChangeHead
 		ldx CurrentHead
 		inx
-		cpx #5
+		cpx #6
 		bne NoLooparoundHead
 		ldx #0
 NoLooparoundHead:
@@ -253,13 +295,42 @@ NoChangeHead:
 		ldx #LEADER_HEAD_SPRITE	; Offset
 		jsr move_head_group
 
-		lda #16
+		lda #16 ; Offset from base
 		sta $04
-		lda #3
+		lda #2 ; Width
 		sta $01
-		ldy #4
-		ldx #KAPPA_SPRITE
+		ldy #3 ; Height
+		ldx #PRINCESS_SPRITE
 		jsr move_head_group
+
+		dec PrincessNextThrow
+		bne @no_throw
+		jsr get_random
+		and #$7F
+		clc
+		adc #15
+		sta PrincessNextThrow
+		lda #$15
+		sta PrincessThrowingTimer
+@no_throw:
+		dec PrincessThrowingTimer
+		bmi @not_throwing
+		lda #$15 ; No hand on cloud sprite
+		ldx $200+(PRINCESS_SPRITE) ; Process top Y
+		bne @update_cloud_sprite
+@not_throwing:
+		lda #$11
+		ldx #$ff
+@update_cloud_sprite:
+ 		; Cloud top right sprite
+		sta $200+(PRINCESS_SPRITE+(2*4)+1)
+		; Move hand
+		stx $200+PRINCESS_HAND_SPRITE ; Y
+		lda $200+(PRINCESS_SPRITE+3)
+		sec
+		sbc #6
+		sta $200+PRINCESS_HAND_SPRITE+3
+
 		;
 		;
 		;
@@ -387,16 +458,17 @@ shuffle_more_stars:
 		ldx #0
 no_loop:
 		dey
-		bpl shuffle_more_stars
+		bne shuffle_more_stars
 		lda PPU_STATUS
 		lda #$00
 		sta PPU_ADDRESS
 		sta PPU_ADDRESS
 		rts
 
-
 head_sprite_indexes:
-		.byte $0b, $2E, $51, $74, $97
+		.byte FIRST_HEAD_TILE+35*0, FIRST_HEAD_TILE+35*1
+		.byte FIRST_HEAD_TILE+35*2, FIRST_HEAD_TILE+35*3
+		.byte FIRST_HEAD_TILE+35*4, FIRST_HEAD_TILE+35*5
 
 set_leader_head_sprite:
 		lda #35
@@ -547,23 +619,17 @@ static_sprite_data:
 	;
 	; Leader face
 	;
-	.byte $40,	$0B, $01, $40
-	.byte $40,	$0C, $01, $40+8
-	.byte $40,	$0D, $01, $40+16
-	.byte $40,	$0E, $01, $40+24
-	.byte $40,	$0F, $01, $40+32
+	.byte $40,	FIRST_HEAD_TILE+1, $01, $40
+	.byte $40,	FIRST_HEAD_TILE+2, $01, $40+8
+	.byte $40,	FIRST_HEAD_TILE+3, $01, $40+16
+	.byte $40,	FIRST_HEAD_TILE+4, $01, $40+24
+	.byte $40,	FIRST_HEAD_TILE+5, $01, $40+32
 	;
-	.byte $FF,	$10, $01, $40
-	.byte $FF,	$11, $01, $40+8
-	.byte $FF,	$12, $01, $40+16
-	.byte $FF,	$13, $01, $40+24
-	.byte $FF,	$14, $01, $40+32
-	;
-	.byte $ff,	$15, $01, $40
-	.byte $ff,	$16, $01, $40+8
-	.byte $ff,	$17, $01, $40+16
-	.byte $ff,	$18, $01, $40+24
-	.byte $ff,	$19, $01, $40+32
+	.byte $FF,	$15, $01, $40
+	.byte $FF,	$16, $01, $40+8
+	.byte $FF,	$17, $01, $40+16
+	.byte $FF,	$18, $01, $40+24
+	.byte $FF,	$19, $01, $40+32
 	;
 	.byte $ff,	$1a, $01, $40
 	.byte $ff,	$1b, $01, $40+8
@@ -589,20 +655,32 @@ static_sprite_data:
 	.byte $ff,	$2c, $01, $40+24
 	.byte $ff,	$2d, $01, $40+32
 	;
-	; Kappa
+	.byte $ff,	$2e, $01, $40
+	.byte $ff,	$2f, $01, $40+8
+	.byte $ff,	$30, $01, $40+16
+	.byte $ff,	$31, $01, $40+24
+	.byte $ff,	$32, $01, $40+32
 	;
-	.byte $FF,	$eb, $03, $90
-	.byte $FF,	$ec, $03, $90+8
-	.byte $FF,	$ed, $03, $90+16
+	; Throwing hand
 	;
-	.byte $ff,	$ee, $03, $90
-	.byte $ff,	$ef, $03, $90+8
-	.byte $ff,	$f0, $03, $90+16
+	.byte $ff,	$17, $03, $ff
 	;
-	.byte $ff,	$f1, $03, $90
-	.byte $ff,	$f2, $03, $90+8
-	.byte $ff,	$f3, $03, $90+16
+	; Heart
 	;
+	.byte $ff,	$ff, $03, $90+16
+	;
+	; Princess
+	;
+	.byte $FF,	$0f, $00, $90
+	.byte $FF,	$10, $00, $90+8
+	;
+	.byte $ff,	$11, $03, $90
+	.byte $ff,	$12, $03, $90+8
+	;
+	.byte $ff,	$13, $03, $90
+	.byte $ff,	$14, $03, $90+8
+	; kek
+	.byte $FF,	$ff, $00, $90+16
 	.byte $ff,	$f4, $03, $90
 	.byte $ff,	$f5, $03, $90+8
 	.byte $ff,	$f6, $03, $90+16
@@ -623,7 +701,7 @@ palette_star_shuffle:
 		.byte $0f, $16, $27, $18 ; Mario
 		.byte $0f, $27, $17, $0d ; Leader head
 		.byte $0f, $30, $2c, $11 ; Window
-		.byte $0f, $10, $00, $0d ; Kappa head
+		.byte $0f, $0D, $16, $27 ; Princess cloud
 
 bank_table:
 		.byte BANK_ORG, BANK_SMBLL, BANK_SCEN
