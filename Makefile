@@ -82,7 +82,7 @@ $(OUT)/lost.o: $(INCS) $(WRAM) lost/lost.asm
 $(OUT)/leveldata.o: lost/leveldata.asm
 	$(AS) $(AFLAGS) -l $(OUT)/leveldata.map lost/leveldata.asm -o $@
 
-smb.nes: $(OBJECTS)
+smb.nes: $(OBJECTS) chr/full.chr
 	$(LD) -C scripts/link.cfg \
 		$(OUT)/ines.o \
 		$(OUT)/intro.o \
