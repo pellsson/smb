@@ -83,7 +83,15 @@ ScreenOff:     sta Mirror_PPU_CTRL_REG2  ;save bits for later but not in registe
                lda VRAM_AddrTable_High,x
                sta $01
                jsr UpdateScreen          ;update screen with buffer contents
-               ldy #$00
+               lda WRAM_PracticeFlags
+               and #PF_EnableInputDisplay
+               beq ChkAddrCtrl           ;if input display not enabled, don't print it
+               lda #<WRAM_StoredInputs   ;otherwise set indirect at $00 to WRAM stored inputs pointer
+               sta $00
+               lda #>WRAM_StoredInputs
+               sta $01
+               jsr UpdateScreen          ;update input display
+ChkAddrCtrl:   ldy #$00
                ldx VRAM_Buffer_AddrCtrl  ;check for usage of $0341
                cpx #$06
                bne InitBuffer

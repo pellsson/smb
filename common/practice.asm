@@ -1281,8 +1281,7 @@ SaveState:
 noredraw_dec:
 		dec WRAM_UserFramesLeft
 noredraw:
-        jsr UpdateStatusInput
-		jmp ReturnBank
+        jmp UpdateStatusInput
 
 RedrawUserVars:
 		lda WRAM_UserFramesLeft
@@ -1311,33 +1310,25 @@ RedrawUserVars:
 		sty VRAM_Buffer1+$0A
 		lda WRAM_DelayUserFrames
 		sta WRAM_UserFramesLeft
-		jmp ReturnBank ; TODO: Render input display on frames that user vars are rendered
 
 UpdateStatusInput:
-    lda OperMode
-	beq @exit ; don't bother if title screen
     lda WRAM_PracticeFlags
     and #PF_EnableInputDisplay
 	beq @exit
-	lda GameEngineSubroutine
-	beq @exit ; if setting up level, don't show
-	ldx VRAM_Buffer1_Offset
-    cpx #$28 ;TODO move VRAM buffer to WRAM so this isn't needed
-    bcs @exit
-    jmp DrawInputButtons
+    jsr DrawInputButtons
 @exit:
-    rts
+    jmp ReturnBank
 DrawInputButtons:
     ldy JoypadBitMask
     sty $03
 	lda #$20
-    sta VRAM_Buffer1+0, x
+    sta WRAM_StoredInputs
     lda #$51
-    sta VRAM_Buffer1+1, x
+    sta WRAM_StoredInputs+1
     lda #$07
-    sta VRAM_Buffer1+2, x
+    sta WRAM_StoredInputs+2
 	lda #$24
-	sta VRAM_Buffer1+7, x
+	sta WRAM_StoredInputs+7
 	;
     ; Up
     ;
@@ -1349,7 +1340,7 @@ DrawInputButtons:
 NoUpStatus:
     lda #$28
 WriteUp:
-    sta VRAM_Buffer1+3, x
+    sta WRAM_StoredInputs+3
     ;
     ; Left
     ;
@@ -1361,7 +1352,7 @@ WriteUp:
 NoLeftStatus:
     lda #$28
 WriteLeft:
-    sta VRAM_Buffer1+4, x
+    sta WRAM_StoredInputs+4
 	;
     ; Down
     ;
@@ -1373,7 +1364,7 @@ WriteLeft:
 NoDownStatus:
     lda #$28
 WriteDown:
-    sta VRAM_Buffer1+5, x
+    sta WRAM_StoredInputs+5
     ;
     ; Right
     ;
@@ -1385,7 +1376,7 @@ WriteDown:
 NoRightStatus:
     lda #$28
 WriteRight:
-    sta VRAM_Buffer1+6, x
+    sta WRAM_StoredInputs+6
     ;
     ; B
     ;
@@ -1397,7 +1388,7 @@ WriteRight:
 NoBStatus:
     lda #$28
 WriteB:
-    sta VRAM_Buffer1+8, x
+    sta WRAM_StoredInputs+8
     ;
     ; A
     ;
@@ -1409,13 +1400,9 @@ WriteB:
 NoAStatus:
     lda #$28
 WriteA:
-    sta VRAM_Buffer1+9, x
+    sta WRAM_StoredInputs+9
     lda #$00
-    sta VRAM_Buffer1+10, x
-    lda VRAM_Buffer1_Offset
-    clc
-    adc #$0a
-    sta VRAM_Buffer1_Offset
+    sta WRAM_StoredInputs+10
     rts
 
 RequestRestartLevel:

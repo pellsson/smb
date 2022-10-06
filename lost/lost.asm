@@ -141,6 +141,16 @@ ScreenOff:
 		lda VRAM_AddrTable_DW_NEW,x
 		sta TMP_1
 		jsr UpdateScreen
+        lda WRAM_PracticeFlags
+        and #PF_EnableInputDisplay
+        beq ChkAddrCtrl
+        lda #<WRAM_StoredInputs
+        sta TMP_0
+        lda #>WRAM_StoredInputs
+        sta TMP_1
+        jsr UpdateScreen
+ChkAddrCtrl:
+		ldy #0
 		ldy #0
 		ldx VRAM_Buffer_AddrCtrl
 		cpx #6
