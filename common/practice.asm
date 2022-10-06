@@ -332,7 +332,7 @@ SaveFrameCounter:
 TopText:
 	text_block $2044, "RULE * FRAME"
 	text_block $2051, " X   Y  TIME R "
-	.byte $20, $68, $05, $24, $fe, $24, $2e, $29 ; score trailing digit and coin display
+	.byte $20, $6b, $02, $2e, $29 ; score trailing digit and coin display
 	.byte $23, $c0, $7f, $aa ; attribute table data, clears name table 0 to palette 2
 	.byte $23, $c2, $01, $ea ; attribute table data, used for coin icon in status bar
 	.byte $00
@@ -342,6 +342,21 @@ WritePracticeTop:
 	jmp ReturnBank
 
 RedrawFramesRemaningInner:
+        lda WRAM_PracticeFlags
+        and #PF_DisablePracticeInfo
+        beq @draw
+		lda StarFlagTaskControl
+		cmp #$04
+		beq @draw ; force remainder if flagpole end
+		lda OperMode
+		cmp #$02
+		beq @draw ; force remainder if castle end
+		lda GameEngineSubroutine
+		cmp #$03
+		bne ndraw
+		lda WarpZoneControl
+		beq ndraw ; force remainder if warp zone
+@draw:	ldy VRAM_Buffer1_Offset
 		ldy VRAM_Buffer1_Offset
 		lda #$20
 		sta VRAM_Buffer1, y
@@ -360,12 +375,12 @@ RedrawFramesRemaningInner:
 		tya
 		adc #5
 		sta VRAM_Buffer1_Offset
-		rts
+        rts
 
 RedrawAllInner:
 		jsr RedrawFramesRemaningInner
 		jsr RedrawFrameNumbersInner
-		rts
+ndraw:  rts
 
 RedrawAll:
 		jsr RedrawFramesRemaningInner
@@ -373,7 +388,12 @@ RedrawAll:
 		jmp ReturnBank
 
 RedrawFrameNumbersInner:
-		ldy VRAM_Buffer1_Offset
+        lda OperMode
+		beq @draw ; slighty dumb
+		lda WRAM_PracticeFlags
+        and #PF_DisablePracticeInfo
+		bne ndraw
+@draw:	ldy VRAM_Buffer1_Offset
 		lda #$20
 		sta VRAM_Buffer1, y
 		lda #$6d
@@ -961,6 +981,9 @@ DontUpdateSockHash:
 		rts
 
 ForceUpdateSockHashInner:
+        lda WRAM_PracticeFlags
+        and #PF_DisablePracticeInfo
+        bne DontUpdateSockHash
 		lda SprObject_X_MoveForce ; Player force
 		sta $3
 		lda SprObject_X_Position ; Player X
@@ -1258,6 +1281,7 @@ SaveState:
 noredraw_dec:
 		dec WRAM_UserFramesLeft
 noredraw:
+        jsr UpdateStatusInput
 		jmp ReturnBank
 
 RedrawUserVars:
@@ -1287,7 +1311,112 @@ RedrawUserVars:
 		sty VRAM_Buffer1+$0A
 		lda WRAM_DelayUserFrames
 		sta WRAM_UserFramesLeft
-		jmp ReturnBank
+		jmp ReturnBank ; TODO: Render input display on frames that user vars are rendered
+
+UpdateStatusInput:
+    lda OperMode
+	beq @exit ; don't bother if title screen
+    lda WRAM_PracticeFlags
+    and #PF_EnableInputDisplay
+	beq @exit
+	lda GameEngineSubroutine
+	beq @exit ; if setting up level, don't show
+	ldx VRAM_Buffer1_Offset
+    cpx #$28 ;TODO move VRAM buffer to WRAM so this isn't needed
+    bcs @exit
+    jmp DrawInputButtons
+@exit:
+    rts
+DrawInputButtons:
+    ldy JoypadBitMask
+    sty $03
+	lda #$20
+    sta VRAM_Buffer1+0, x
+    lda #$51
+    sta VRAM_Buffer1+1, x
+    lda #$07
+    sta VRAM_Buffer1+2, x
+	lda #$24
+	sta VRAM_Buffer1+7, x
+	;
+    ; Up
+    ;
+    lda $03
+    and #Up_Dir
+    beq NoUpStatus
+    lda #$1e
+    jmp WriteUp
+NoUpStatus:
+    lda #$28
+WriteUp:
+    sta VRAM_Buffer1+3, x
+    ;
+    ; Left
+    ;
+    lda $03
+    and #Left_Dir
+    beq NoLeftStatus
+    lda #$15
+    jmp WriteLeft
+NoLeftStatus:
+    lda #$28
+WriteLeft:
+    sta VRAM_Buffer1+4, x
+	;
+    ; Down
+    ;
+    lda $03
+    and #Down_Dir
+    beq NoDownStatus
+    lda #$0d
+    jmp WriteDown
+NoDownStatus:
+    lda #$28
+WriteDown:
+    sta VRAM_Buffer1+5, x
+    ;
+    ; Right
+    ;
+    lda $03
+    and #Right_Dir
+    beq NoRightStatus
+    lda #$1b
+    jmp WriteRight
+NoRightStatus:
+    lda #$28
+WriteRight:
+    sta VRAM_Buffer1+6, x
+    ;
+    ; B
+    ;
+    lda $03
+    and #B_Button
+    beq NoBStatus
+    lda #$0b
+    jmp WriteB
+NoBStatus:
+    lda #$28
+WriteB:
+    sta VRAM_Buffer1+8, x
+    ;
+    ; A
+    ;
+    lda $03
+    and #A_Button
+    beq NoAStatus
+    lda #$0a
+    jmp WriteA
+NoAStatus:
+    lda #$28
+WriteA:
+    sta VRAM_Buffer1+9, x
+    lda #$00
+    sta VRAM_Buffer1+10, x
+    lda VRAM_Buffer1_Offset
+    clc
+    adc #$0a
+    sta VRAM_Buffer1_Offset
+    rts
 
 RequestRestartLevel:
 		lda #$80 ; REMOVE 0x80?
@@ -1401,9 +1530,12 @@ PracticeInit:
 		lda WRAM_PracticeFlags
 		and #((PF_SaveState|PF_LoadState|PF_RestartLevel|PF_LevelEntrySaved)^$ff)
 		sta WRAM_PracticeFlags
-		jmp ReturnBank
+NoSock: jmp ReturnBank
 
 RedrawSockTimer:
+        lda WRAM_PracticeFlags
+        and #PF_DisablePracticeInfo
+        bne NoSock
 		ldx VRAM_Buffer1_Offset
 		lda #$20
 		sta VRAM_Buffer1,x
@@ -2032,9 +2164,7 @@ EndOfCastle:
 		sta WRAM_PracticeFlags
 		lda #$EE
 		sta WRAM_Timer+1
-		jsr RedrawAllInner
-		ldx #1
-		jmp ReturnBank
+        bne @exit
 @check_ext:
 		lda BANK_SELECTED
 		cmp #BANK_ORG
@@ -2044,7 +2174,5 @@ EndOfCastle:
 		cpx #3 ; World D
 		beq @is_end
 @exit:
-		jsr RedrawAllInner
-		ldx #0
 		jmp ReturnBank
 

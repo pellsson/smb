@@ -398,6 +398,7 @@ IncMsgCounter: lda SecondaryMsgCounter
                sta PrimaryMsgCounter
                cmp #$07                      ;check primary counter one more time
 SetEndTimer:   bcc ExitMsgs                  ;if not reached value yet, branch to leave
+               jsr Enter_RedrawAll
                lda #$06
                sta WorldEndTimer             ;otherwise set world end timer
 IncModeTask_A: inc OperMode_Task             ;move onto next task in mode
@@ -5991,9 +5992,8 @@ DrawFlagSetTimer:
       sta EnemyIntervalTimer,x  ;set interval timer here
 
 IncrementSFTask2:
-      jsr Enter_RedrawAll
       inc StarFlagTaskControl   ;move onto next task
-      rts
+      jmp Enter_RedrawAll
 
 DelayToAreaEnd:
       jsr DrawStarFlag          ;do sub to draw star flag
@@ -8653,6 +8653,7 @@ BridgeCollapseData:
       .byte $8a, $88, $86, $84, $82, $80
 
 BridgeCollapse:
+       jsr Enter_EndOfCastle
        ldx BowserFront_Offset    ;get enemy offset for bowser
        lda Enemy_ID,x            ;check enemy object identifier for bowser
        cmp #Bowser               ;if not found, branch ahead,
@@ -10524,6 +10525,7 @@ ChkGERtn: lda GameEngineSubroutine   ;get number of game engine routine running
           bne ExCSM
           lda #$02
           sta GameEngineSubroutine   ;otherwise set sideways pipe entry routine to run
+          jsr Enter_RedrawAll
           rts                        ;and leave
 
 ;--------------------------------
@@ -10544,21 +10546,13 @@ HandleCoinMetatile:
       jmp GiveOneCoin       ;update coin amount and tally on the screen
 
 HandleAxeMetatile:
-       jsr Enter_EndOfCastle
        lda #$00
        sta OperMode_Task   ;reset secondary mode
        lda #$02
        sta OperMode        ;set primary mode to autoctrl mode
+       jsr Enter_RedrawAll
        lda #$18
        sta Player_X_Speed  ;set horizontal speed and continue to erase axe metatile
-       cpx #1
-       bne @not_end_of_game
-       ;
-       ; ############### WARNING THIS ADDS A FRAME!!! #####################
-       ;
-       rts
-@not_end_of_game:
-
 ErACM: ldy $02             ;load vertical high nybble offset for block buffer
        lda #$00            ;load blank metatile
        sta ($06),y         ;store to remove old contents from block buffer
