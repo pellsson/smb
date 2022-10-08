@@ -28,6 +28,7 @@ ContraSoundFrames = $711
 CreditsIndex = $712
 PrincessThrowingTimer = $714
 PrincessNextThrow = $715
+ThrowDir = $716
 
 MirrorPPUCTRL = $720
 RndSeed = $721
@@ -149,15 +150,16 @@ PortLoop:
 		rts
 
 get_random:
-	    lda RndSeed
-	    asl
-	    asl
-	    clc
-	    adc RndSeed
-	    clc
-	    adc #17
-	    sta RndSeed
-	    rts
+        lda RndSeed
+        beq @do_eor
+        asl
+        beq @no_eor
+        bcc @no_eor
+@do_eor:
+		eor #$1d
+@no_eor:
+		sta RndSeed
+		rts
 
 screen_off:
 		ldx PPU_STATUS	; Read PPU status to reset the high/low latch
@@ -183,7 +185,6 @@ enter_loader:
 		; Install nametable
 		;
 		write_nt "intro_data"
-
 		;
 		; Copy static sprite-data over
 		;
@@ -193,6 +194,8 @@ copy_more_sprites:
 		sta $200, x
 		inx
 		bne copy_more_sprites
+
+		jsr set_leader_head_sprite
 		;
 		; Install palette
 		;
@@ -321,20 +324,36 @@ NoChangeHead:
 		lda PrincessThrowingTimer
 		beq @not_throwing
 		dec PrincessThrowingTimer
-		lda #$16 ; No hand on cloud sprite
+		lda #$15 ; No hand on cloud sprite
 		ldx $200+(PRINCESS_SPRITE_OFF) ; Process top Y
 		bne @update_cloud_sprite
 @not_throwing:
-		lda #$12
+		lda #$11
 		ldx #$ff
 @update_cloud_sprite:
- 		; Cloud top right sprite
-		sta $200+(PRINCESS_SPRITE_OFF+(3*4)+1)
+	pha
+		lda ThrowDir
+		asl
+		asl
+		tay
+	pla
+		clc
+		adc ThrowDir
+ 		; Cloud top left/right sprite
+		sta $200+(PRINCESS_SPRITE_OFF+(2*4)+1),y
 		; Move hand
 		stx $200+HAND_SPRITE_OFF ; Y
-		lda $200+(PRINCESS_SPRITE_OFF+(1*4)+3)
+		lda $200+(PRINCESS_SPRITE_OFF+3),y
+		ldx ThrowDir
+		beq @throw_l
 		clc
 		adc #6
+		jmp @set_hand
+@throw_l:
+		lda $200+(PRINCESS_SPRITE_OFF+3),y
+		sec
+		sbc #6
+@set_hand:
 		sta $200+HAND_SPRITE_OFF+3
 		;
 		; 
@@ -428,6 +447,9 @@ no_start:
 		rti
 
 spawn_heart:
+		jsr get_random
+		and #1
+		sta ThrowDir
 		lda NumHearts
 		sta $00
 		asl
@@ -435,13 +457,13 @@ spawn_heart:
 		tax
 		inc NumHearts 
 		jsr get_random
-		and #$7F
+		and #$1F
 		clc
 		adc #15
 		sta PrincessNextThrow
 		lda #$15
 		sta PrincessThrowingTimer
-		lda $200+(PRINCESS_SPRITE_OFF + 1*4) ; Princess Y
+		lda $200+(PRINCESS_SPRITE_OFF) ; Princess Y
 		sec
 		sbc #8
 		sta $200+HEART_SPRITE_OFF,x ; Y
@@ -449,9 +471,17 @@ spawn_heart:
 		sta $200+HEART_SPRITE_OFF+1,x ; Sprite
 		lda #0
 		sta $200+HEART_SPRITE_OFF+2,x ; Palette
+		lda ThrowDir
+		bne @throw_right
+		lda $200+(PRINCESS_SPRITE_OFF + 0*4)+3 ;Princess X
+		sec
+		sbc #6
+		jmp @next
+@throw_right:
 		lda $200+(PRINCESS_SPRITE_OFF + 1*4)+3 ;Princess X
 		clc
-		adc #3
+		adc #6
+@next:
 		sta $200+HEART_SPRITE_OFF+3,x ; X
 		lda $00
 		asl ; *= 2
@@ -473,6 +503,10 @@ spawn_heart:
 		sta HeartVX,x
 		jsr get_random
 		and #$1
+		ldy ThrowDir
+		bne @pos
+		eor #$FE
+@pos:
 		sta HeartVX+1,x
 		rts
 
@@ -718,11 +752,11 @@ static_sprite_data:
 	;
 	; Leader face
 	;
-	.byte $40,	FIRST_HEAD_TILE+1, $01, $40
-	.byte $40,	FIRST_HEAD_TILE+2, $01, $40+8
-	.byte $40,	FIRST_HEAD_TILE+3, $01, $40+16
-	.byte $40,	FIRST_HEAD_TILE+4, $01, $40+24
-	.byte $40,	FIRST_HEAD_TILE+5, $01, $40+32
+	.byte $a0,	FIRST_HEAD_TILE+1, $01, $40
+	.byte $a0,	FIRST_HEAD_TILE+2, $01, $40+8
+	.byte $a0,	FIRST_HEAD_TILE+3, $01, $40+16
+	.byte $a0,	FIRST_HEAD_TILE+4, $01, $40+24
+	.byte $a0,	FIRST_HEAD_TILE+5, $01, $40+32
 	;
 	.byte $FF,	$15, $01, $40
 	.byte $FF,	$16, $01, $40+8
