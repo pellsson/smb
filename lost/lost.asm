@@ -37,6 +37,11 @@ Start:
 		jsr Enter_PracticeInit
 		lda #CHR_LOST_SPR
 		ldx #CHR_LOST_BG
+		ldy WRAM_CharSet
+        cpy #1
+        bne @not_org
+        ldx #CHR_LOST_BG_ALTFONT
+@not_org:
 		jsr SetChrBanksFromAX
 		jsr Initialize_WRAM
 

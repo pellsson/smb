@@ -1,6 +1,13 @@
-LEADER_HEAD_SPRITE = 17*4
-PRINCESS_SPRITE = 54*4
-PRINCESS_HAND_SPRITE = 52*4
+HEAP_SPRITE_OFF = 17*4
+PRINCESS_SPRITE_OFF = 53*4
+HAND_SPRITE_OFF = 52*4
+HEART_SPRITE_OFF = 59*4
+
+LoaderFrameCounter = $30
+CurrentHead = $31
+
+CursorY = $200
+
 STAR_INDEX = $700
 SEL_INDEX = $701
 LDR_MODE = $702 ; ?
@@ -19,25 +26,25 @@ ContraCodeX = $710
 ContraSoundFrames = $711
 
 CreditsIndex = $712
-CursorY = $713
 PrincessThrowingTimer = $714
 PrincessNextThrow = $715
 
 MirrorPPUCTRL = $720
+RndSeed = $721
 
-Heart0X = $721 ; and 722
-Heart0Y = $723 ; and 724
-Heart0VX = $725 ; and 726
-Heart0VY = $727 ; and 728
+NumHearts = $722
 
-RndSeed = $730
+HeartXLow = $723
+HeartYLow = $724
+HeartVX = $725 ; and 726
+HeartVY = $727 ; and 728
+; 5x ^
 
+MAX_HEARTS = 4
 SEL_START_Y = $7e
-LoaderFrameCounter = $30
-CurrentHead = $31
 CURSOR_SPRITE = $0A
 FIRST_HEAD_TILE = $2E
-
+HEART_SPRITE = $18
 
 	.include "mario.inc"
 	.include "shared.inc"
@@ -292,7 +299,7 @@ NoChangeHead:
 		lda #5 ; Width
 		sta $01
 		ldy #7 ; Height
-		ldx #LEADER_HEAD_SPRITE	; Offset
+		ldx #HEAP_SPRITE_OFF	; Offset
 		jsr move_head_group
 
 		lda #16 ; Offset from base
@@ -300,52 +307,47 @@ NoChangeHead:
 		lda #2 ; Width
 		sta $01
 		ldy #3 ; Height
-		ldx #PRINCESS_SPRITE
+		ldx #PRINCESS_SPRITE_OFF
 		jsr move_head_group
+		jsr update_hearts
 
+		lda #MAX_HEARTS
+		cmp NumHearts
+		beq @no_new_throw
 		dec PrincessNextThrow
-		bne @no_throw
-		jsr get_random
-		and #$7F
-		clc
-		adc #15
-		sta PrincessNextThrow
-		lda #$15
-		sta PrincessThrowingTimer
-@no_throw:
+		bne @no_new_throw
+		jsr spawn_heart
+@no_new_throw:
+		lda PrincessThrowingTimer
+		beq @not_throwing
 		dec PrincessThrowingTimer
-		bmi @not_throwing
-		lda #$15 ; No hand on cloud sprite
-		ldx $200+(PRINCESS_SPRITE) ; Process top Y
+		lda #$16 ; No hand on cloud sprite
+		ldx $200+(PRINCESS_SPRITE_OFF) ; Process top Y
 		bne @update_cloud_sprite
 @not_throwing:
-		lda #$11
+		lda #$12
 		ldx #$ff
 @update_cloud_sprite:
  		; Cloud top right sprite
-		sta $200+(PRINCESS_SPRITE+(2*4)+1)
+		sta $200+(PRINCESS_SPRITE_OFF+(3*4)+1)
 		; Move hand
-		stx $200+PRINCESS_HAND_SPRITE ; Y
-		lda $200+(PRINCESS_SPRITE+3)
-		sec
-		sbc #6
-		sta $200+PRINCESS_HAND_SPRITE+3
-
+		stx $200+HAND_SPRITE_OFF ; Y
+		lda $200+(PRINCESS_SPRITE_OFF+(1*4)+3)
+		clc
+		adc #6
+		sta $200+HAND_SPRITE_OFF+3
 		;
-		;
+		; 
 		;
 		lda LoaderFrameCounter
 		and #$07
 		bne dont_update_cursor
-		lda $200
-		cmp #$ff
+		lda #$0B
+		cmp $201
 		bne hide_cursor
-		lda CursorY
-		sta $200
-		jmp dont_update_cursor
+		lda #$0A
 hide_cursor:
-		lda #$ff
-		sta $200
+		sta $201
 dont_update_cursor:
 		;
 		; Update sound
@@ -384,8 +386,6 @@ dont_update_cursor:
 		cmp #Select_Button
 		bne no_select
 		lda CursorY
-		cmp #$ff
-		beq cursor_off_screen
 		ldx SEL_INDEX
 		inx 
 		cpx #5
@@ -396,8 +396,6 @@ no_loop_around:
 		clc
 		adc #16
 		sta CursorY
-cursor_off_screen:
-		sta $200
 		stx SEL_INDEX
 no_select:
 		cmp #Start_Button
@@ -428,6 +426,107 @@ no_start:
 		lda MirrorPPUCTRL
 		sta PPU_CTRL_REG1	; Make sure NMI is on...
 		rti
+
+spawn_heart:
+		lda NumHearts
+		sta $00
+		asl
+		asl
+		tax
+		inc NumHearts 
+		jsr get_random
+		and #$7F
+		clc
+		adc #15
+		sta PrincessNextThrow
+		lda #$15
+		sta PrincessThrowingTimer
+		lda $200+(PRINCESS_SPRITE_OFF + 1*4) ; Princess Y
+		sec
+		sbc #8
+		sta $200+HEART_SPRITE_OFF,x ; Y
+		lda #HEART_SPRITE
+		sta $200+HEART_SPRITE_OFF+1,x ; Sprite
+		lda #0
+		sta $200+HEART_SPRITE_OFF+2,x ; Palette
+		lda $200+(PRINCESS_SPRITE_OFF + 1*4)+3 ;Princess X
+		clc
+		adc #3
+		sta $200+HEART_SPRITE_OFF+3,x ; X
+		lda $00
+		asl ; *= 2
+		clc
+		adc $00 ; *= 3
+		asl ; *= 6
+		tax
+		lda #0
+		sta HeartYLow,x
+		sta HeartXLow,x
+		jsr get_random
+		sta HeartVY,x
+		jsr get_random
+		and #1
+		clc
+		adc #1
+		sta HeartVY+1,x
+		jsr get_random
+		sta HeartVX,x
+		jsr get_random
+		and #$1
+		sta HeartVX+1,x
+		rts
+
+update_hearts:
+		ldx #0
+		ldy #0
+		lda #MAX_HEARTS
+		sta $00
+@gogo:
+		dec $00
+		bpl @check_heart
+		rts
+@check_heart:
+		lda $200+HEART_SPRITE_OFF+1,y
+		cmp #$ff
+		beq @advance_next
+		; Move X
+		lda HeartXLow,x
+		clc
+		adc HeartVX,x
+		sta HeartXLow,x
+		lda $200+HEART_SPRITE_OFF+3,y
+		adc HeartVX+1,x
+		sta $200+HEART_SPRITE_OFF+3,y
+		; Move Y
+		lda HeartYLow,x
+		sec
+		sbc HeartVY,x
+		sta HeartYLow,x
+		lda $200+HEART_SPRITE_OFF,y
+		sbc HeartVY+1,x
+		sta $200+HEART_SPRITE_OFF,y
+		cmp #240
+		bcc @advance_next
+		dec NumHearts
+		lda #$ff
+		sta $200+HEART_SPRITE_OFF+1,y
+@advance_next:
+		lda HeartVY,x
+		sec
+		sbc #20
+		sta HeartVY,x
+		lda HeartVY+1,x
+		sbc #0
+		sta HeartVY+1,x
+		txa
+		clc
+		adc #6
+		tax
+		iny
+		iny
+		iny
+		iny
+		jmp @gogo
 
 rotate_star_palette:
 		;
@@ -474,7 +573,7 @@ set_leader_head_sprite:
 		lda #35
 		sta $0
 		ldy head_sprite_indexes, x
-		ldx #LEADER_HEAD_SPRITE
+		ldx #HEAP_SPRITE_OFF
 		inx
 copy_next_sprite:
 		tya
@@ -665,10 +764,6 @@ static_sprite_data:
 	;
 	.byte $ff,	$17, $03, $ff
 	;
-	; Heart
-	;
-	.byte $ff,	$ff, $03, $90+16
-	;
 	; Princess
 	;
 	.byte $FF,	$0f, $00, $90
@@ -679,11 +774,14 @@ static_sprite_data:
 	;
 	.byte $ff,	$13, $03, $90
 	.byte $ff,	$14, $03, $90+8
-	; kek
-	.byte $FF,	$ff, $00, $90+16
-	.byte $ff,	$f4, $03, $90
-	.byte $ff,	$f5, $03, $90+8
-	.byte $ff,	$f6, $03, $90+16
+	;
+	; Hearts
+	;
+	.byte $ff,	$ff, $03, $90+16
+	.byte $ff,	$ff, $00, $90+16
+	.byte $ff,	$ff, $03, $90
+	.byte $ff,	$ff, $03, $90+8
+	.byte $ff,	$ff, $03, $90+16
 	;
 	; 0x100 bytes here...
 	;

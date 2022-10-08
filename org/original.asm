@@ -31,7 +31,16 @@ ColdBoot:    jsr InitializeMemory         ;clear memory using pointer in Y
              jsr Enter_PracticeInit
 
              lda #CHR_ORG_SPR
+             ldy WRAM_IsContraMode
+             beq @not_peach
+             lda #CHR_PEACH_SPR
+@not_peach:
              ldx #CHR_ORG_BG
+             ldy WRAM_CharSet
+             cpy #2
+             bne @not_lost
+             ldx #CHR_ORG_BG_ALTFONT
+@not_lost:
              jsr SetChrBanksFromAX
 
              lda #%00001111

@@ -290,7 +290,7 @@ set_selection_sprites:
 @set_more:
 		lda $01
 		sta $204, y
-		lda #$26
+		lda #$0D
 		sta $205, y
 		lda #$20
 		ora SETTINGS_ATTR
