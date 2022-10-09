@@ -7040,9 +7040,13 @@ FindLoop:
 		lda Player_State
 		cmp #0
 		bne loc_8CE6
+		lda #Sfx_CoinGrab
 		inc MultiLoopCorrectCntr
+		bne skipFailSound
 loc_8CE6:
-
+		lda #Sfx_TimerTick
+skipFailSound:
+		sta Square2SoundQueue
 		inc MultiLoopPassCntr
 		lda MultiLoopPassCntr
 		cmp LoopCmdMultiLoopPassCntr,y
