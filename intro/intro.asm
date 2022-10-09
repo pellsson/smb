@@ -75,9 +75,9 @@ Start:
 		adc $500, x
 		adc $600, x
 		adc $700, x
-		sta RndSeed
 		dex
 		bne @more_random
+		sta RndSeed
 		;
 		; Wait for stable ppu state
 		;
@@ -177,6 +177,7 @@ enter_loader:
 		lda #SEL_START_Y
 		sta CursorY
 		lda #0 ; for sml_export_init
+		sta NumHearts
 		sta SEL_INDEX
 		sta LDR_MODE
 		tax
@@ -260,10 +261,10 @@ NonMaskableInterrupt:
 		dex
 		bne @not_settings
 		jsr run_settings
-		jmp no_start
+		jmp exit_nmi
 @not_settings:
 		jsr run_records
-		jmp no_start
+		jmp exit_nmi
 @run_menu:
 		;
 		; Rotate star palette
@@ -377,14 +378,14 @@ dont_update_cursor:
 @disabled:
 		lda SavedJoypadBits
 		cmp LAST_INPUT
-		beq no_start
+		bne @has_input
+		jmp exit_nmi
+@has_input:
 		cmp #0
 		beq @handlein
 		;
 		; Check contra code
 		;
-		ldx SEL_INDEX
-		bne @resetcode
 		ldx ContraCodeX
 		cmp ContraCode, X
 		bne @resetcode
@@ -392,33 +393,53 @@ dont_update_cursor:
 		stx ContraCodeX
 		cpx #(ContraCodeEnd-ContraCode)
 		bne @handlein
+		ldx SEL_INDEX
+		bne @resetcode
 		ldx #$4F
 		stx ContraSoundFrames
 		ldx #0
 		lda #41
 		jsr fax_load_song
-		jmp no_start
+		jmp exit_nmi
 @resetcode:
 		ldx #0
 		stx ContraCodeX
 @handlein:
 		cmp #Select_Button
-		bne no_select
+		beq @go_down
+		cmp #Down_Dir
+		bne @check_up
+@go_down:
 		lda CursorY
 		ldx SEL_INDEX
 		inx 
 		cpx #5
-		bne no_loop_around
+		bne @no_loop_around
 		ldx #0
 		lda #SEL_START_Y-16
-no_loop_around:
+@no_loop_around:
 		clc
 		adc #16
+@move_cursor:
 		sta CursorY
 		stx SEL_INDEX
-no_select:
+		jmp exit_nmi
+@check_up:
+		cmp #Up_Dir
+		bne @check_start
+		lda CursorY
+		ldx SEL_INDEX
+		dex
+		bpl @no_underflow
+		ldx #4
+		lda #SEL_START_Y+(5*16)
+@no_underflow:
+		sec
+		sbc #16
+		jmp @move_cursor
+@check_start:
 		cmp #Start_Button
-		bne no_start
+		bne exit_nmi
 		ldx SEL_INDEX
 		cpx #3
 		beq @settings
@@ -428,10 +449,10 @@ no_select:
 		jmp StartBank
 @showrecords:
 		jsr enter_records
-		jmp no_start
+		jmp exit_nmi
 @settings:
 		jsr enter_settings
-no_start:
+exit_nmi:
 		;
 		; Reset
 		;
@@ -447,19 +468,25 @@ no_start:
 		rti
 
 spawn_heart:
+		inc NumHearts 
 		jsr get_random
 		and #1
 		sta ThrowDir
-		lda NumHearts
-		sta $00
-		asl
-		asl
-		tax
-		inc NumHearts 
+		ldx #$FC
+		ldy #$FF
+@taken:
+		iny
+		inx
+		inx
+		inx
+		inx
+		lda $200+HEART_SPRITE_OFF+1,x ; Sprite
+		bpl @taken
+		sty $00 ; Index
 		jsr get_random
 		and #$1F
 		clc
-		adc #15
+		adc #20
 		sta PrincessNextThrow
 		lda #$15
 		sta PrincessThrowingTimer
@@ -494,10 +521,12 @@ spawn_heart:
 		sta HeartXLow,x
 		jsr get_random
 		sta HeartVY,x
-		jsr get_random
-		and #1
-		clc
-		adc #1
+		ldy #0
+		cmp #$9F
+		bcs @big_enough
+		ldy #1
+@big_enough:
+		tya
 		sta HeartVY+1,x
 		jsr get_random
 		sta HeartVX,x
@@ -505,7 +534,9 @@ spawn_heart:
 		and #$1
 		ldy ThrowDir
 		bne @pos
-		eor #$FE
+		clc
+		adc #1
+		eor #$FF
 @pos:
 		sta HeartVX+1,x
 		rts
