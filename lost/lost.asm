@@ -16845,4 +16845,4 @@ SetMarioName:
 .include "utils.inc"
 
 practice_callgate
-control_bank
+control_bank BANK_SMBLL

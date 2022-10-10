@@ -85,6 +85,11 @@
 		jsr SetBankFromA
 		jmp UpdateFrameRule
 
+	Enter_RunPendingWrites:
+		lda #BANK_COMMON
+		jsr SetBankFromA
+		jmp RunPendingWrites
+
 	Enter_WritePracticeTop:
 		lda #BANK_COMMON
 		jsr SetBankFromA
@@ -167,100 +172,150 @@
 
 .endmacro
 
+MMC5_PRGMode          = $5100
+MMC5_CHRMode          = $5101
+MMC5_RAMProtect1      = $5102
+MMC5_RAMProtect2      = $5103
+MMC5_ExRamMode        = $5104
+MMC5_Nametables       = $5105
+MMC5_FillTile         = $5106
+MMC5_CHRBank          = $5120
+MMC5_PRGBank          = $5113
+MMC5_VSplitMode       = $5200
+MMC5_VSplitScroll     = $5201
+MMC5_VSplitBank       = $5202
+MMC5_SLCompare        = $5203
+MMC5_SLIRQ            = $5204
+MMC5_ExRamOfs         = $3C00
+
+; todo - move these :D
+BankJSRAddr           = $6990
+BankJSRTargetBank     = $6991
+BankJSRA              = $6992
+ActiveBank            = $6993
+IRQNameTableSelect    = $6994
+IRQHorizontalScroll   = $6995
+PendingWrites         = $6996
+IRQAckFlag            = $69A7
+NameTableSelect       = $69A8
+
 ;
 ; Lower banks
 ; 
-.macro control_bank
-	.res $FF00 - *, $EA
+.macro control_bank bank
+.res $FEF0 - *, $EA
 
-	Enter_SoundEngine:
-		lda #BANK_COMMON
-		jsr SetBankFromA
-		jmp SoundEngineExternal
+Enter_SoundEngine:
+	lda #BANK_COMMON
+	jsr SetBankFromA
+	jmp SoundEngineExternal
 
-	ReturnBank:
-		lda BANK_SELECTED
-		jmp SetBankFromA
+ReturnBank:
+	lda BANK_SELECTED
+	jmp SetBankFromA
 
-	SetChrBank0FromA:
-		sta $A000
-		lsr
-		sta $A000
-		lsr
-		sta $A000
-		lsr
-		sta $A000
-		lsr
-		sta $A000
-		rts
+SetChrBank0FromA:
+	clc
+	sta MMC5_CHRBank+0
+	adc #1
+	sta MMC5_CHRBank+1
+	adc #1
+	sta MMC5_CHRBank+2
+	adc #1
+	sta MMC5_CHRBank+3
+	rts
 
-	SetChrBank1FromA:
-		sta $C000
-		lsr
-		sta $C000
-		lsr
-		sta $C000
-		lsr
-		sta $C000
-		lsr
-		sta $C000
-		rts
+SetChrBanksFromAX:
+	jsr SetChrBank0FromA
+	txa
+SetChrBank1FromA:
+	clc
+	sta MMC5_CHRBank+4
+	adc #1
+	sta MMC5_CHRBank+5
+	adc #1
+	sta MMC5_CHRBank+6
+	adc #1
+	sta MMC5_CHRBank+7
+	rts
 
-	SetChrBanksFromAX:
-		jsr SetChrBank0FromA
-		txa
-		jmp SetChrBank1FromA
+SetBankFromA:
+	clc
+	ora #$80			; mark as prg-rom
+	sta MMC5_PRGBank+2  ; set low prg bank
+	adc #2              ; advance to high bank
+	sta MMC5_PRGBank+4  ; and set high prg bank
+	rts
 
-	SetBankFromA:
-		sta $E000
-		lsr
-		sta $E000
-		lsr
-		sta $E000
-		lsr
-		sta $E000
-		lsr
-		sta $E000
-		rts
+MapperReset:
+	;
+	; clear mapper state
+	;
+	sei
+	ldx #$FF
+	txs
+	lda #%01000000         ; disable apu irq
+	sta $4017
+	lda #%10
+	sta MMC5_RAMProtect1
+	lda #%01
+	sta MMC5_RAMProtect2
+	lda #3
+	sta MMC5_CHRMode       ; use 1kb chr banking
+	lda #1
+	sta MMC5_PRGMode       ; use 16kb prg banking
+	lsr a
+	sta MMC5_PRGBank       ; use bank 0 for prg-ram
+	lda #%10
+	sta MMC5_ExRamMode
+	lda #BANK_LOADER
+	sta BANK_SELECTED
+	jsr SetBankFromA       ; set startup bank
+	lda #$44
+	sta MMC5_Nametables    ; set vertical mirroring
+	jmp $8000
 
-	MapperReset:
-		;
-		; Clear MMC1 state
-		;
-		sei
-		ldx #$FF
-		txs
-		stx $8000
-		;
-		; Set 32kb prg bank switch, 4KB chr ram switch, vertical mirroring 
-		;
-		lda #$12
-		sta $8000
-		lsr
-		sta $8000
-		lsr
-		sta $8000
-		lsr
-		sta $8000
-		lsr
-		sta $8000
-		lsr
-	StartBank:
-		;
-		; 0 Bank selected
-		;
-		sta BANK_SELECTED
-		ldx #$00
-		stx PPU_CTRL_REG1
-		stx PPU_CTRL_REG2
-		jsr SetBankFromA
-		jmp Start
+StartBank:
+	;
+	; 0 Bank selected
+	;
+	sta BANK_SELECTED
+	ldx #$00
+	stx PPU_CTRL_REG1
+	stx PPU_CTRL_REG2
+	jsr SetBankFromA
+	jmp Start
 
-		.res $FFFA - *, $ea
-		;
-		; Interrupt table
-		;
-		.word NonMaskableInterrupt
-		.word MapperReset
-		.word MapperReset
+IRQ:
+	sei
+	php
+	pha
+	lda MMC5_SLIRQ
+	lda #$44
+	sta MMC5_Nametables           ; set vertical mirroring
+	lda Mirror_PPU_CTRL_REG1
+	and #%11110110                ;mask out sprite address and nametable
+	ora IRQNameTableSelect
+	sta Mirror_PPU_CTRL_REG1      ;update the register and its mirror
+	sta PPU_CTRL_REG1
+	lda IRQHorizontalScroll
+	sta PPU_SCROLL_REG            ;set scroll regs for the screen under the status bar
+	lda #$00
+	sta PPU_SCROLL_REG
+	sta IRQAckFlag                ;indicate IRQ was acknowledged
+	lda #%10
+	sta MMC5_ExRamMode
+@Done:
+	pla
+	plp
+	cli
+	rti
+
+	.res $FFFA - *, $ea
+	;
+	; Interrupt table
+	;
+	.word NonMaskableInterrupt
+	.word MapperReset
+	.word IRQ
 .endmacro

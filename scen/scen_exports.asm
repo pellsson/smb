@@ -150,5 +150,5 @@ Start:
 NonMaskableInterrupt:
 
 scenarios_callgate
-control_bank
+control_bank BANK_SCEN_DATA
 

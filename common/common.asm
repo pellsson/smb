@@ -41,6 +41,7 @@ NonMaskableInterrupt: ; Dummy
 	.export RedrawAll
 	.export UpdateFrameRule
 	.export WritePracticeTop
+	.export RunPendingWrites
 	.export RedrawFrameNumbers
 	.export RedrawSockTimer
 	.export SetDefaultWRAM
@@ -48,4 +49,4 @@ NonMaskableInterrupt: ; Dummy
 	.export UpdateGameTimer
 
 practice_callgate
-control_bank
+control_bank BANK_COMMON

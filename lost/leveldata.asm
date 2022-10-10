@@ -9695,5 +9695,5 @@ unk_CFDB:
 		.byte $FF
 
 practice_callgate
-control_bank
+control_bank BANK_LLDATA
 

@@ -875,4 +875,4 @@ bank_table:
 	.include "faxsound.asm"
 
 practice_callgate
-control_bank
+control_bank BANK_LOADER

@@ -53,6 +53,7 @@ ColdBoot:    jsr InitializeMemory         ;clear memory using pointer in Y
              lda Mirror_PPU_CTRL_REG1
              ora #%10000000               ;enable NMIs
              jsr WritePPUReg1
+             cli
 EndlessLoop: jmp EndlessLoop              ;endless loop, need I say more?
 
 
@@ -61,15 +62,29 @@ EndlessLoop: jmp EndlessLoop              ;endless loop, need I say more?
 MACRO_ThrowFrameImpl
 
 NonMaskableInterrupt:
+               lda #$44
+               sta MMC5_Nametables
+               lda NameTableSelect
+               sta IRQNameTableSelect
+               lda HorizontalScroll
+               sta IRQHorizontalScroll
                lda Mirror_PPU_CTRL_REG1  ;disable NMIs in mirror reg
-               and #%01111111            ;save all other bits
+               and #%01111110            ;save all other bits
+               ora #%00010000
                sta Mirror_PPU_CTRL_REG1
-               and #%01111110            ;alter name table address to be $2800
                sta PPU_CTRL_REG1         ;(essentially $2000) but save other bits
                lda Mirror_PPU_CTRL_REG2  ;disable OAM and background display by default
                and #%11100110
                ldy DisableScreenFlag     ;get screen disable flag
                bne ScreenOff             ;if set, used bits as-is
+               lda Sprite0HitDetectFlag
+               beq SkipIRQ
+               lda #$1F                  ;set interrupt scanline
+               sta MMC5_SLCompare
+               lda #$80
+               sta MMC5_SLIRQ            ;reset IRQ
+               inc IRQAckFlag            ;reset flag to wait for next IRQ
+SkipIRQ:
                lda Mirror_PPU_CTRL_REG2  ;otherwise reenable bits and save them
                ora #%00011110
 ScreenOff:     sta Mirror_PPU_CTRL_REG2  ;save bits for later but not in register at the moment
@@ -112,6 +127,13 @@ InitBuffer:    ldx VRAM_Buffer_Offset,y
                sta VRAM_Buffer_AddrCtrl  ;reinit address control to $0301
                lda Mirror_PPU_CTRL_REG2  ;copy mirror of $2001 to register
                sta PPU_CTRL_REG2
+               lda DisableScreenFlag
+               bne :+
+               lda #%00
+               sta MMC5_ExRamMode
+               lda #$AA
+               sta MMC5_Nametables
+:              cli
 
                jsr Enter_PracticeOnFrame
 
@@ -142,45 +164,30 @@ PauseSkip:
                bne SkipSprite0
                lda Sprite0HitDetectFlag  ;check for flag here
                beq SkipSprite0
-Sprite0Clr:
-               lda PPU_STATUS            ;wait for sprite 0 flag to clear, which will
-               and #%01000000            ;not happen until vblank has ended
-               bne Sprite0Clr
                lda GamePauseStatus       ;if in pause mode, do not bother with sprites at all
                and #3
                bne Sprite0Hit
                jsr MoveSpritesOffscreen
                jsr SpriteShuffler
 Sprite0Hit:
-               lda PPU_STATUS            ;do sprite #0 hit detection
-               and #%01000000
-               beq Sprite0Hit
-               ldy #$14                  ;small delay, to wait until we hit horizontal blank time
-HBlankDelay:
-               dey
-               bne HBlankDelay
 SkipSprite0:
-               lda HorizontalScroll      ;set scroll registers from variables
-               sta PPU_SCROLL_REG
-               lda VerticalScroll
-               sta PPU_SCROLL_REG
-               lda Mirror_PPU_CTRL_REG1  ;load saved mirror of $2000
-               pha
-               sta PPU_CTRL_REG1
                lda GamePauseStatus       ;if in pause mode, do not perform operation mode stuff
                and #3
                bne SkipMainOper
                jsr OperModeExecutionTree ;otherwise do one of many, many possible subroutines
 SkipMainOper:
-               jsr Enter_RedrawUserVars
-               lda PPU_STATUS            ;reset flip-flop
-               pla
-               ora #%10000000            ;reactivate NMIs
-               sta PPU_CTRL_REG1
-               lda GamePauseStatus
-               and #$FD
-               sta GamePauseStatus
-               rti                       ;we are done until the next frame!
+               ;jsr Enter_RedrawUserVars
+   jsr Enter_RedrawUserVars
+WaitForIRQ:
+   lda IRQAckFlag            ;wait for IRQ
+   bne WaitForIRQ
+   jsr Enter_RunPendingWrites
+   lda PPU_STATUS
+   lda Mirror_PPU_CTRL_REG1       ;reenable NMIs 
+   ora #$80
+   sta Mirror_PPU_CTRL_REG1       ;then park it at endless loop until next NMI
+   sta PPU_CTRL_REG1
+   rti
 
 ;-------------------------------------------------------------------------------------
 ;$00 - vram buffer address table low, also used for pseudorandom bit
@@ -617,6 +624,10 @@ WriteTopStatusLine:
     jmp IncSubtask
 
 DisplayIntermediate:
+               lda #0
+               sta PPU_SCROLL_REG
+               sta PPU_SCROLL_REG
+               sta NameTableSelect
                lda OperMode                 ;check primary mode of operation
                beq NoInter                  ;if in title screen mode, skip this
                cmp #GameOverModeValue       ;are we in game over mode?
@@ -711,8 +722,9 @@ WorldLivesDisplay:
   .byte $29, $24, $24, $24, $24 ; lives display
   .byte $21, $4b, $09, $20, $18 ; "WORLD  - " used on lives display
   .byte $1b, $15, $0d, $24, $24, $28, $24
-  .byte $22, $0c, $47, $24 ; possibly used to clear time up
-  .byte $23, $dc, $01, $ba ; attribute table data for crown if more than 9 lives
+  ;.byte $22, $0c, $47, $24 ; possibly used to clear time up
+  .byte $23, $c0, $7f, $aa
+  ;.byte $23, $dc, $01, $ba ; attribute table data for crown if more than 9 lives
   .byte $ff
 
 OnePlayerTimeUp:
@@ -1280,10 +1292,8 @@ ClearVRLoop: sta VRAM_Buffer1-1,y      ;clear buffer at $0300-$03ff
              lda #$ff
              sta BalPlatformAlignment  ;initialize balance platform assignment flag
              lda ScreenLeft_PageLoc    ;get left side page location
-             lsr Mirror_PPU_CTRL_REG1  ;shift LSB of ppu register #1 mirror out
-             and #$01                  ;mask out all but LSB of page location
-             ror                       ;rotate LSB of page location into carry then onto mirror
-             rol Mirror_PPU_CTRL_REG1  ;this is to set the proper PPU name table
+             and #$01
+             sta NameTableSelect
              jsr GetAreaMusic          ;load proper music into queue
              lda #$38                  ;load sprite shuffle amounts to be used later
              sta SprShuffleAmt+2
@@ -3718,12 +3728,8 @@ ScrollScreen:
               lda ScreenLeft_PageLoc
               adc #$00                  ;add carry to page location for left
               sta ScreenLeft_PageLoc    ;side of the screen
-              and #$01                  ;get LSB of page location
-              sta $00                   ;save as temp variable for PPU register 1 mirror
-              lda Mirror_PPU_CTRL_REG1  ;get PPU register 1 mirror
-              and #%11111110            ;save all bits except d0
-              ora $00                   ;get saved bit here and save in PPU register 1
-              sta Mirror_PPU_CTRL_REG1  ;mirror to be used to set name table later
+              and #$01                   ;get LSB of page location
+              sta NameTableSelect        ;save as name table select for later use
               jsr GetScreenPosition     ;figure out where the right side is
               lda #$08
               sta ScrollIntervalTimer   ;set scroll timer (residual, not used elsewhere)
@@ -6072,6 +6078,10 @@ SkipByte:     dey
               pla
               sta BANK_SELECTED
               lda #00
+              ldx #0
+:             sta $6900,x
+              inx
+              bne :-
               rts
 
 ;-------------------------------------------------------------------------------------
@@ -6136,7 +6146,23 @@ WritePPUReg1:
 
 ;-------------------------------------------------------------------------------------
 
+InitializeExRam:
+      lda #$24
+      ldx #$00
+:     sta $5C00,x
+      inx
+      bne :-
+      lda #$AA
+:     sta $5F00,x
+      inx
+      bne :-
+      lda #$00
+      rts
+
 InitializeNameTables:
+              jsr InitializeExRam
+              lda #$44
+              sta MMC5_Nametables
               lda PPU_STATUS            ;reset flip-flop
               lda Mirror_PPU_CTRL_REG1  ;load mirror of ppu reg $2000
               ora #%00010000            ;set sprites for first 4k and background for second 4k
@@ -13890,5 +13916,5 @@ NoHammer: ldx ObjectOffset         ;get original enemy object offset
           .include "utils.inc"
 
 practice_callgate
-control_bank
+control_bank BANK_ORG
 

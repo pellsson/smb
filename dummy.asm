@@ -7,5 +7,5 @@
 
 Start:
 NonMaskableInterrupt:
-	control_bank
+	control_bank BANK_CHR
 

@@ -401,6 +401,9 @@ UpdateGameTimer:
 		clc
 		adc #6
 		sta VRAM_Buffer1_Offset
+		lda #%1000
+		ora PendingWrites
+		sta PendingWrites
 		ldx ObjectOffset
 		jmp ReturnBank
 
