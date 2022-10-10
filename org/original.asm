@@ -31,7 +31,16 @@ ColdBoot:    jsr InitializeMemory         ;clear memory using pointer in Y
              jsr Enter_PracticeInit
 
              lda #CHR_ORG_SPR
+             ldy WRAM_IsContraMode
+             beq @not_peach
+             lda #CHR_PEACH_SPR
+@not_peach:
              ldx #CHR_ORG_BG
+             ldy WRAM_CharSet
+             cpy #2
+             bne @not_lost
+             ldx #CHR_ORG_BG_ALTFONT
+@not_lost:
              jsr SetChrBanksFromAX
 
              lda #%00001111
@@ -77,21 +86,21 @@ ScreenOff:     sta Mirror_PPU_CTRL_REG2  ;save bits for later but not in registe
                lda #$02                  ;perform spr-ram DMA access on $0200-$02ff
                sta SPR_DMA
 
-               ldx VRAM_Buffer_AddrCtrl  ;load control for pointer to buffer contents
+               lda WRAM_PracticeFlags
+               and #PF_EnableInputDisplay
+               beq DrawBuffer            ;if input display not enabled, don't print it
+               lda #<WRAM_StoredInputs   ;otherwise set indirect at $00 to WRAM stored inputs
+               sta $00
+               lda #>WRAM_StoredInputs
+               sta $01
+               jsr UpdateScreen          ;update input display
+DrawBuffer:    ldx VRAM_Buffer_AddrCtrl  ;load control for pointer to buffer contents
                lda VRAM_AddrTable_Low,x  ;set indirect at $00 to pointer
                sta $00
                lda VRAM_AddrTable_High,x
                sta $01
                jsr UpdateScreen          ;update screen with buffer contents
-               lda WRAM_PracticeFlags
-               and #PF_EnableInputDisplay
-               beq ChkAddrCtrl           ;if input display not enabled, don't print it
-               lda #<WRAM_StoredInputs   ;otherwise set indirect at $00 to WRAM stored inputs pointer
-               sta $00
-               lda #>WRAM_StoredInputs
-               sta $01
-               jsr UpdateScreen          ;update input display
-ChkAddrCtrl:   ldy #$00
+               ldy #$00
                ldx VRAM_Buffer_AddrCtrl  ;check for usage of $0341
                cpx #$06
                bne InitBuffer
@@ -5340,6 +5349,8 @@ FindLoop: dey
           lda Player_State          ;check to see if the player is
           cmp #$00                  ;on solid ground (i.e. not jumping or falling)
           bne WrongChk              ;if not, player fails to pass loop, and loopback
+          lda #Sfx_CoinGrab
+          sta Square2SoundQueue
           lda WorldNumber           ;are we in world 7? (check performed on correct
           cmp #World7               ;vertical position and on solid ground)
           bne InitMLp               ;if not, initialize flags used there, otherwise
@@ -5352,7 +5363,9 @@ IncMLoop: inc MultiLoopPassCntr     ;increment master multi-part counter
           cmp #$03
           beq InitMLp               ;if so, branch past unnecessary check here
           bne DoLpBack              ;unconditional branch if previous branch fails
-WrongChk: lda WorldNumber           ;are we in world 7? (check performed on
+WrongChk: lda #Sfx_TimerTick
+          sta Square2SoundQueue
+          lda WorldNumber           ;are we in world 7? (check performed on
           cmp #World7               ;incorrect vertical position or not on solid ground)
           beq IncMLoop
 DoLpBack: jsr ExecGameLoopback      ;if player is not in right place, loop back

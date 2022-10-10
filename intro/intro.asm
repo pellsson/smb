@@ -1,6 +1,13 @@
-LEADER_HEAD_SPRITE = 17*4
-PRINCESS_SPRITE = 54*4
-PRINCESS_HAND_SPRITE = 52*4
+HEAP_SPRITE_OFF = 17*4
+PRINCESS_SPRITE_OFF = 53*4
+HAND_SPRITE_OFF = 52*4
+HEART_SPRITE_OFF = 59*4
+
+LoaderFrameCounter = $30
+CurrentHead = $31
+
+CursorY = $200
+
 STAR_INDEX = $700
 SEL_INDEX = $701
 LDR_MODE = $702 ; ?
@@ -19,25 +26,26 @@ ContraCodeX = $710
 ContraSoundFrames = $711
 
 CreditsIndex = $712
-CursorY = $713
 PrincessThrowingTimer = $714
 PrincessNextThrow = $715
+ThrowDir = $716
 
 MirrorPPUCTRL = $720
+RndSeed = $721
 
-Heart0X = $721 ; and 722
-Heart0Y = $723 ; and 724
-Heart0VX = $725 ; and 726
-Heart0VY = $727 ; and 728
+NumHearts = $722
 
-RndSeed = $730
+HeartXLow = $723
+HeartYLow = $724
+HeartVX = $725 ; and 726
+HeartVY = $727 ; and 728
+; 5x ^
 
+MAX_HEARTS = 4
 SEL_START_Y = $7e
-LoaderFrameCounter = $30
-CurrentHead = $31
 CURSOR_SPRITE = $0A
 FIRST_HEAD_TILE = $2E
-
+HEART_SPRITE = $18
 
 	.include "mario.inc"
 	.include "shared.inc"
@@ -67,9 +75,9 @@ Start:
 		adc $500, x
 		adc $600, x
 		adc $700, x
-		sta RndSeed
 		dex
 		bne @more_random
+		sta RndSeed
 		;
 		; Wait for stable ppu state
 		;
@@ -142,15 +150,16 @@ PortLoop:
 		rts
 
 get_random:
-	    lda RndSeed
-	    asl
-	    asl
-	    clc
-	    adc RndSeed
-	    clc
-	    adc #17
-	    sta RndSeed
-	    rts
+        lda RndSeed
+        beq @do_eor
+        asl
+        beq @no_eor
+        bcc @no_eor
+@do_eor:
+		eor #$1d
+@no_eor:
+		sta RndSeed
+		rts
 
 screen_off:
 		ldx PPU_STATUS	; Read PPU status to reset the high/low latch
@@ -168,6 +177,7 @@ enter_loader:
 		lda #SEL_START_Y
 		sta CursorY
 		lda #0 ; for sml_export_init
+		sta NumHearts
 		sta SEL_INDEX
 		sta LDR_MODE
 		tax
@@ -176,7 +186,6 @@ enter_loader:
 		; Install nametable
 		;
 		write_nt "intro_data"
-
 		;
 		; Copy static sprite-data over
 		;
@@ -186,6 +195,8 @@ copy_more_sprites:
 		sta $200, x
 		inx
 		bne copy_more_sprites
+
+		jsr set_leader_head_sprite
 		;
 		; Install palette
 		;
@@ -250,10 +261,10 @@ NonMaskableInterrupt:
 		dex
 		bne @not_settings
 		jsr run_settings
-		jmp no_start
+		jmp exit_nmi
 @not_settings:
 		jsr run_records
-		jmp no_start
+		jmp exit_nmi
 @run_menu:
 		;
 		; Rotate star palette
@@ -292,7 +303,7 @@ NoChangeHead:
 		lda #5 ; Width
 		sta $01
 		ldy #7 ; Height
-		ldx #LEADER_HEAD_SPRITE	; Offset
+		ldx #HEAP_SPRITE_OFF	; Offset
 		jsr move_head_group
 
 		lda #16 ; Offset from base
@@ -300,52 +311,63 @@ NoChangeHead:
 		lda #2 ; Width
 		sta $01
 		ldy #3 ; Height
-		ldx #PRINCESS_SPRITE
+		ldx #PRINCESS_SPRITE_OFF
 		jsr move_head_group
+		jsr update_hearts
 
+		lda #MAX_HEARTS
+		cmp NumHearts
+		beq @no_new_throw
 		dec PrincessNextThrow
-		bne @no_throw
-		jsr get_random
-		and #$7F
-		clc
-		adc #15
-		sta PrincessNextThrow
-		lda #$15
-		sta PrincessThrowingTimer
-@no_throw:
+		bne @no_new_throw
+		jsr spawn_heart
+@no_new_throw:
+		lda PrincessThrowingTimer
+		beq @not_throwing
 		dec PrincessThrowingTimer
-		bmi @not_throwing
 		lda #$15 ; No hand on cloud sprite
-		ldx $200+(PRINCESS_SPRITE) ; Process top Y
+		ldx $200+(PRINCESS_SPRITE_OFF) ; Process top Y
 		bne @update_cloud_sprite
 @not_throwing:
 		lda #$11
 		ldx #$ff
 @update_cloud_sprite:
- 		; Cloud top right sprite
-		sta $200+(PRINCESS_SPRITE+(2*4)+1)
+	pha
+		lda ThrowDir
+		asl
+		asl
+		tay
+	pla
+		clc
+		adc ThrowDir
+ 		; Cloud top left/right sprite
+		sta $200+(PRINCESS_SPRITE_OFF+(2*4)+1),y
 		; Move hand
-		stx $200+PRINCESS_HAND_SPRITE ; Y
-		lda $200+(PRINCESS_SPRITE+3)
+		stx $200+HAND_SPRITE_OFF ; Y
+		lda $200+(PRINCESS_SPRITE_OFF+3),y
+		ldx ThrowDir
+		beq @throw_l
+		clc
+		adc #6
+		jmp @set_hand
+@throw_l:
+		lda $200+(PRINCESS_SPRITE_OFF+3),y
 		sec
 		sbc #6
-		sta $200+PRINCESS_HAND_SPRITE+3
-
+@set_hand:
+		sta $200+HAND_SPRITE_OFF+3
 		;
-		;
+		; 
 		;
 		lda LoaderFrameCounter
 		and #$07
 		bne dont_update_cursor
-		lda $200
-		cmp #$ff
+		lda #$0B
+		cmp $201
 		bne hide_cursor
-		lda CursorY
-		sta $200
-		jmp dont_update_cursor
+		lda #$0A
 hide_cursor:
-		lda #$ff
-		sta $200
+		sta $201
 dont_update_cursor:
 		;
 		; Update sound
@@ -356,14 +378,14 @@ dont_update_cursor:
 @disabled:
 		lda SavedJoypadBits
 		cmp LAST_INPUT
-		beq no_start
+		bne @has_input
+		jmp exit_nmi
+@has_input:
 		cmp #0
 		beq @handlein
 		;
 		; Check contra code
 		;
-		ldx SEL_INDEX
-		bne @resetcode
 		ldx ContraCodeX
 		cmp ContraCode, X
 		bne @resetcode
@@ -371,37 +393,53 @@ dont_update_cursor:
 		stx ContraCodeX
 		cpx #(ContraCodeEnd-ContraCode)
 		bne @handlein
+		ldx SEL_INDEX
+		bne @resetcode
 		ldx #$4F
 		stx ContraSoundFrames
 		ldx #0
 		lda #41
 		jsr fax_load_song
-		jmp no_start
+		jmp exit_nmi
 @resetcode:
 		ldx #0
 		stx ContraCodeX
 @handlein:
 		cmp #Select_Button
-		bne no_select
+		beq @go_down
+		cmp #Down_Dir
+		bne @check_up
+@go_down:
 		lda CursorY
-		cmp #$ff
-		beq cursor_off_screen
 		ldx SEL_INDEX
 		inx 
 		cpx #5
-		bne no_loop_around
+		bne @no_loop_around
 		ldx #0
 		lda #SEL_START_Y-16
-no_loop_around:
+@no_loop_around:
 		clc
 		adc #16
+@move_cursor:
 		sta CursorY
-cursor_off_screen:
-		sta $200
 		stx SEL_INDEX
-no_select:
+		jmp exit_nmi
+@check_up:
+		cmp #Up_Dir
+		bne @check_start
+		lda CursorY
+		ldx SEL_INDEX
+		dex
+		bpl @no_underflow
+		ldx #4
+		lda #SEL_START_Y+(5*16)
+@no_underflow:
+		sec
+		sbc #16
+		jmp @move_cursor
+@check_start:
 		cmp #Start_Button
-		bne no_start
+		bne exit_nmi
 		ldx SEL_INDEX
 		cpx #3
 		beq @settings
@@ -411,10 +449,10 @@ no_select:
 		jmp StartBank
 @showrecords:
 		jsr enter_records
-		jmp no_start
+		jmp exit_nmi
 @settings:
 		jsr enter_settings
-no_start:
+exit_nmi:
 		;
 		; Reset
 		;
@@ -428,6 +466,132 @@ no_start:
 		lda MirrorPPUCTRL
 		sta PPU_CTRL_REG1	; Make sure NMI is on...
 		rti
+
+spawn_heart:
+		inc NumHearts 
+		jsr get_random
+		and #1
+		sta ThrowDir
+		ldx #$FC
+		ldy #$FF
+@taken:
+		iny
+		inx
+		inx
+		inx
+		inx
+		lda $200+HEART_SPRITE_OFF+1,x ; Sprite
+		bpl @taken
+		sty $00 ; Index
+		jsr get_random
+		and #$1F
+		clc
+		adc #20
+		sta PrincessNextThrow
+		lda #$15
+		sta PrincessThrowingTimer
+		lda $200+(PRINCESS_SPRITE_OFF) ; Princess Y
+		sec
+		sbc #8
+		sta $200+HEART_SPRITE_OFF,x ; Y
+		lda #HEART_SPRITE
+		sta $200+HEART_SPRITE_OFF+1,x ; Sprite
+		lda #0
+		sta $200+HEART_SPRITE_OFF+2,x ; Palette
+		lda ThrowDir
+		bne @throw_right
+		lda $200+(PRINCESS_SPRITE_OFF + 0*4)+3 ;Princess X
+		sec
+		sbc #6
+		jmp @next
+@throw_right:
+		lda $200+(PRINCESS_SPRITE_OFF + 1*4)+3 ;Princess X
+		clc
+		adc #6
+@next:
+		sta $200+HEART_SPRITE_OFF+3,x ; X
+		lda $00
+		asl ; *= 2
+		clc
+		adc $00 ; *= 3
+		asl ; *= 6
+		tax
+		lda #0
+		sta HeartYLow,x
+		sta HeartXLow,x
+		jsr get_random
+		sta HeartVY,x
+		ldy #0
+		cmp #$9F
+		bcs @big_enough
+		ldy #1
+@big_enough:
+		tya
+		sta HeartVY+1,x
+		jsr get_random
+		sta HeartVX,x
+		jsr get_random
+		and #$1
+		ldy ThrowDir
+		bne @pos
+		clc
+		adc #1
+		eor #$FF
+@pos:
+		sta HeartVX+1,x
+		rts
+
+update_hearts:
+		ldx #0
+		ldy #0
+		lda #MAX_HEARTS
+		sta $00
+@gogo:
+		dec $00
+		bpl @check_heart
+		rts
+@check_heart:
+		lda $200+HEART_SPRITE_OFF+1,y
+		cmp #$ff
+		beq @advance_next
+		; Move X
+		lda HeartXLow,x
+		clc
+		adc HeartVX,x
+		sta HeartXLow,x
+		lda $200+HEART_SPRITE_OFF+3,y
+		adc HeartVX+1,x
+		sta $200+HEART_SPRITE_OFF+3,y
+		; Move Y
+		lda HeartYLow,x
+		sec
+		sbc HeartVY,x
+		sta HeartYLow,x
+		lda $200+HEART_SPRITE_OFF,y
+		sbc HeartVY+1,x
+		sta $200+HEART_SPRITE_OFF,y
+		cmp #240
+		bcc @advance_next
+		dec NumHearts
+		lda #$ff
+		sta $200+HEART_SPRITE_OFF+1,y
+@advance_next:
+		lda HeartVY,x
+		sec
+		sbc #20
+		sta HeartVY,x
+		lda HeartVY+1,x
+		sbc #0
+		sta HeartVY+1,x
+		txa
+		clc
+		adc #6
+		tax
+		iny
+		iny
+		iny
+		iny
+		jmp @gogo
 
 rotate_star_palette:
 		;
@@ -474,7 +638,7 @@ set_leader_head_sprite:
 		lda #35
 		sta $0
 		ldy head_sprite_indexes, x
-		ldx #LEADER_HEAD_SPRITE
+		ldx #HEAP_SPRITE_OFF
 		inx
 copy_next_sprite:
 		tya
@@ -619,11 +783,11 @@ static_sprite_data:
 	;
 	; Leader face
 	;
-	.byte $40,	FIRST_HEAD_TILE+1, $01, $40
-	.byte $40,	FIRST_HEAD_TILE+2, $01, $40+8
-	.byte $40,	FIRST_HEAD_TILE+3, $01, $40+16
-	.byte $40,	FIRST_HEAD_TILE+4, $01, $40+24
-	.byte $40,	FIRST_HEAD_TILE+5, $01, $40+32
+	.byte $a0,	FIRST_HEAD_TILE+1, $01, $40
+	.byte $a0,	FIRST_HEAD_TILE+2, $01, $40+8
+	.byte $a0,	FIRST_HEAD_TILE+3, $01, $40+16
+	.byte $a0,	FIRST_HEAD_TILE+4, $01, $40+24
+	.byte $a0,	FIRST_HEAD_TILE+5, $01, $40+32
 	;
 	.byte $FF,	$15, $01, $40
 	.byte $FF,	$16, $01, $40+8
@@ -665,10 +829,6 @@ static_sprite_data:
 	;
 	.byte $ff,	$17, $03, $ff
 	;
-	; Heart
-	;
-	.byte $ff,	$ff, $03, $90+16
-	;
 	; Princess
 	;
 	.byte $FF,	$0f, $00, $90
@@ -679,11 +839,14 @@ static_sprite_data:
 	;
 	.byte $ff,	$13, $03, $90
 	.byte $ff,	$14, $03, $90+8
-	; kek
-	.byte $FF,	$ff, $00, $90+16
-	.byte $ff,	$f4, $03, $90
-	.byte $ff,	$f5, $03, $90+8
-	.byte $ff,	$f6, $03, $90+16
+	;
+	; Hearts
+	;
+	.byte $ff,	$ff, $03, $90+16
+	.byte $ff,	$ff, $00, $90+16
+	.byte $ff,	$ff, $03, $90
+	.byte $ff,	$ff, $03, $90+8
+	.byte $ff,	$ff, $03, $90+16
 	;
 	; 0x100 bytes here...
 	;

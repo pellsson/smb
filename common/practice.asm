@@ -351,13 +351,12 @@ RedrawFramesRemaningInner:
 		lda OperMode
 		cmp #$02
 		beq @draw ; force remainder if castle end
+		lda WarpZoneControl
+		beq nodraw
 		lda GameEngineSubroutine
 		cmp #$03
-		bne ndraw
-		lda WarpZoneControl
-		beq ndraw ; force remainder if warp zone
+		bne nodraw ; force remainder if warp zone
 @draw:	ldy VRAM_Buffer1_Offset
-		ldy VRAM_Buffer1_Offset
 		lda #$20
 		sta VRAM_Buffer1, y
 		lda #$7E
@@ -375,12 +374,12 @@ RedrawFramesRemaningInner:
 		tya
 		adc #5
 		sta VRAM_Buffer1_Offset
-        rts
+nodraw:	rts
 
 RedrawAllInner:
 		jsr RedrawFramesRemaningInner
 		jsr RedrawFrameNumbersInner
-ndraw:  rts
+		rts
 
 RedrawAll:
 		jsr RedrawFramesRemaningInner
@@ -388,11 +387,11 @@ RedrawAll:
 		jmp ReturnBank
 
 RedrawFrameNumbersInner:
-        lda OperMode
+		lda OperMode
 		beq @draw ; slighty dumb
 		lda WRAM_PracticeFlags
-        and #PF_DisablePracticeInfo
-		bne ndraw
+		and #PF_DisablePracticeInfo
+		bne nodraw
 @draw:	ldy VRAM_Buffer1_Offset
 		lda #$20
 		sta VRAM_Buffer1, y
@@ -411,10 +410,12 @@ RedrawFrameNumbersInner:
 		lda #0
 		sta VRAM_Buffer1+6, y
 
+		lda OperMode
+		beq @rule ; force RULE if on title screen
 		lda WRAM_PracticeFlags
 		and #PF_SockMode
-		bne @dont_draw_rule
-		lda #$20
+		beq @dont_draw_rule
+@rule:	lda #$20
 		sta VRAM_Buffer1+6, y ; Offset for RULE (if any)
 		lda #$64
 		sta VRAM_Buffer1+7, y
@@ -981,7 +982,7 @@ DontUpdateSockHash:
 		rts
 
 ForceUpdateSockHashInner:
-        lda WRAM_PracticeFlags
+		lda WRAM_PracticeFlags
         and #PF_DisablePracticeInfo
         bne DontUpdateSockHash
 		lda SprObject_X_MoveForce ; Player force
@@ -1281,7 +1282,7 @@ SaveState:
 noredraw_dec:
 		dec WRAM_UserFramesLeft
 noredraw:
-        jmp UpdateStatusInput
+		jmp UpdateStatusInput
 
 RedrawUserVars:
 		lda WRAM_UserFramesLeft
@@ -1313,97 +1314,97 @@ RedrawUserVars:
 
 UpdateStatusInput:
     lda WRAM_PracticeFlags
-    and #PF_EnableInputDisplay
+	and #PF_EnableInputDisplay
 	beq @exit
-    jsr DrawInputButtons
+	jsr DrawInputButtons
 @exit:
-    jmp ReturnBank
+	jmp ReturnBank
 DrawInputButtons:
-    ldy JoypadBitMask
-    sty $03
+	ldy JoypadBitMask
+	sty $03
 	lda #$20
-    sta WRAM_StoredInputs
-    lda #$51
-    sta WRAM_StoredInputs+1
-    lda #$07
-    sta WRAM_StoredInputs+2
+	sta WRAM_StoredInputs
+	lda #$51
+	sta WRAM_StoredInputs+1
+	lda #$07
+	sta WRAM_StoredInputs+2
 	lda #$24
 	sta WRAM_StoredInputs+7
 	;
-    ; Up
-    ;
-    lda $03
-    and #Up_Dir
-    beq NoUpStatus
-    lda #$1e
-    jmp WriteUp
-NoUpStatus:
-    lda #$28
-WriteUp:
-    sta WRAM_StoredInputs+3
-    ;
-    ; Left
-    ;
-    lda $03
-    and #Left_Dir
-    beq NoLeftStatus
-    lda #$15
-    jmp WriteLeft
-NoLeftStatus:
-    lda #$28
-WriteLeft:
-    sta WRAM_StoredInputs+4
+	; Up
 	;
-    ; Down
-    ;
-    lda $03
-    and #Down_Dir
-    beq NoDownStatus
-    lda #$0d
-    jmp WriteDown
+	lda $03
+	and #Up_Dir
+	beq NoUpStatus
+	lda #$1e
+	jmp WriteUp
+NoUpStatus:
+	lda #$28
+WriteUp:
+	sta WRAM_StoredInputs+3
+	;
+	; Left
+	;
+	lda $03
+	and #Left_Dir
+	beq NoLeftStatus
+	lda #$15
+	jmp WriteLeft
+NoLeftStatus:
+	lda #$28
+WriteLeft:
+	sta WRAM_StoredInputs+4
+	;
+	; Down
+	;
+	lda $03
+	and #Down_Dir
+	beq NoDownStatus
+	lda #$0d
+	jmp WriteDown
 NoDownStatus:
-    lda #$28
+	lda #$28
 WriteDown:
-    sta WRAM_StoredInputs+5
-    ;
-    ; Right
-    ;
-    lda $03
-    and #Right_Dir
-    beq NoRightStatus
-    lda #$1b
-    jmp WriteRight
+	sta WRAM_StoredInputs+5
+	;
+	; Right
+	;
+	lda $03
+	and #Right_Dir
+	beq NoRightStatus
+	lda #$1b
+	jmp WriteRight
 NoRightStatus:
-    lda #$28
+	lda #$28
 WriteRight:
-    sta WRAM_StoredInputs+6
-    ;
-    ; B
-    ;
-    lda $03
-    and #B_Button
-    beq NoBStatus
-    lda #$0b
-    jmp WriteB
+	sta WRAM_StoredInputs+6
+	;
+	; B
+	;
+	lda $03
+	and #B_Button
+	beq NoBStatus
+	lda #$0b
+	jmp WriteB
 NoBStatus:
-    lda #$28
+	lda #$28
 WriteB:
-    sta WRAM_StoredInputs+8
-    ;
-    ; A
-    ;
-    lda $03
-    and #A_Button
-    beq NoAStatus
-    lda #$0a
-    jmp WriteA
+	sta WRAM_StoredInputs+8
+	;
+	; A
+	;
+	lda $03
+	and #A_Button
+	beq NoAStatus
+	lda #$0a
+	jmp WriteA
 NoAStatus:
-    lda #$28
+	lda #$28
 WriteA:
-    sta WRAM_StoredInputs+9
-    lda #$00
-    sta WRAM_StoredInputs+10
-    rts
+	sta WRAM_StoredInputs+9
+	lda #$00
+	sta WRAM_StoredInputs+10 ; maybe redundant due to WRAM init?
+	rts
 
 RequestRestartLevel:
 		lda #$80 ; REMOVE 0x80?
@@ -1517,12 +1518,12 @@ PracticeInit:
 		lda WRAM_PracticeFlags
 		and #((PF_SaveState|PF_LoadState|PF_RestartLevel|PF_LevelEntrySaved)^$ff)
 		sta WRAM_PracticeFlags
-NoSock: jmp ReturnBank
+nosock:	jmp ReturnBank
 
 RedrawSockTimer:
-        lda WRAM_PracticeFlags
-        and #PF_DisablePracticeInfo
-        bne NoSock
+		lda WRAM_PracticeFlags
+		and #PF_DisablePracticeInfo
+		bne nosock
 		ldx VRAM_Buffer1_Offset
 		lda #$20
 		sta VRAM_Buffer1,x
@@ -2151,7 +2152,7 @@ EndOfCastle:
 		sta WRAM_PracticeFlags
 		lda #$EE
 		sta WRAM_Timer+1
-        bne @exit
+		bne @exit
 @check_ext:
 		lda BANK_SELECTED
 		cmp #BANK_ORG

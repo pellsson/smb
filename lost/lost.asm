@@ -37,6 +37,11 @@ Start:
 		jsr Enter_PracticeInit
 		lda #CHR_LOST_SPR
 		ldx #CHR_LOST_BG
+		ldy WRAM_CharSet
+        cpy #1
+        bne @not_org
+        ldx #CHR_LOST_BG_ALTFONT
+@not_org:
 		jsr SetChrBanksFromAX
 		jsr Initialize_WRAM
 
@@ -132,25 +137,25 @@ ScreenOff:
 		lda #2
 		sta SPR_DMA
 
+		lda WRAM_PracticeFlags
+		and #PF_EnableInputDisplay
+		beq DrawBuffer
+		lda #<WRAM_StoredInputs
+		sta TMP_0
+		lda #>WRAM_StoredInputs
+		sta TMP_1
+		jsr UpdateScreen
+DrawBuffer:
 		lda VRAM_Buffer_AddrCtrl
 		asl
 		tax
+		ldy #0
 		lda VRAM_AddrTable_DW_NEW,x
 		sta TMP_0
 		inx
 		lda VRAM_AddrTable_DW_NEW,x
 		sta TMP_1
 		jsr UpdateScreen
-        lda WRAM_PracticeFlags
-        and #PF_EnableInputDisplay
-        beq ChkAddrCtrl
-        lda #<WRAM_StoredInputs
-        sta TMP_0
-        lda #>WRAM_StoredInputs
-        sta TMP_1
-        jsr UpdateScreen
-ChkAddrCtrl:
-		ldy #0
 		ldy #0
 		ldx VRAM_Buffer_AddrCtrl
 		cpx #6
@@ -7046,9 +7051,13 @@ FindLoop:
 		lda Player_State
 		cmp #0
 		bne loc_8CE6
+		lda #Sfx_CoinGrab
 		inc MultiLoopCorrectCntr
+		bne skipFailSound
 loc_8CE6:
-
+		lda #Sfx_TimerTick
+skipFailSound:
+		sta Square2SoundQueue
 		inc MultiLoopPassCntr
 		lda MultiLoopPassCntr
 		cmp LoopCmdMultiLoopPassCntr,y
@@ -11796,10 +11805,11 @@ HandleAxeMetatile:
 		sta OperMode_Task
 		lda #2
 		sta OperMode
-		jsr Enter_RedrawAll
+		jsr Enter_EndOfCastle
 		jsr Enter_LoadMarioPhysics
 		lda #$18
 		sta Player_X_Speed
+		
 sub_AA8D:
 
 		ldy byte_2
