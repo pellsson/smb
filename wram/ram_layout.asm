@@ -264,3 +264,5 @@ WRAM_SaveNT:
 WRAM_SavePAL:
 		.res $20, $00
 
+WRAM_StoredInputs:
+        .res $0b, $00

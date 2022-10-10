@@ -35,6 +35,8 @@ NonMaskableInterrupt: ; Dummy
 	.export PracticeTitleMenu
 	.export SoundEngineExternal
 	.export ProcessLevelLoad
+	.export LoadPhysicsData
+	.export LoadMarioPhysics
 	.export RedrawUserVars
 	.export RedrawAll
 	.export UpdateFrameRule

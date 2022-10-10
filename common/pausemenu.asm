@@ -4,7 +4,7 @@
 CustomRow = WRAM_Temp+$10
 
 .define MENU_ROW_LENGTH 16
-.define MENU_ROW_COUNT 14
+.define MENU_ROW_COUNT 16
 
 pm_empty_row:
 	.byte "                "
@@ -30,6 +30,16 @@ pm_show_rule_row:
 	.byte $24, " SHOW  RULE ", $24, $24, $24
 pm_show_sock_row:
 	.byte $24, " SHOW  SOCK ", $24, $24, $24
+
+pm_info_on_row:
+	.byte $24, " INFO  ON   ", $24, $24, $24
+pm_info_off_row:
+	.byte $24, " INFO  OFF  ", $24, $24, $24
+
+pm_input_on_row:
+	.byte $24, " INPUT ON   ", $24, $24, $24
+pm_input_off_row:
+	.byte $24, " INPUT OFF  ", $24, $24, $24
 
 pm_star_row:
 	.byte $24, " GET STAR   ", $24, $24, $24
@@ -123,11 +133,10 @@ _draw_pm_row_4:
 		row_render_data $23D0, pm_attr_data
 		inc $07
 		jsr draw_prepared_row
-
 		row_render_data $2100, pm_show_sock_row
 		lda WRAM_PracticeFlags
 		and #PF_SockMode
-		bne @is_sock
+		beq @is_sock
 		row_render_data $2100, pm_show_rule_row
 	@is_sock:
 		rts
@@ -157,6 +166,24 @@ copy_user_row:
 		rts
 
 _draw_pm_row_5:
+		row_render_data $2120, pm_info_on_row
+		lda WRAM_PracticeFlags
+		and #PF_DisablePracticeInfo
+		beq @info_on
+		row_render_data $2120, pm_info_off_row
+	@info_on:
+		rts
+
+_draw_pm_row_6:
+		row_render_data $2140, pm_input_on_row
+		lda WRAM_PracticeFlags
+		and #PF_EnableInputDisplay
+		bne @input_on
+		row_render_data $2140, pm_input_off_row
+	@input_on:
+		rts
+
+_draw_pm_row_7:
 		lda BANK_SELECTED
 		cmp #BANK_ORG
 		beq @is_org
@@ -172,10 +199,13 @@ _draw_pm_row_5:
 		lda #$21 ; X
 		sta $02
 		jsr copy_user_row
-		row_render_data $2120, CustomRow
+		row_render_data $2160, CustomRow
 		rts
 
-_draw_pm_row_6:
+_draw_pm_row_8:
+		row_render_data $23D8, pm_attr_data
+		inc $07
+		jsr draw_prepared_row
 		lda BANK_SELECTED
 		cmp #BANK_ORG
 		beq @is_org
@@ -191,10 +221,10 @@ _draw_pm_row_6:
 		lda #$22 ; Y
 		sta $02
 		jsr copy_user_row
-		row_render_data $2140, CustomRow
+		row_render_data $2180, CustomRow
 		rts
 
-_draw_pm_row_7:
+_draw_pm_row_9:
 		ldx WRAM_SlowMotion
 		beq @off
 		dex
@@ -203,57 +233,46 @@ _draw_pm_row_7:
 		beq @mid
 		dex
 		beq @max
-		row_render_data $2160, pm_slowmo_adv_row
+		row_render_data $21A0, pm_slowmo_adv_row
 		rts
 @max:
-		row_render_data $2160, pm_slowmo_max_row
+		row_render_data $21A0, pm_slowmo_max_row
 		rts
 @mid:
-		row_render_data $2160, pm_slowmo_mid_row
+		row_render_data $21A0, pm_slowmo_mid_row
 		rts
 @min:
-		row_render_data $2160, pm_slowmo_min_row
+		row_render_data $21A0, pm_slowmo_min_row
 		rts
 @off:
-		row_render_data $2160, pm_slowmo_off_row
-		rts
-
-_draw_pm_row_8:
-		row_render_data $23D8, pm_attr_data
-		inc $07
-		jsr draw_prepared_row
-		row_render_data $2180, pm_star_row
-		rts
-
-_draw_pm_row_9:
-		row_render_data $21A0, pm_restart_row
+		row_render_data $21A0, pm_slowmo_off_row
 		rts
 
 _draw_pm_row_10:
-		row_render_data $21C0, pm_save_row
+		row_render_data $21C0, pm_star_row
 		rts
 
 _draw_pm_row_11:
-		row_render_data $21E0, pm_load_row
+		row_render_data $21E0, pm_restart_row
 		rts
 
 _draw_pm_row_12:
 		row_render_data $23E0, pm_attr_data
 		inc $07
 		jsr draw_prepared_row
-		row_render_data $2200, pm_title_row
+		row_render_data $2200, pm_save_row
 		rts
 
 _draw_pm_row_13:
-		row_render_data $2220, pm_intro_row
+		row_render_data $2220, pm_load_row
 		rts
 
 _draw_pm_row_14:
-		row_render_data $2240, pm_empty_row
+		row_render_data $2240, pm_title_row
 		rts
 
 _draw_pm_row_15:
-		row_render_data $2260, pm_empty_row
+		row_render_data $2260, pm_intro_row
 		rts
 
 _draw_pm_row_16:
@@ -460,7 +479,7 @@ pm_toggle_show:
 		eor #PF_SockMode
 		sta WRAM_PracticeFlags
 		and #PF_SockMode
-		bne @SockMode
+		beq @SockMode
 		;
 		; If we change back to rule mode we must remove top sock bytes
 		;
@@ -483,6 +502,100 @@ pm_toggle_show:
 		jmp RedrawFrameNumbersInner
 @SockMode:
 		jmp ForceUpdateSockHashInner
+
+pm_toggle_info:
+		lda WRAM_PracticeFlags
+		eor #PF_DisablePracticeInfo
+		sta WRAM_PracticeFlags
+		and #PF_DisablePracticeInfo
+		beq @keepinfo
+		;
+		; Blank out practice info if practice info is disabled
+		;
+		ldx VRAM_Buffer1_Offset
+		lda #$20
+		sta VRAM_Buffer1,x
+		lda #$62 ; addr
+		sta VRAM_Buffer1+1,x
+		lda #$0e ; len
+		sta VRAM_Buffer1+2,x
+		lda #$24 ; blank
+		sta VRAM_Buffer1+3, x
+		sta VRAM_Buffer1+4, x
+		sta VRAM_Buffer1+5, x
+		sta VRAM_Buffer1+6, x
+		sta VRAM_Buffer1+7, x
+		sta VRAM_Buffer1+8, x
+		sta VRAM_Buffer1+9, x
+		sta VRAM_Buffer1+10, x
+		sta VRAM_Buffer1+11, x
+		sta VRAM_Buffer1+14, x
+		sta VRAM_Buffer1+15, x
+		sta VRAM_Buffer1+16, x
+		lda #$2e ; coin icon
+		sta VRAM_Buffer1+12, x
+		lda #$29 ; cross symbol
+		sta VRAM_Buffer1+13, x
+		lda #$00
+		sta VRAM_Buffer1+17, x
+		lda VRAM_Buffer1_Offset
+		clc
+		adc #$11
+		sta VRAM_Buffer1_Offset
+		rts
+@keepinfo:
+		ldx VRAM_Buffer1_Offset
+		lda #$20
+		sta VRAM_Buffer1,x
+		lda #$69 ; addr
+		sta VRAM_Buffer1+1,x
+		lda #$01 ; len
+		sta VRAM_Buffer1+2,x
+		lda WRAM_EntrySockTimer
+		sta VRAM_Buffer1+3, x
+		lda #$00
+		sta VRAM_Buffer1+4, x
+		lda VRAM_Buffer1_Offset
+		clc
+		adc #$04
+		sta VRAM_Buffer1_Offset
+        jmp RedrawFrameNumbersInner
+
+pm_toggle_input:
+		lda WRAM_PracticeFlags
+		eor #PF_EnableInputDisplay
+		sta WRAM_PracticeFlags
+		and #PF_EnableInputDisplay
+		bne @inputon
+		;
+		; If we disable input display, restore " X   Y " text
+		;
+		ldx VRAM_Buffer1_Offset
+		lda #$20
+		sta VRAM_Buffer1,x
+		lda #$51 ; addr
+		sta VRAM_Buffer1+1,x
+		lda #$07 ; len
+		sta VRAM_Buffer1+2,x
+		lda #$24 ; blank
+		sta VRAM_Buffer1+3, x
+		sta VRAM_Buffer1+5, x
+		sta VRAM_Buffer1+6, x
+		sta VRAM_Buffer1+7, x
+		sta VRAM_Buffer1+9, x
+		lda #$21 ; X
+		sta VRAM_Buffer1+4, x
+		lda #$22 ; Y
+		sta VRAM_Buffer1+8, x
+		lda #$00
+		sta VRAM_Buffer1+10, x
+		lda VRAM_Buffer1_Offset
+		clc
+		adc #$0a
+		sta VRAM_Buffer1_Offset
+@inputon:
+        rts
+
 
 pm_slowmo:
 		ldx WRAM_SlowMotion
@@ -539,6 +652,8 @@ pm_activation_slots:
 		.word pm_toggle_size
 		.word pm_toggle_hero
 		.word pm_toggle_show
+		.word pm_toggle_info
+		.word pm_toggle_input
 		.word pm_low_user ; user
 		.word pm_low_user ;
 		.word pm_slowmo
@@ -577,7 +692,7 @@ get_user_selected:
 		lda BANK_SELECTED
 		cmp #BANK_ORG
 		beq @is_org
-		cpx #4
+		cpx #6
 		bne @is_0
 		lda #<WRAM_LostUser0
 		ldx #>WRAM_LostUser0
@@ -587,7 +702,7 @@ get_user_selected:
 		ldx #>WRAM_LostUser1
 		jmp @save
 @is_org:
-		cpx #4
+		cpx #6
 		beq @is_org_0
 		lda #<WRAM_OrgUser1
 		ldx #>WRAM_OrgUser1
@@ -713,10 +828,10 @@ RunPauseMenu:
 		stx WRAM_MenuIndex
 @exit:
 		ldx WRAM_MenuIndex
-		cpx #4
-		bcc @doneso
 		cpx #6
-		bcs @doneso ;4-5
+		bcc @doneso
+		cpx #8
+		bcs @doneso ;6-7
 		jmp do_uservar_input
 @doneso:
 		rts

@@ -137,9 +137,19 @@ ScreenOff:
 		lda #2
 		sta SPR_DMA
 
+		lda WRAM_PracticeFlags
+		and #PF_EnableInputDisplay
+		beq DrawBuffer
+		lda #<WRAM_StoredInputs
+		sta TMP_0
+		lda #>WRAM_StoredInputs
+		sta TMP_1
+		jsr UpdateScreen
+DrawBuffer:
 		lda VRAM_Buffer_AddrCtrl
 		asl
 		tax
+		ldy #0
 		lda VRAM_AddrTable_DW_NEW,x
 		sta TMP_0
 		inx
@@ -2178,6 +2188,7 @@ loc_6EA9:
 		sta AreaMusicQueue
 		lda #1
 		sta DisableScreenFlag
+		jsr Enter_LoadPhysicsData
 		inc OperMode_Task
 		rts
 
@@ -9604,6 +9615,7 @@ byte_9C13:
 		.byte $80
 BridgeCollapse:
 
+		jsr Enter_EndOfCastle
 		ldx BowserFront_Offset
 		lda Enemy_ID,x
 		cmp #$2D
@@ -10108,9 +10120,8 @@ DrawFlagSetTimer:
 		lda #6
 		sta $796,x
 IncrementSFTask2:
-		jsr Enter_RedrawAll
 		inc StarFlagTaskControl
-		rts
+		jmp Enter_RedrawAll
 
 DelayToAreaEnd:
 		jsr DrawStarFlag
@@ -11771,6 +11782,7 @@ loc_AA5E:
 		bne locret_AA70
 		lda #2
 		sta GameEngineSubroutine
+		jsr Enter_RedrawAll
 		rts
 loc_AA6D:
 
@@ -11789,22 +11801,15 @@ loc_AA73:
 		jmp GiveOneCoin
 
 HandleAxeMetatile:
-		jsr Enter_EndOfCastle
 		lda #0
 		sta OperMode_Task
-		sta CurrentPlayer
-		; TODO hackyfucky
 		lda #2
 		sta OperMode
+		jsr Enter_EndOfCastle
+		jsr Enter_LoadMarioPhysics
 		lda #$18
 		sta Player_X_Speed
-		cpx #1
-		bne @not_end_of_game
-		;
-		; ############### WARNING THIS ADDS A FRAME!!! #####################
-		;
-		rts
-@not_end_of_game:
+		
 sub_AA8D:
 
 		ldy byte_2

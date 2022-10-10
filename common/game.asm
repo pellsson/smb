@@ -280,6 +280,13 @@ RedrawMario:
 		jsr PlayerGfxProcessing
 		jmp SetMarioPalette
 
+LoadPhysicsData:
+		jsr LL_UpdatePlayerChange
+		jmp ReturnBank
+
+LoadMarioPhysics:
+		jsr PlayerIsMarioPatch
+		jmp ReturnBank
 
 MarioOrLuigiPhysics:
 		;

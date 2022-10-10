@@ -8,7 +8,7 @@
 		.local @dont_render
 		lda WRAM_PracticeFlags
 		and #PF_SockMode
-		beq @dont_render
+		bne @dont_render
 		lda IntervalTimerControl
 		and #3
 		cmp #2
@@ -109,6 +109,16 @@
 		lda #BANK_COMMON
 		jsr SetBankFromA
 		jmp ProcessLevelLoad
+
+	Enter_LoadPhysicsData:
+		lda #BANK_COMMON
+		jsr SetBankFromA
+		jmp LoadPhysicsData
+
+	Enter_LoadMarioPhysics:
+		lda #BANK_COMMON
+		jsr SetBankFromA
+		jmp LoadMarioPhysics
 
 	Enter_LL_LoadWarpzone:
 		lda #BANK_LLDATA

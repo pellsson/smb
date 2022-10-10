@@ -86,7 +86,15 @@ ScreenOff:     sta Mirror_PPU_CTRL_REG2  ;save bits for later but not in registe
                lda #$02                  ;perform spr-ram DMA access on $0200-$02ff
                sta SPR_DMA
 
-               ldx VRAM_Buffer_AddrCtrl  ;load control for pointer to buffer contents
+               lda WRAM_PracticeFlags
+               and #PF_EnableInputDisplay
+               beq DrawBuffer            ;if input display not enabled, don't print it
+               lda #<WRAM_StoredInputs   ;otherwise set indirect at $00 to WRAM stored inputs
+               sta $00
+               lda #>WRAM_StoredInputs
+               sta $01
+               jsr UpdateScreen          ;update input display
+DrawBuffer:    ldx VRAM_Buffer_AddrCtrl  ;load control for pointer to buffer contents
                lda VRAM_AddrTable_Low,x  ;set indirect at $00 to pointer
                sta $00
                lda VRAM_AddrTable_High,x
@@ -407,6 +415,7 @@ IncMsgCounter: lda SecondaryMsgCounter
                sta PrimaryMsgCounter
                cmp #$07                      ;check primary counter one more time
 SetEndTimer:   bcc ExitMsgs                  ;if not reached value yet, branch to leave
+               jsr Enter_RedrawAll
                lda #$06
                sta WorldEndTimer             ;otherwise set world end timer
 IncModeTask_A: inc OperMode_Task             ;move onto next task in mode
@@ -6004,9 +6013,8 @@ DrawFlagSetTimer:
       sta EnemyIntervalTimer,x  ;set interval timer here
 
 IncrementSFTask2:
-      jsr Enter_RedrawAll
       inc StarFlagTaskControl   ;move onto next task
-      rts
+      jmp Enter_RedrawAll
 
 DelayToAreaEnd:
       jsr DrawStarFlag          ;do sub to draw star flag
@@ -8666,6 +8674,7 @@ BridgeCollapseData:
       .byte $8a, $88, $86, $84, $82, $80
 
 BridgeCollapse:
+       jsr Enter_EndOfCastle
        ldx BowserFront_Offset    ;get enemy offset for bowser
        lda Enemy_ID,x            ;check enemy object identifier for bowser
        cmp #Bowser               ;if not found, branch ahead,
@@ -10537,6 +10546,7 @@ ChkGERtn: lda GameEngineSubroutine   ;get number of game engine routine running
           bne ExCSM
           lda #$02
           sta GameEngineSubroutine   ;otherwise set sideways pipe entry routine to run
+          jsr Enter_RedrawAll
           rts                        ;and leave
 
 ;--------------------------------
@@ -10557,21 +10567,13 @@ HandleCoinMetatile:
       jmp GiveOneCoin       ;update coin amount and tally on the screen
 
 HandleAxeMetatile:
-       jsr Enter_EndOfCastle
        lda #$00
        sta OperMode_Task   ;reset secondary mode
        lda #$02
        sta OperMode        ;set primary mode to autoctrl mode
+       jsr Enter_RedrawAll
        lda #$18
        sta Player_X_Speed  ;set horizontal speed and continue to erase axe metatile
-       cpx #1
-       bne @not_end_of_game
-       ;
-       ; ############### WARNING THIS ADDS A FRAME!!! #####################
-       ;
-       rts
-@not_end_of_game:
-
 ErACM: ldy $02             ;load vertical high nybble offset for block buffer
        lda #$00            ;load blank metatile
        sta ($06),y         ;store to remove old contents from block buffer
