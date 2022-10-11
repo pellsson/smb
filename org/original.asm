@@ -54,8 +54,8 @@ ColdBoot:    jsr InitializeMemory         ;clear memory using pointer in Y
              ora #%10000000               ;enable NMIs
              jsr WritePPUReg1
              cli
-EndlessLoop: jmp EndlessLoop              ;endless loop, need I say more?
-
+EndlessLoop:
+      jmp EndlessLoop              ;endless loop, need I say more?
 
 ;-----------------------------------------------------------------
 
@@ -77,8 +77,8 @@ NonMaskableInterrupt:
                and #%11100110
                ldy DisableScreenFlag     ;get screen disable flag
                bne ScreenOff             ;if set, used bits as-is
-               lda Sprite0HitDetectFlag
-               beq SkipIRQ
+               ;lda Sprite0HitDetectFlag
+               ;beq SkipIRQ
                lda #$1F                  ;set interrupt scanline
                sta MMC5_SLCompare
                lda #$80
@@ -176,8 +176,6 @@ SkipSprite0:
                bne SkipMainOper
                jsr OperModeExecutionTree ;otherwise do one of many, many possible subroutines
 SkipMainOper:
-               ;jsr Enter_RedrawUserVars
-   jsr Enter_RedrawUserVars
 WaitForIRQ:
    lda IRQAckFlag            ;wait for IRQ
    bne WaitForIRQ
@@ -1307,12 +1305,6 @@ ShufAmtLoop: lda DefaultSprOffsets,x
              dex                       ;do this until they're all set
              bpl ShufAmtLoop
              ldy #$03                  ;set up sprite #0
-ISpr0Loop:   lda Sprite0Data,y
-             sta Sprite_Data,y
-             dey
-             bpl ISpr0Loop
-             jsr DoNothing2            ;these jsrs doesn't do anything useful
-             jsr DoNothing1
              inc Sprite0HitDetectFlag  ;set sprite #0 check flag
              inc OperMode_Task         ;increment to next task
              rts
@@ -3689,8 +3681,6 @@ ExitEng:      rts                        ;and after all that, we're finally done
 ;-------------------------------------------------------------------------------------
 
 ScrollHandler:
-			DoUpdateSockHash
-
             lda Player_X_Scroll       ;load value saved here
             clc
             adc Platform_X_Scroll     ;add value used by left/right platforms
@@ -5974,7 +5964,7 @@ AwardGameTimerPoints:
          beq NoTTick            ;for four frames every four frames) branch if not set
          lda #Sfx_TimerTick
          sta Square2SoundQueue  ;load timer tick sound
-NoTTick: jmp Enter_UpdateGameTimer
+NoTTick: rts
 
 RaiseFlagSetoffFWorks:
          lda Enemy_Y_Position,x  ;check star flag's vertical position

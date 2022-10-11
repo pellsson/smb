@@ -1,29 +1,121 @@
-	.include "org.inc"
-	.include "lost.inc"
-	.include "wram.inc"
-
+.include "org.inc"
+.include "lost.inc"
+.include "wram.inc"
 .include "rng.asm"
 .include "savestates.asm"
 
-
 RunPendingWrites:
 	lda PendingWrites
+	beq @DonePending
 	lsr a
 	bcc :+
+	tax
 	jsr WritePracticeTopReal
+	txa
 :	lsr a
 	bcc :+
+	tay
 	jsr WriteSockTimer
+	tya
 :	lsr a
 	bcc :+
+	tay
 	jsr RedrawFrameNumbersReal
+	tya
 :	lsr a
 	bcc :+
+	tay
 	jsr RedrawGameTimer
+	tya
+:	lsr a
+	bcc :+
+	jsr DrawRemainTimer
 :	lda #0
 	sta PendingWrites
+@DonePending:
 	jsr PerFrameSock
+	jsr WriteJoypad
 	jmp ReturnBank
+
+WriteJoypad:
+	@RightOfs = MMC5_ExRamOfs+$2074
+	@LeftOfs  = MMC5_ExRamOfs+$2072
+	@DownOfs  = MMC5_ExRamOfs+$2073
+	@UpOfs    = MMC5_ExRamOfs+$2053
+	@BOfs     = MMC5_ExRamOfs+$2076
+	@AOfs     = MMC5_ExRamOfs+$2077
+	ldx #'-'
+	lda JoypadBitMask
+
+	; right
+@Right:
+	lsr a
+	bcc :+
+	ldy #'R'
+	sty @RightOfs
+	bne @Left
+:   stx @RightOfs
+	
+	; left
+@Left:
+ 	lsr a
+	bcc :+
+	ldy #'L'
+	sty @LeftOfs
+	bne @Down
+:   stx @LeftOfs
+
+	; down
+@Down:
+ 	lsr a
+	bcc :+
+	ldy #'D'
+	sty @DownOfs
+	bne @Up
+:   stx @DownOfs
+
+	; up
+@Up:
+ 	lsr a
+	bcc :+
+	ldy #'U'
+	sty @UpOfs
+	bne @B
+:   stx @UpOfs
+
+	; B
+@B:
+	lsr a ; skip start
+	lsr a ; skip select
+ 	lsr a
+	bcc :+
+	ldy #'B'
+	sty @BOfs
+	bne @A
+:   stx @BOfs
+
+	; A
+@A:
+ 	lsr a
+	bcc :+
+	ldy #'A'
+	sty @AOfs
+	bne @Done
+:   stx @AOfs
+@Done:
+	clc
+	rts
+
+DrawRemainTimer:
+	lda IntervalTimerControl
+	cmp #10
+	bcs :+
+	sta MMC5_ExRamOfs+$207E
+	rts
+:	jsr DivByTen
+	stx MMC5_ExRamOfs+$207E
+	sta MMC5_ExRamOfs+$207F
+	rts
 
 WritePracticeTop:
 	lda #%1
@@ -44,21 +136,53 @@ RedrawFrameNumbers:
 	jmp ReturnBank
 
 WritePracticeTopReal:
-    ldx #@TextEnd-@Text-1
-:	lda @Text,x
-	sta MMC5_ExRamOfs+$2044,x
-	dex
-	bpl :-
-	lda #$2E
-	sta MMC5_ExRamOfs+$206B
-	lda #'*'
-	sta MMC5_ExRamOfs+$206C
-	lda #$ea
-	sta MMC5_ExRamOfs+$23C2
+	lda #<@Text
+	sta $0
+	lda #>@Text
+	sta $1
+	jsr WriteMenuText
+	lda #'R'
+	sta MMC5_ExRamOfs+$2061
+	lda #'Y'
+	sta MMC5_ExRamOfs+$206D
+	lda #'S'
+	sta MMC5_ExRamOfs+$2067
+	lda #%10111010
+	sta MMC5_ExRamOfs+$23C0
+	lda #%00101010
+	sta MMC5_ExRamOfs+$23C1
+	lda #%10001010
+	sta MMC5_ExRamOfs+$23C3
 	rts
 @Text:
-.byte "RULE * FRAME  X   Y  TIME R"
+.byte $40, "F*       *  X", $FF
+.byte $58, "TIME R", $FF
+.byte $00
 @TextEnd:
+
+WriteMenuText:
+	ldy #0
+	lda ($00),y
+	beq @Exit
+	sta $3
+	lda #$5C
+	sta $4
+:	iny
+	lda ($00),y
+	cmp #$FF
+	bcs @Done
+	sta ($03),y
+	bcc :-
+@Done:
+	tya
+	adc $00
+	sta $00
+	lda $01
+	adc #0
+	sta $01
+	bcc WriteMenuText
+@Exit:
+	rts
 
 
 RedrawFramesRemaningInner:
@@ -76,24 +200,9 @@ RedrawFramesRemaningInner:
 		lda GameEngineSubroutine
 		cmp #$03
 		bne nodraw ; force remainder if warp zone
-@draw:	ldy VRAM_Buffer1_Offset
-		lda #$20
-		sta VRAM_Buffer1, y
-		lda #$7E
-		sta VRAM_Buffer1+1, y
-		lda #$02
-		sta VRAM_Buffer1+2, y
-		lda IntervalTimerControl
-		jsr DivByTen
-		sta VRAM_Buffer1+4, y
-		txa
-		sta VRAM_Buffer1+3, y
-		lda #0
-		sta VRAM_Buffer1+5, y
-		clc
-		tya
-		adc #5
-		sta VRAM_Buffer1_Offset
+@draw:	lda #%10000
+		ora PendingWrites
+		sta PendingWrites
 nodraw:	rts
 
 RedrawAllInner:
@@ -107,17 +216,30 @@ RedrawAll:
 		jmp ReturnBank
 
 RedrawFrameNumbersReal:
+	; frame counter
 	lda FrameCounter
 	jsr DivByTen
-	sta MMC5_ExRamOfs+$206F
+	sta MMC5_ExRamOfs+$2045
 	txa
 	jsr DivByTen
-	sta MMC5_ExRamOfs+$206E
-	stx MMC5_ExRamOfs+$206D
-
+	sta MMC5_ExRamOfs+$2044
+	stx MMC5_ExRamOfs+$2043
+	; rule counter
+	lda CurrentRule+0
+	sta MMC5_ExRamOfs+$2062
+	lda CurrentRule+1
+	sta MMC5_ExRamOfs+$2063
+	lda CurrentRule+2
+	sta MMC5_ExRamOfs+$2064
+	lda CurrentRule+3
+	sta MMC5_ExRamOfs+$2065
 	rts
 
 RedrawFrameNumbersInner:
+	lda #%110
+	ora PendingWrites
+	sta PendingWrites
+
 		lda OperMode
 		beq @draw ; slighty dumb
 		lda WRAM_PracticeFlags
@@ -728,7 +850,39 @@ ToHexByte:
 		and #$0f
 		rts
 
+
+
+.macro RedrawUserVarEx name, off
+		lda name
+		sta $00
+		lda name+1
+		sta $01
+		lda ($00), y
+		;jsr ToHexByte
+		;stx MMC5_ExRamOfs+$204E+off
+		;sta MMC5_ExRamOfs+$204F+off
+
+		jsr DivByTen
+		sta MMC5_ExRamOfs+$2050+off
+		txa
+		jsr DivByTen
+		sta MMC5_ExRamOfs+$204F+off
+		stx MMC5_ExRamOfs+$204E+off
+.endmacro
+
 PerFrameSock:
+		ldy #0
+		lda BANK_SELECTED
+		cmp #BANK_ORG
+		beq @is_org
+		RedrawUserVarEx WRAM_LostUser0, $00
+		RedrawUserVarEx WRAM_LostUser1, $20
+		jmp @terminate
+@is_org:
+		RedrawUserVarEx WRAM_OrgUser0, $00
+		RedrawUserVarEx WRAM_OrgUser1, $20
+@terminate:
+PerFrameSockUpdate:
 		lda IntervalTimerControl
 		and #3
 		cmp #2
@@ -769,166 +923,17 @@ PerFrameSock:
 		lda @Data+1
 		adc #0
 		jsr ToHexByte
-		stx MMC5_ExRamOfs+$2062
-		sta MMC5_ExRamOfs+$2063
+		;stx MMC5_ExRamOfs+$2062
+		sta MMC5_ExRamOfs+$2068
 		lda @Data+2
 		jsr ToHexByte
-		stx MMC5_ExRamOfs+$2064
-		sta MMC5_ExRamOfs+$2065
+		stx MMC5_ExRamOfs+$2069
+		sta MMC5_ExRamOfs+$206A
 		lda @Data+3
 		jsr ToHexByte
-		stx MMC5_ExRamOfs+$2066
-		sta MMC5_ExRamOfs+$2067
+		stx MMC5_ExRamOfs+$206B
+		;sta MMC5_ExRamOfs+$2067
 		rts
-
-ForceUpdateSockHashInner:
-	rts
-
-ForceUpdateSockHash:
-		jsr ForceUpdateSockHashInner
-		jmp ReturnBank
-
-.macro RedrawUserVar name, off
-		lda name
-		sta $00
-		lda name+1
-		sta $01
-		lda ($00), y
-		jsr DivByTen
-		sta VRAM_Buffer1+off+2
-		txa
-		jsr DivByTen
-		sta VRAM_Buffer1+off+1
-		stx VRAM_Buffer1+off+0
-.endmacro
-
-noredraw_dec:
-		dec WRAM_UserFramesLeft
-noredraw:
-		jmp UpdateStatusInput
-
-RedrawUserVars:
-		jmp ReturnBank
-		lda WRAM_UserFramesLeft
-		bne noredraw_dec
-		ldy VRAM_Buffer1_Offset
-		bne noredraw
-		lda #$20
-		sta VRAM_Buffer1
-		lda #$71
-		sta VRAM_Buffer1+1
-		lda #$07
-		sta VRAM_Buffer1+2
-		lda #$24
-		sta VRAM_Buffer1+6
-
-		lda BANK_SELECTED
-		cmp #BANK_ORG
-		beq @is_org
-		RedrawUserVar WRAM_LostUser0, 3
-		RedrawUserVar WRAM_LostUser1, 7
-		jmp @terminate
-@is_org:
-		RedrawUserVar WRAM_OrgUser0, 3
-		RedrawUserVar WRAM_OrgUser1, 7
-@terminate:
-		sty VRAM_Buffer1+$0A
-		lda WRAM_DelayUserFrames
-		sta WRAM_UserFramesLeft
-
-UpdateStatusInput:
-    lda WRAM_PracticeFlags
-	and #PF_EnableInputDisplay
-	beq @exit
-	jsr DrawInputButtons
-@exit:
-	jmp ReturnBank
-DrawInputButtons:
-	ldy JoypadBitMask
-	sty $03
-	lda #$20
-	sta WRAM_StoredInputs
-	lda #$51
-	sta WRAM_StoredInputs+1
-	lda #$07
-	sta WRAM_StoredInputs+2
-	lda #$24
-	sta WRAM_StoredInputs+7
-	;
-	; Up
-	;
-	lda $03
-	and #Up_Dir
-	beq NoUpStatus
-	lda #$1e
-	jmp WriteUp
-NoUpStatus:
-	lda #$28
-WriteUp:
-	sta WRAM_StoredInputs+3
-	;
-	; Left
-	;
-	lda $03
-	and #Left_Dir
-	beq NoLeftStatus
-	lda #$15
-	jmp WriteLeft
-NoLeftStatus:
-	lda #$28
-WriteLeft:
-	sta WRAM_StoredInputs+4
-	;
-	; Down
-	;
-	lda $03
-	and #Down_Dir
-	beq NoDownStatus
-	lda #$0d
-	jmp WriteDown
-NoDownStatus:
-	lda #$28
-WriteDown:
-	sta WRAM_StoredInputs+5
-	;
-	; Right
-	;
-	lda $03
-	and #Right_Dir
-	beq NoRightStatus
-	lda #$1b
-	jmp WriteRight
-NoRightStatus:
-	lda #$28
-WriteRight:
-	sta WRAM_StoredInputs+6
-	;
-	; B
-	;
-	lda $03
-	and #B_Button
-	beq NoBStatus
-	lda #$0b
-	jmp WriteB
-NoBStatus:
-	lda #$28
-WriteB:
-	sta WRAM_StoredInputs+8
-	;
-	; A
-	;
-	lda $03
-	and #A_Button
-	beq NoAStatus
-	lda #$0a
-	jmp WriteA
-NoAStatus:
-	lda #$28
-WriteA:
-	sta WRAM_StoredInputs+9
-	lda #$00
-	sta WRAM_StoredInputs+10 ; maybe redundant due to WRAM init?
-	rts
 
 RequestRestartLevel:
 		lda #$80 ; REMOVE 0x80?
@@ -1046,7 +1051,7 @@ nosock:	jmp ReturnBank
 
 WriteSockTimer:
     lda IntervalTimerControl
-	sta MMC5_ExRamOfs+$2069
+	sta MMC5_ExRamOfs+$204B
 	rts
 
 MagicByte0 = $70 ; P

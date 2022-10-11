@@ -251,7 +251,6 @@ SkipSprite0:
 		bne SkipMainOper
 		jsr OperModeExecutionTree
 SkipMainOper:
-		jsr Enter_RedrawUserVars
 		lda PPU_STATUS
 		lda Mirror_PPU_CTRL_REG1
 		ora #$80
@@ -4278,7 +4277,6 @@ locret_7AEE:
 
 		rts
 ScrollHandler:
-		DoUpdateSockHash
 		lda Player_X_Scroll
 		clc
 		adc Platform_X_Scroll

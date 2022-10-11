@@ -4,19 +4,6 @@
 	.endrep
 .endmacro
 
-.macro DoUpdateSockHash
-		.local @dont_render
-		lda WRAM_PracticeFlags
-		and #PF_SockMode
-		bne @dont_render
-		lda IntervalTimerControl
-		and #3
-		cmp #2
-		bne @dont_render
-		jsr Enter_ForceUpdateSockHash
-	@dont_render:
-.endmacro
-
 .macro practice_callgate
 	.res $FE00 - *, $EA
 
@@ -65,11 +52,6 @@
 		jsr SetBankFromA
 		jmp PracticeInit
 
-	Enter_ForceUpdateSockHash:
-		lda #BANK_COMMON
-		jsr SetBankFromA
-		jmp ForceUpdateSockHash
-
 	Enter_PracticeOnFrame:
 		lda #BANK_COMMON
 		jsr SetBankFromA
@@ -94,11 +76,6 @@
 		lda #BANK_COMMON
 		jsr SetBankFromA
 		jmp WritePracticeTop
-
-	Enter_RedrawUserVars:
-		lda #BANK_COMMON
-		jsr SetBankFromA
-		jmp RedrawUserVars
 
 	Enter_RedrawAll:
 		lda #BANK_COMMON
@@ -290,6 +267,10 @@ IRQ:
 	sei
 	php
 	pha
+	txa
+	pha
+	tya
+	pha
 	lda MMC5_SLIRQ
 	lda #$44
 	sta MMC5_Nametables           ; set vertical mirroring
@@ -306,6 +287,10 @@ IRQ:
 	lda #%10
 	sta MMC5_ExRamMode
 @Done:
+	pla
+	tay
+	pla
+	tax
 	pla
 	plp
 	cli

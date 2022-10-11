@@ -30,14 +30,12 @@ NonMaskableInterrupt: ; Dummy
 	.export FrameToTime
 	.export PracticeInit
 	.export InitializeWRAM
-	.export ForceUpdateSockHash
 	.export PracticeOnFrame
 	.export PracticeTitleMenu
 	.export SoundEngineExternal
 	.export ProcessLevelLoad
 	.export LoadPhysicsData
 	.export LoadMarioPhysics
-	.export RedrawUserVars
 	.export RedrawAll
 	.export UpdateFrameRule
 	.export WritePracticeTop

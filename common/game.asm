@@ -40,30 +40,88 @@ mario_colors_peach:
 		.byte $3F, $11, $03, $30, $27, $19, $00 ; not-used (but offset is ;) hack fuck.
 		.byte $3F, $11, $03, $16, $27, $37, $00 ; fiery
 
-mario_gfx:
-		.byte $c0, $32, $00, $A0
-		.byte $c0, $33, $00, $A8
-		.byte $c8, $4f, $00, $A0
-		.byte $c8, $4f, $40, $A8
+mario_spr:
+	.byte $fc, $fc, $fc, $fc, $3a, $37, $4f, $4f ; small
+	.byte $00, $01, $4c, $4d, $4a, $4a, $4b, $4b ; big
 
 DrawTitleMario:
-		ldx #4*4-1
-		ldy #4*4-1
-@copy_next:
-		lda mario_gfx, x
-		sta Sprite_Data+4, y
-		dey
-		dex
-		bpl @copy_next
+	clc
+	lda #$b0
+	sta Sprite_Y_Position+4
+	sta Sprite_Y_Position+8
+	adc #8
+	sta Sprite_Y_Position+12
+	sta Sprite_Y_Position+16
+	adc #8
+	sta Sprite_Y_Position+20
+	sta Sprite_Y_Position+24
+	adc #8
+	sta Sprite_Y_Position+28
+	sta Sprite_Y_Position+32
+	lda #$a0
+	sta Sprite_X_Position+4
+	sta Sprite_X_Position+12
+	sta Sprite_X_Position+20
+	sta Sprite_X_Position+28
+	adc #8
+	sta Sprite_X_Position+8
+	sta Sprite_X_Position+16
+	sta Sprite_X_Position+24
+	sta Sprite_X_Position+32
+	lda #0
+	sta Sprite_Attributes+4
+	sta Sprite_Attributes+8
+	sta Sprite_Attributes+12
+	sta Sprite_Attributes+16
+	sta Sprite_Attributes+20
+	sta Sprite_Attributes+24
+	sta Sprite_Attributes+28
+	ora #%01000000
+	sta Sprite_Attributes+32
+
+	ldx PowerUps
+	lda @PlayerSizes,x
+	beq :+
+	lda Sprite_Attributes+4
+	ora #%01000000
+	sta Sprite_Attributes+24
+	lda #1
+:	
+
+	and #1
+	asl a
+	asl a
+	asl a
+	tax
+
+	ldy #0
+:	lda mario_spr,x
+	sta Sprite_Tilenumber+4,y
+	iny
+	iny
+	iny
+	iny
+	inx
+	cpy #8*4
+	bne :-
+
+	jmp SetMarioPalette
+@PlayerSizes:
+.byte $00, $01, $01, $00
+@PlayerStatus:
+.byte $00, $00, $02, $02
+.byte $01, $01, $02, $02
+
+
 SetMarioPalette:
 		ldy VRAM_Buffer1_Offset
 		ldx CurrentPlayer
 		beq @mario_pal
 		ldx #$07
 @mario_pal:
-		lda PlayerStatus
+		lda PowerUps
 		cmp #$02
-		bne @draw_pal
+		bcc @draw_pal
 		ldx #$0E
 @draw_pal:
 		lda WRAM_IsContraMode
@@ -382,25 +440,6 @@ UpdateGameTimer:
 		lda #$ff
 		sta DigitModifier+5
 		jsr DigitsMathRoutine3
-		ldx VRAM_Buffer1_Offset
-		lda #$20
-		sta VRAM_Buffer1,x
-		lda #$7A
-		sta VRAM_Buffer1+1,x
-		lda #$03
-		sta VRAM_Buffer1+2,x
-		lda GameTimerDisplay
-		sta VRAM_Buffer1+3,x
-		lda GameTimerDisplay+1
-		sta VRAM_Buffer1+4,x
-		lda GameTimerDisplay+2
-		sta VRAM_Buffer1+5,x
-		lda #0
-		sta VRAM_Buffer1+6,x
-		lda VRAM_Buffer1_Offset
-		clc
-		adc #6
-		sta VRAM_Buffer1_Offset
 		lda #%1000
 		ora PendingWrites
 		sta PendingWrites
