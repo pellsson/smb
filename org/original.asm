@@ -5964,7 +5964,7 @@ AwardGameTimerPoints:
          beq NoTTick            ;for four frames every four frames) branch if not set
          lda #Sfx_TimerTick
          sta Square2SoundQueue  ;load timer tick sound
-NoTTick: rts
+NoTTick: jmp Enter_UpdateGameTimer
 
 RaiseFlagSetoffFWorks:
          lda Enemy_Y_Position,x  ;check star flag's vertical position
