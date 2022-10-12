@@ -30,18 +30,18 @@ ColdBoot:    jsr InitializeMemory         ;clear memory using pointer in Y
 
              jsr Enter_PracticeInit
 
-             lda #CHR_ORG_SPR
-             ldy WRAM_IsContraMode
+             ldx #CHR_ORG_SPR
+             lda WRAM_IsContraMode
              beq @not_peach
-             lda #CHR_PEACH_SPR
+             ldx #CHR_PEACH_SPR
 @not_peach:
-             ldx #CHR_ORG_BG
-             ldy WRAM_CharSet
-             cpy #2
+             ldy #CHR_ORG_BG
+             lda WRAM_CharSet
+             cmp #2
              bne @not_lost
-             ldx #CHR_ORG_BG_ALTFONT
+             ldy #CHR_ORG_BG_ALTFONT
 @not_lost:
-             jsr SetChrBanksFromAX
+             jsr SetChrBanksFromXY
 
              lda #%00001111
              sta SND_MASTERCTRL_REG       ;enable all sound channels except dmc

@@ -105,9 +105,9 @@ dont_wipe_bank_selection:
 		inx
 		bne clear_memory
 
-		lda #CHR_INTRO_SPR0
-		ldx #CHR_INTRO_BG
-		jsr SetChrBanksFromAX
+		ldx #CHR_INTRO_SPR0
+		ldy #CHR_INTRO_BG
+		jsr SetChrBanksFromXY
 
 		jsr enter_loader
 

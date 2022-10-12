@@ -35,14 +35,14 @@ Start:
 		pha
 
 		jsr Enter_PracticeInit
-		lda #CHR_LOST_SPR
-		ldx #CHR_LOST_BG
-		ldy WRAM_CharSet
+		ldx #CHR_LOST_SPR
+		ldy #CHR_LOST_BG
+		lda WRAM_CharSet
         cpy #1
         bne @not_org
-        ldx #CHR_LOST_BG_ALTFONT
+        ldy #CHR_LOST_BG_ALTFONT
 @not_org:
-		jsr SetChrBanksFromAX
+		jsr SetChrBanksFromXY
 		jsr Initialize_WRAM
 
 		ldy #$FE

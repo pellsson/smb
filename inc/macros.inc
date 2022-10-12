@@ -191,29 +191,26 @@ ReturnBank:
 	lda BANK_SELECTED
 	jmp SetBankFromA
 
-SetChrBank0FromA:
-	clc
-	sta MMC5_CHRBank+0
-	adc #1
-	sta MMC5_CHRBank+1
-	adc #1
-	sta MMC5_CHRBank+2
-	adc #1
-	sta MMC5_CHRBank+3
+SetChrBank0FromX:
+	stx MMC5_CHRBank+0
+	inx
+	stx MMC5_CHRBank+1
+	inx
+	stx MMC5_CHRBank+2
+	inx
+	stx MMC5_CHRBank+3
 	rts
 
-SetChrBanksFromAX:
-	jsr SetChrBank0FromA
-	txa
-SetChrBank1FromA:
-	clc
-	sta MMC5_CHRBank+4
-	adc #1
-	sta MMC5_CHRBank+5
-	adc #1
-	sta MMC5_CHRBank+6
-	adc #1
-	sta MMC5_CHRBank+7
+SetChrBanksFromXY:
+	jsr SetChrBank0FromX
+SetChrBank1FromY:
+	sty MMC5_CHRBank+4
+	iny
+	sty MMC5_CHRBank+5
+	iny
+	sty MMC5_CHRBank+6
+	iny
+	sty MMC5_CHRBank+7
 	rts
 
 SetBankFromA:
