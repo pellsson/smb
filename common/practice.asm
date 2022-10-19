@@ -38,73 +38,39 @@ RunPendingWrites:
 	jmp ReturnBank
 
 WriteJoypad:
-	@RightOfs = MMC5_ExRamOfs+$2074
-	@LeftOfs  = MMC5_ExRamOfs+$2072
-	@DownOfs  = MMC5_ExRamOfs+$2073
-	@UpOfs    = MMC5_ExRamOfs+$2053
-	@BOfs     = MMC5_ExRamOfs+$2076
-	@AOfs     = MMC5_ExRamOfs+$2077
-	ldx #'-'
+	@DPadOfs = MMC5_ExRamOfs+$205D
+	@BtnOfs = MMC5_ExRamOfs+$205E
 	lda JoypadBitMask
-
-	; right
-@Right:
-	lsr a
-	bcc :+
-	ldy #'R'
-	sty @RightOfs
-	bne @Left
-:   stx @RightOfs
-	
-	; left
-@Left:
- 	lsr a
-	bcc :+
-	ldy #'L'
-	sty @LeftOfs
-	bne @Down
-:   stx @LeftOfs
-
-	; down
-@Down:
- 	lsr a
-	bcc :+
-	ldy #'D'
-	sty @DownOfs
-	bne @Up
-:   stx @DownOfs
-
-	; up
-@Up:
- 	lsr a
-	bcc :+
-	ldy #'U'
-	sty @UpOfs
-	bne @B
-:   stx @UpOfs
-
-	; B
-@B:
-	lsr a ; skip start
-	lsr a ; skip select
- 	lsr a
-	bcc :+
-	ldy #'B'
-	sty @BOfs
-	bne @A
-:   stx @BOfs
-
-	; A
-@A:
- 	lsr a
-	bcc :+
-	ldy #'A'
-	sty @AOfs
-	bne @Done
-:   stx @AOfs
-@Done:
-	clc
+	and #%1111
+	tay
+	lda @DPadGfx,y
+	sta @DPadOfs
+	lda JoypadBitMask
+	asl a
+	rol a
+	rol a
+	and #%11
+	tay
+	lda @BtnGfx,y
+	sta @BtnOfs
 	rts
+@DPadGfx:
+.byte $24 ; %0000 None
+.byte $30 ; %0001 R
+.byte $31 ; %0010 L
+.byte $24 ; %0011 L+R
+.byte $32 ; %0100 D
+.byte $33 ; %0101 D+R
+.byte $34 ; %0110 D+L
+.byte $32 ; %0111 D+L+R
+.byte $35 ; %1000 U
+.byte $36 ; %1001 U+R
+.byte $37 ; %1010 U+L
+@BtnGfx:
+.byte $24 ; %00 None
+.byte $38 ; %01 A
+.byte $39 ; %10 B
+.byte $3A ; %11 A+B
 
 DrawRemainTimer:
 	lda IntervalTimerControl

@@ -77,13 +77,13 @@ NonMaskableInterrupt:
                and #%11100110
                ldy DisableScreenFlag     ;get screen disable flag
                bne ScreenOff             ;if set, used bits as-is
-               ;lda Sprite0HitDetectFlag
-               ;beq SkipIRQ
                lda #$1F                  ;set interrupt scanline
                sta MMC5_SLCompare
+               inc IRQAckFlag            ;reset flag to wait for next IRQ
+               lda #MAKE_MMC5_CHRBANK 9
+               sta MMC5_CHRBank+4        ;switch to statusbar chr
                lda #$80
                sta MMC5_SLIRQ            ;reset IRQ
-               inc IRQAckFlag            ;reset flag to wait for next IRQ
 SkipIRQ:
                lda Mirror_PPU_CTRL_REG2  ;otherwise reenable bits and save them
                ora #%00011110

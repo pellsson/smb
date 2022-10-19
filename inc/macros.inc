@@ -166,6 +166,8 @@ MMC5_SLIRQ            = $5204
 MMC5_ExRamOfs         = $3C00
 
 ; todo - move these :D
+OriginalCHRBank       = $68FE
+IRQAckFlag            = $68FF
 BankJSRAddr           = $6990
 BankJSRTargetBank     = $6991
 BankJSRA              = $6992
@@ -173,7 +175,6 @@ ActiveBank            = $6993
 IRQNameTableSelect    = $6994
 IRQHorizontalScroll   = $6995
 PendingWrites         = $6996
-IRQAckFlag            = $69A7
 NameTableSelect       = $69A8
 
 ;
@@ -204,6 +205,7 @@ SetChrBank0FromX:
 SetChrBanksFromXY:
 	jsr SetChrBank0FromX
 SetChrBank1FromY:
+	sty OriginalCHRBank
 	sty MMC5_CHRBank+4
 	iny
 	sty MMC5_CHRBank+5
@@ -283,6 +285,8 @@ IRQ:
 	sta IRQAckFlag                ;indicate IRQ was acknowledged
 	lda #%10
 	sta MMC5_ExRamMode
+	lda OriginalCHRBank           ;switch back to original CHR
+	sta MMC5_CHRBank+4
 @Done:
 	pla
 	tay

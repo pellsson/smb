@@ -10,6 +10,7 @@ OBJECTS = $(OUT)/intro.o \
           $(OUT)/lost.o \
           $(OUT)/leveldata.o \
           $(OUT)/dummy.o \
+		  $(OUT)/chr.o \
           $(OUT)/ines.o
 
 SCENARIOS = scen/templates/1-2g_hi.json \
@@ -67,6 +68,9 @@ $(OUT)/original.o: $(INCS) org/original.asm
 $(OUT)/ines.o: $(INCS) common/ines.asm
 	$(AS) $(AFLAGS) -l $(OUT)/ines.map common/ines.asm -o $@
 
+$(OUT)/chr.o: $(INCS) chr/chr.asm
+	$(AS) $(AFLAGS) -l $(OUT)/chr.map chr/chr.asm -o $@
+
 $(OUT)/common.o: common/common.asm common/sound.asm common/sound-ll.asm common/practice.asm
 	$(AS) $(AFLAGS) -l $(OUT)/common.map common/common.asm -o $@
 
@@ -84,6 +88,7 @@ $(OUT)/leveldata.o: lost/leveldata.asm
 
 smb.nes: $(OBJECTS) chr/full.chr
 	$(LD) -C scripts/link.cfg \
+		$(OUT)/chr.o \
 		$(OUT)/ines.o \
 		$(OUT)/intro.o \
 		$(OUT)/dummy.o \
@@ -94,9 +99,7 @@ smb.nes: $(OBJECTS) chr/full.chr
 		$(OUT)/lost.o \
 		$(OUT)/leveldata.o \
 		--dbgfile "smb.dbg" \
-		-o smb.tmp
-	cat smb.tmp chr/full.chr > smb.nes
-
+		-o smb.nes
 
 .PHONY: clean
 
