@@ -17,5 +17,14 @@
 .incbin "intro/intro-bg.chr"
 
 .segment "chr4"
-.incbin "intro-sprbank0.chr"
+.incbin "intro/intro-sprites.chr"
+.incbin "intro/andrewg.chr"
+.incbin "intro/darbian.chr"
+.incbin "intro/roylt.chr"
+.incbin "intro/tavenwebb2002.chr"
+.incbin "intro/kosmic.chr"
+.incbin "intro/leontoast.chr"
+
+.segment "chr5"
+.incbin "statusbar-lost.chr"
 .incbin "statusbar-lost.chr"
