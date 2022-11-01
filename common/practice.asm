@@ -73,14 +73,13 @@ WriteJoypad:
 .byte $3A ; %11 A+B
 
 DrawRemainTimer:
+	lda #'R'
+	sta MMC5_ExRamOfs+$2048
 	lda IntervalTimerControl
 	cmp #10
-	bcs :+
-	sta MMC5_ExRamOfs+$207E
-	rts
-:	jsr DivByTen
-	stx MMC5_ExRamOfs+$207E
-	sta MMC5_ExRamOfs+$207F
+	jsr DivByTen
+	stx MMC5_ExRamOfs+$2049
+	sta MMC5_ExRamOfs+$204A
 	rts
 
 WritePracticeTop:
@@ -102,6 +101,11 @@ RedrawFrameNumbers:
 	jmp ReturnBank
 
 WritePracticeTopReal:
+	lda #$24
+	ldx #$50
+:	sta MMC5_ExRamOfs+$2000 - $50,x
+	inx
+	bne :-
 	lda #<@Text
 	sta $0
 	lda #>@Text
@@ -113,16 +117,24 @@ WritePracticeTopReal:
 	sta MMC5_ExRamOfs+$206D
 	lda #'S'
 	sta MMC5_ExRamOfs+$2067
+	lda #%10101010
+	sta MMC5_ExRamOfs+$23C2
+	sta MMC5_ExRamOfs+$23C4
+	sta MMC5_ExRamOfs+$23C6
+	sta MMC5_ExRamOfs+$23C7
 	lda #%10111010
 	sta MMC5_ExRamOfs+$23C0
 	lda #%00101010
 	sta MMC5_ExRamOfs+$23C1
 	lda #%10001010
 	sta MMC5_ExRamOfs+$23C3
+	lda #%10101010
+	sta MMC5_ExRamOfs+$23C5
 	rts
 @Text:
-.byte $40, "F*       *  X", $FF
-.byte $58, "TIME R", $FF
+.byte $40, "F*      *   X", $FF
+;.byte $58, "R", $FF
+.byte $7A, "T", $FF
 .byte $00
 @TextEnd:
 
@@ -512,27 +524,7 @@ menu_input:
 		sta LevelNumber
 		rts
 @world_selected:
-		lda WorldNumber
-		clc
-		adc $00
-		ldx BANK_SELECTED
-		cpx #BANK_ORG
-		bne @world_lost
-		and #$07
-		jmp @save_world
-@world_lost:
-		cmp #$0D
-		bcc @save_world
-		lda $0
-		cmp #1 ; going right
-		beq @going_left
-		lda #$0C
-		bne @save_world
-@going_left:
-		lda #$00
-@save_world:
-		sta WorldNumber
-		rts
+		jmp ChangeWorldNumber
 @check_pups:
 		dex
 		bne @hero_selected
@@ -552,6 +544,51 @@ menu_input:
 		and #$01
 		sta CurrentPlayer
 		jmp LL_UpdatePlayerChange
+
+ChangeWorldNumber:
+	ldx BANK_SELECTED          ; get selected game
+	ldy WorldNumber            ; and current world number
+	lda $0                     ; get input direction
+	cmp #1                     ; check for going right
+	bne @going_left            ; if not - skip to going left
+@going_right:                  ; we are going right
+	iny                        ; advance to next world
+	cpx #BANK_ANNLL            ; are we playing ANN?
+	bne @checked_ann_r         ; no - skip ahead
+	cpy #8                     ; yes - have we selected world 9
+	bne @checked_ann_r         ; no - skip ahead
+	iny                        ; yep - advance past world 9 (it doesnt exist in ANN)
+@checked_ann_r:                ;
+	cpx #BANK_ORG              ; are we playing smb1?
+	bne @check_ll_r            ; nope - we have more worlds to consider
+    cpy #8                     ; yes - are we past the end of the game?
+	bcc @store                 ; no - we're done, store the world
+	ldy #0                     ; yes - wrap around to world 1
+	beq @store                 ; and store
+@check_ll_r:                   ;
+	cpy #$D                    ; we are playing LL / ANN, are we past the end of the game?
+	bcc @store                 ; no - we're done, store the world
+	ldy #0                     ; yes - wrap around to world 1
+	beq @store                 ; and store
+@going_left:                   ; we are going left
+	dey                        ; drop world number by 1
+	cpx #BANK_ANNLL            ; are we playing ANN?
+	bne @checked_ann_l         ; no - skip ahead
+	cpy #8                     ; yes - have we selected world 9?
+	bne @checked_ann_l         ; no - skip ahead
+	dey                        ; yep - derement cpast world 9 (it doesnt exist in ANN)
+@checked_ann_l:				   ;
+	cpy #$FF                   ; have we wrapped around?
+	bne @store                 ; no - we're done, store the world
+	cpx #BANK_ORG              ; are we playing smb1?
+	bne @check_ll_l            ; nope - we have more worlds to consider
+	ldy #$07                   ; yes - wrap around to world 8
+	bne @store                 ; and store
+@check_ll_l:                   ;
+    ldy #$0C                   ; we are playing LL / ANN, wrap to world D
+@store:                        ;
+	sty WorldNumber            ; update selected world
+	rts                        ; and exit
 
 next_task:
 		ldx #4*4-1
@@ -605,8 +642,8 @@ WriteRulePointer:
 
 toggle_second_quest:
 		lda BANK_SELECTED
-		cmp #BANK_ORG
-		bne @not_org
+		cmp #BANK_SMBLL
+		beq @not_org
 		lda PrimaryHardMode
 		eor #1
 		sta PrimaryHardMode
@@ -781,7 +818,18 @@ PracticeOnFrameInner:
 		cmp #GameModeValue
 		bne @exit
 		lda OperMode_Task
-		cmp #$03
+		ldy BANK_SELECTED
+:		cpy #BANK_SMBLL
+		bne :+
+        cmp #$04
+		bmi @exit
+		bpl @check_pause
+:		cpy #BANK_ANNLL
+		bne :+
+        cmp #$05
+		bmi @exit
+		bpl @check_pause
+:       cmp #$03
 		bmi @exit
 @check_pause:
 		; TODO RENABLE
@@ -789,6 +837,7 @@ PracticeOnFrameInner:
 		jmp PauseMenu
 @exit:
 		rts
+
 
 PrintHexByte:
 		sta $0
@@ -838,6 +887,9 @@ ToHexByte:
 
 PerFrameSock:
 		ldy #0
+		lda FrameCounter
+		and #1
+		bne @terminate
 		lda BANK_SELECTED
 		cmp #BANK_ORG
 		beq @is_org
@@ -855,50 +907,40 @@ PerFrameSockUpdate:
 		beq @Draw
 		rts
 @Draw:
-		@Data = $0
-		lda SprObject_X_MoveForce ; Player force
-		sta @Data+3
-		lda SprObject_X_Position ; Player X
-		sta @Data+2
-		lda SprObject_PageLoc ; Player page
-		sta @Data+1
-		lda SprObject_Y_Position ; Player Y
-		eor #$ff
-		lsr
-		lsr
-		lsr
-		bcc :+
-		pha
-		clc
-		lda #$80
-		adc @Data+3
-		sta @Data+3
-		lda @Data+2
-		adc @Data+2
-		sta @Data+2
-		lda @Data+1
-		adc #0
-		sta @Data+1
-		pla
-:		sta @Data+4
-		asl
-		asl
-		adc @Data+4
-		adc @Data+2
-		sta @Data+2
-		lda @Data+1
-		adc #0
+		@DataTemp = $4                               ; temp value used for some maths
+		@DataSubX = $2                               ; sockfolder subpixel x value
+		@DataX    = $3                               ; sockfolder pixel x value
+		lda SprObject_X_MoveForce                    ; get subpixel x position
+		sta @DataSubX                                ; and store it in our temp data
+		lda Player_X_Position                        ; get x position
+		sta @DataX                                   ; and store it in our temp data
+		lda Player_Y_Position                        ; get y position
+		eor #$FF                                     ; invert the bits, now $FF is the top of the screen
+		lsr a                                        ; divide pixel position by 8
+		lsr a                                        ;
+		lsr a                                        ;
+		bcc @sock1                                   ; if we're on the top half of tile 'tile', we will land 2.5 pixels later.
+		pha                                          ; so store the current value
+		clc                                          ;
+		lda @DataSubX                                ; get subpixel x position
+		adc #$80                                     ; and increase it by half
+		sta @DataSubX                                ; and store it back
+		lda @DataX                                   ; get x position
+		adc #$02                                     ; and add 2 + carry value
+		sta @DataX                                   ; and store it back
+		pla                                          ; then restore our original value
+@sock1:                                          ;
+		sta @DataTemp                                ; store this in our temp value
+		asl a                                        ; multiply by 4
+		asl a                                        ;
+		adc @DataTemp                                ; and add the temp value
+		adc @DataX                                   ; then add our x position
 		jsr ToHexByte
-		;stx MMC5_ExRamOfs+$2062
-		sta MMC5_ExRamOfs+$2068
-		lda @Data+2
+		stx MMC5_ExRamOfs+$2068
+		sta MMC5_ExRamOfs+$2069
+		lda @DataSubX
 		jsr ToHexByte
-		stx MMC5_ExRamOfs+$2069
-		sta MMC5_ExRamOfs+$206A
-		lda @Data+3
-		jsr ToHexByte
-		stx MMC5_ExRamOfs+$206B
-		;sta MMC5_ExRamOfs+$2067
+		stx MMC5_ExRamOfs+$206A
 		rts
 
 RequestRestartLevel:
@@ -1017,7 +1059,7 @@ nosock:	jmp ReturnBank
 
 WriteSockTimer:
     lda IntervalTimerControl
-	sta MMC5_ExRamOfs+$204B
+	sta MMC5_ExRamOfs+$204A
 	rts
 
 MagicByte0 = $70 ; P

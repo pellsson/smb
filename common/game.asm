@@ -436,7 +436,7 @@ CarryOne3:
 
 
 UpdateGameTimer:
-		ldy #$23
+		ldy #GameTimerDisplay-DisplayDigits+2
 		lda #$ff
 		sta DigitModifier+5
 		jsr DigitsMathRoutine3

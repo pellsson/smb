@@ -7,10 +7,8 @@ OBJECTS = $(OUT)/intro.o \
           $(OUT)/common.o \
           $(OUT)/scenarios.o \
           $(OUT)/scenario_data.o \
-          $(OUT)/lost.o \
-          $(OUT)/leveldata.o \
           $(OUT)/dummy.o \
-		  $(OUT)/chr.o \
+          $(OUT)/entry.o \
           $(OUT)/ines.o
 
 SCENARIOS = scen/templates/1-2g_hi.json \
@@ -56,9 +54,6 @@ $(GEN_SCENARIOS): scripts/genscenarios.py $(SCENARIOS)
 $(OUT)/intro.o: $(INCS) intro/intro.asm intro/faxsound.asm intro/intro.inc intro/records.asm intro/smlsound.asm intro/nt.asm intro/settings.asm
 	$(AS) $(AFLAGS) -l $(OUT)/intro.map intro/intro.asm -o $@
 
-chr/full.chr: chr/build_chr.sh
-	(cd chr && sh build_chr.sh)
-
 $(OUT)/dummy.o: $(INCS) dummy.asm
 	$(AS) $(AFLAGS) -l $(OUT)/dummy.map dummy.asm -o $@
 
@@ -67,9 +62,6 @@ $(OUT)/original.o: $(INCS) org/original.asm
 
 $(OUT)/ines.o: $(INCS) common/ines.asm
 	$(AS) $(AFLAGS) -l $(OUT)/ines.map common/ines.asm -o $@
-
-$(OUT)/chr.o: $(INCS) chr/chr.asm
-	$(AS) $(AFLAGS) -l $(OUT)/chr.map chr/chr.asm -o $@
 
 $(OUT)/common.o: common/common.asm common/sound.asm common/sound-ll.asm common/practice.asm
 	$(AS) $(AFLAGS) -l $(OUT)/common.map common/common.asm -o $@
@@ -80,24 +72,19 @@ $(OUT)/scenario_data.o: $(INCS) $(GEN_SCENARIOS) scen/scen_exports.asm
 $(OUT)/scenarios.o: $(INCS) scen/scenarios.asm
 	$(AS) $(AFLAGS) -l $(OUT)/scenarios.map scen/scenarios.asm -o $@
 
-$(OUT)/lost.o: $(INCS) $(WRAM) lost/lost.asm
-	$(AS) $(AFLAGS) -l $(OUT)/lost.map lost/lost.asm -o $@
+$(OUT)/entry.o: $(INCS) $(WRAM) entry.asm
+	$(AS) $(AFLAGS) entry.asm -o $@
 
-$(OUT)/leveldata.o: lost/leveldata.asm
-	$(AS) $(AFLAGS) -l $(OUT)/leveldata.map lost/leveldata.asm -o $@
-
-smb.nes: $(OBJECTS) chr/full.chr
+smb.nes: $(OBJECTS)
 	$(LD) -C scripts/link.cfg \
-		$(OUT)/chr.o \
 		$(OUT)/ines.o \
+		$(OUT)/entry.o \
 		$(OUT)/intro.o \
 		$(OUT)/dummy.o \
 		$(OUT)/original.o \
 		$(OUT)/common.o \
 		$(OUT)/scenarios.o \
 		$(OUT)/scenario_data.o \
-		$(OUT)/lost.o \
-		$(OUT)/leveldata.o \
 		--dbgfile "smb.dbg" \
 		-o smb.nes
 

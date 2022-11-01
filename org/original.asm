@@ -36,11 +36,6 @@ ColdBoot:    jsr InitializeMemory         ;clear memory using pointer in Y
              ldx #CHR_PEACH_SPR
 @not_peach:
              ldy #CHR_ORG_BG
-             lda WRAM_CharSet
-             cmp #2
-             bne @not_lost
-             ldy #CHR_ORG_BG_ALTFONT
-@not_lost:
              jsr SetChrBanksFromXY
 
              lda #%00001111
@@ -80,8 +75,10 @@ NonMaskableInterrupt:
                lda #$1F                  ;set interrupt scanline
                sta MMC5_SLCompare
                inc IRQAckFlag            ;reset flag to wait for next IRQ
-               lda #MAKE_MMC5_CHRBANK 10
-               sta MMC5_CHRBank+4        ;switch to statusbar chr
+               ldy #CHR_STATUSBAR_ORG
+               sty MMC5_CHRBank+4        ;switch to statusbar chr
+               iny
+               sty MMC5_CHRBank+5        ;switch to statusbar chr
                lda #$80
                sta MMC5_SLIRQ            ;reset IRQ
 SkipIRQ:
@@ -101,14 +98,6 @@ ScreenOff:     sta Mirror_PPU_CTRL_REG2  ;save bits for later but not in registe
                lda #$02                  ;perform spr-ram DMA access on $0200-$02ff
                sta SPR_DMA
 
-               lda WRAM_PracticeFlags
-               and #PF_EnableInputDisplay
-               beq DrawBuffer            ;if input display not enabled, don't print it
-               lda #<WRAM_StoredInputs   ;otherwise set indirect at $00 to WRAM stored inputs
-               sta $00
-               lda #>WRAM_StoredInputs
-               sta $01
-               jsr UpdateScreen          ;update input display
 DrawBuffer:    ldx VRAM_Buffer_AddrCtrl  ;load control for pointer to buffer contents
                lda VRAM_AddrTable_Low,x  ;set indirect at $00 to pointer
                sta $00

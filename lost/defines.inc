@@ -1,9 +1,16 @@
-PPU_CTRL_REG1         = $2000
-PPU_CTRL_REG2         = $2001
+;SMB2J DISASSEMBLY (SM2MAIN portion)
+
+;-------------------------------------------------------------------------------------
+;DEFINES
+
+;NES specific hardware defines
+
+PPU_CTRL_REG1              = $2000
+PPU_CTRL_REG2              = $2001
 PPU_STATUS            = $2002
 PPU_SPR_ADDR          = $2003
 PPU_SPR_DATA          = $2004
-PPU_SCROLL_REG        = $2005
+PPU_SCROLL_REG            = $2005
 PPU_ADDRESS           = $2006
 PPU_DATA              = $2007
 
@@ -14,18 +21,6 @@ SND_TRIANGLE_REG      = $4008
 SND_NOISE_REG         = $400c
 SND_DELTA_REG         = $4010
 SND_MASTERCTRL_REG    = $4015
-SND_VOLENV_REG        = $4080
-SND_FDS0_REG          = $4040
-SND_FDS1_REG          = $4041
-SND_PULSE_4002_REG    = $4002
-SND_PULSE_4003_REG    = $4003
-SND_PULSE_4004_REG    = $4004
-SND_PULSE_4005_REG    = $4005
-SND_PULSE_4006_REG    = $4006
-SND_TRIANGLE_400A_REG = $400A
-SND_TRIANGLE_400B_REG = $400B
-SND_NOISE_400E_REG    = $400E
-SND_NOISE_400F_REG    = $400F
 
 SPR_DMA               = $4014
 JOYPAD_PORT           = $4016
@@ -51,12 +46,19 @@ Left_Right_Buttons    = $0c
 
 GameEngineSubroutine  = $0e
 
-Mirror_PPU_CTRL_REG1  = $0778
-Mirror_PPU_CTRL_REG2  = $0779
+Mirror_PPU_CTRL_REG1       = $0778
+Mirror_PPU_CTRL_REG2       = $0779
+FileListNumber        = $07f7
 
 OperMode              = $0770
 OperMode_Task         = $0772
 ScreenRoutineTask     = $073c
+
+IRQUpdateFlag         = $0722
+DiskIOTask            = $07fc
+NotColdFlag           = $07fd
+
+
 
 GamePauseStatus       = $0776
 GamePauseTimer        = $0777
@@ -65,7 +67,6 @@ DemoAction            = $0717
 DemoActionTimer       = $0718
 
 TimerControl          = $0747
-ANNMushroomRetainerGfxHandler = $77C
 IntervalTimerControl  = $077f
 
 Timers                = $0780
@@ -91,6 +92,7 @@ StarInvincibleTimer   = $079f
 ScreenTimer           = $07a0
 WorldEndTimer         = $07a1
 DemoTimer             = $07a2
+FantasyW9MsgFlag      = $07f5
 
 Sprite_Data           = $0200
 
@@ -110,13 +112,11 @@ PlayerFacingDir       = $33
 DestinationPageLoc    = $34
 VictoryWalkControl    = $35
 ScrollFractional      = $0768
-PrimaryMsgCounter     = $0719
-MsgCounter            = $0719
 SecondaryMsgCounter   = $0749
+MsgCounter            = $0719
 MsgFractional         = $0749
 
 HorizontalScroll      = $073f
-VerticalScroll        = $0740
 ScrollLock            = $0723
 ScrollThirtyTwo       = $073d
 Player_X_Scroll       = $06ff
@@ -129,9 +129,6 @@ AreaDataHigh          = $e8
 EnemyData             = $e9
 EnemyDataLow          = $e9
 EnemyDataHigh         = $ea
-AreaDataRAM           = $6100
-EnemyDataRAM          = $6200
-
 
 AreaParserTaskNum     = $071f
 ColumnSets            = $071e
@@ -162,9 +159,17 @@ DisplayDigits         = $07d7
 TopScoreDisplay       = $07d7
 ScoreAndCoinDisplay   = $07dd
 PlayerScoreDisplay    = $07dd
-GameTimerDisplay      = $07ec
 CoinDisplay           = $07e7
+GameTimerDisplay      = $07f8
 DigitModifier         = $0134
+
+;DisplayDigits         = $07d7
+;TopScoreDisplay       = $07d7
+;ScoreAndCoinDisplay   = $07dd
+;PlayerScoreDisplay    = $07dd
+;GameTimerDisplay      = $07ec
+;CoinDisplay           = $07e7
+;DigitModifier         = $0134
 
 VerticalFlipFlag      = $0109
 FloateyNum_Control    = $0110
@@ -177,21 +182,17 @@ FlagpoleFNum_YMFDummy = $010e
 FlagpoleScore         = $010f
 FlagpoleCollisionYPos = $070f
 StompChainCounter     = $0484
+FlagpoleMusicFlag     = $07f6
 
 VRAM_Buffer1_Offset   = $0300
 VRAM_Buffer1          = $0301
 VRAM_Buffer2_Offset   = $0340
 VRAM_Buffer2          = $0341
 VRAM_Buffer_AddrCtrl  = $0773
-Sprite0HitDetectFlag  = $0722
-IRQUpdateFlag         = $0722
+
 DisableScreenFlag     = $0774
 DisableIntermediate   = $0769
 ColorRotateOffset     = $06d4
-FantasyW9MsgFlag      = $07f5
-FlagpoleMusicFlag     = $07f6
-FileListNumber        = $07f7
-DiskIOTask            = $07fc
 
 TerrainControl        = $0727
 AreaStyle             = $0733
@@ -207,7 +208,6 @@ PlayerEntranceCtrl    = $0710
 GameTimerSetting      = $0715
 AltEntranceControl    = $0752
 EntrancePage          = $0751
-NumberOfPlayers       = $077a
 WarpZoneControl       = $06d6
 ChangeAreaTimer       = $06de
 
@@ -217,24 +217,22 @@ MultiLoopPassCntr     = $06da
 FetchNewGameTimerFlag = $0757
 GameTimerExpiredFlag  = $0759
 
+.ifdef ANN
+PrimaryHardMode       = $077d
+.else
 PrimaryHardMode       = $076a
+.endif
 SecondaryHardMode     = $06cc
 WorldSelectNumber     = $076b
-ContinueMenuSelect    = $07f8
 CompletedWorlds       = $07fa
 HardWorldFlag         = $07fb
-WorldSelectEnableFlag = $07fc
-ContinueWorld         = $07fd
-NotColdFlag           = $07fd
+ContinueMenuSelect    = $07f8
 
-.define IsPlayingLuigi CurrentPlayer
-
-CurrentPlayer         = $0753
 SelectedPlayer        = $0753
 PlayerSize            = $0754
 PlayerStatus          = $0756
 
-;OnscreenPlayerInfo    = $075a
+OnscreenPlayerInfo    = $075a
 NumberofLives         = $075a ;used by current player
 HalfwayPage           = $075b
 LevelNumber           = $075c ;the actual dash number
@@ -244,15 +242,6 @@ WorldNumber           = $075f
 AreaNumber            = $0760 ;internal number used to find areas
 
 CoinTallyFor1Ups      = $0748
-
-OffscreenPlayerInfo   = $0761
-OffScr_NumberofLives  = $0761 ;used by offscreen player
-OffScr_HalfwayPage    = $0762
-OffScr_LevelNumber    = $0763
-OffScr_Hidden1UpFlag  = $0764
-OffScr_CoinTally      = $0765
-OffScr_WorldNumber    = $0766
-OffScr_AreaNumber     = $0767
 
 BalPlatformAlignment  = $03a0
 Platform_X_Scroll     = $03a1
@@ -264,6 +253,7 @@ BrickCoinTimerFlag    = $06bc
 StarFlagTaskControl   = $0746
 
 PseudoRandomBitReg    = $07a7
+WarmBootValidation    = $07ff
 
 SprShuffleAmtOffset   = $06e0
 SprShuffleAmt         = $06e1
@@ -405,6 +395,8 @@ CrouchingFlag         = $0714
 MaximumLeftSpeed      = $0450
 MaximumRightSpeed     = $0456
 
+WindFlag              = $07f9
+
 SprObject_OffscrBits  = $03d0
 Player_OffscreenBits  = $03d0
 Enemy_OffscreenBits   = $03d1
@@ -484,6 +476,7 @@ FirebarSpinDirection  = $34
 
 DuplicateObj_Offset   = $06cf
 NumberofGroupEnemies  = $06d3
+BlueColorOfs          = $0762
 
 BlooperMoveCounter    = $a0
 BlooperMoveSpeed      = $58
@@ -510,6 +503,13 @@ FireworksCounter      = $06d7
 ExplosionGfxCounter   = $58
 ExplosionTimerCounter = $a0
 
+EndControlCntr        = $0761
+BlueDelayFlag         = $0763
+MRetainerOffset       = $0762
+MushroomRetDelay      = $0764
+CurrentFlashMRet      = $0763
+PiranhaPlantType      = $0765
+
 ;sound related defines
 Squ2_NoteLenBuffer    = $07b3
 Squ2_NoteLenCounter   = $07b4
@@ -535,6 +535,7 @@ Square1SoundBuffer    = $f1
 Square2SoundBuffer    = $f2
 NoiseSoundBuffer      = $f3
 AreaMusicBuffer       = $f4
+AltMusicBuffer        = $0608
 EventMusicBuffer      = $07b1
 PauseSoundBuffer      = $07b2
 
@@ -555,14 +556,7 @@ PauseModeFlag         = $07c6
 GroundMusicHeaderOfs  = $07c7
 AltRegContentFlag     = $07ca
 
-EndControlCntr        = $0761
-BlueDelayFlag         = $0763
-BlueColorOfs          = $0762
-MRetainerOffset       = $0762
-MushroomRetDelay      = $0764
-CurrentFlashMRet      = $0763
-PiranhaPlantType      = $0765
-WindFlag              = $07f9
+ANNMushroomRetainerGfxHandler = $77C
 
 ;-------------------------------------------------------------------------------------
 ;CONSTANTS
@@ -659,12 +653,7 @@ Level4 = 3
 
 WarmBootOffset        = <$07d6
 ColdBootOffset        = <$07fe
-TitleScreenDataOffset = $1ec0
 SoundMemory           = $07b0
-
-.define SwimTileRepOffset		PlayerGraphicsTable + $9e
-.define MusicHeaderOffsetData	MusicHeaderData - 1
-.define MHD 					MusicHeaderData
 
 A_Button              = %10000000
 B_Button              = %01000000
@@ -675,13 +664,19 @@ Down_Dir              = %00000100
 Left_Dir              = %00000010
 Right_Dir             = %00000001
 
-TitleScreenModeValue  = 0
-GameModeValue         = 1
-VictoryModeValue      = 2
-GameOverModeValue     = 3
+AttractMode           = 0
+GameMode              = 1
+VictoryMode           = 2
+GameOverMode          = 3
+
+
 
 SaveHeader            = $7000 ; 3 byte save file header
 GamesBeatenCount      = $7003 ; number of times the player has won
+
+; copies of areadata and enemydata to minimize banking
+AreaDataRAM           = $6100
+EnemyDataRAM          = $6200
 
 ; leaves the fly across the screen during wind
 LeavesEnabledRAM      = $6300 +  0

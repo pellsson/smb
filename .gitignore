@@ -13,3 +13,4 @@ test.*
 /*.dbg
 chr/*.chr
 smb.tmp
+*.bak

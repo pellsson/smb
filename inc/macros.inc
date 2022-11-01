@@ -102,25 +102,15 @@
 		jsr SetBankFromA
 		jmp LoadMarioPhysics
 
-	Enter_LL_LoadWarpzone:
-		lda #BANK_LLDATA
-		jsr SetBankFromA
-		jmp LoadWarpzone
-
 	Enter_LL_GetAreaDataAddrs:
 		lda #BANK_LLDATA
 		jsr SetBankFromA
-		jmp GetAreaDataAddrs
+		jmp LL_GetAreaDataAddrs
 
 	Enter_LL_LoadAreaPointer:
 		lda #BANK_LLDATA
 		jsr SetBankFromA
-		jmp LoadAreaPointer
-
-	Enter_LL_WriteHalfwayPages:
-		lda #BANK_LLDATA
-		jsr SetBankFromA
-		jmp WriteHalfwayPages
+		jmp LL_LoadAreaPointer
 
 .endmacro
 
@@ -167,21 +157,46 @@ MMC5_ExRamOfs         = $3C00
 
 ; todo - move these :D
 OriginalCHRBank       = $68FE
-IRQAckFlag            = $68FF
 BankJSRAddr           = $6990
-BankJSRTargetBank     = $6991
-BankJSRA              = $6992
-ActiveBank            = $6993
-IRQNameTableSelect    = $6994
-IRQHorizontalScroll   = $6995
-PendingWrites         = $6996
-NameTableSelect       = $69A8
+BankJSRTargetBank     = $6992
+BankJSRA              = $6993
+ActiveBank            = $6994
+IRQNameTableSelect    = $6995
+IRQHorizontalScroll   = $6996
+PendingWrites         = $6997
+IRQAckFlag            = $69A8
+NameTableSelect       = $69A9
+
+.macro BankJSR bank, addr
+      sta BankJSRA
+      lda #<addr
+      sta BankJSRAddr
+      lda #>addr
+      sta BankJSRAddr+1
+      lda #bank
+      jsr _BankJSR
+.endmacro
 
 ;
 ; Lower banks
 ; 
 .macro control_bank bank
 .res $FEF0 - *, $EA
+
+_BankJSR:
+    sta BankJSRTargetBank
+    lda #bank
+    pha
+    lda BankJSRTargetBank
+    jsr SetBankFromA
+    lda BankJSRA
+    jsr @CallJSR
+    pla
+    jsr SetBankFromA
+    rts
+@CallJSR:
+    jmp (BankJSRAddr)
+
 
 Enter_SoundEngine:
 	lda #BANK_COMMON
@@ -285,8 +300,10 @@ IRQ:
 	sta IRQAckFlag                ;indicate IRQ was acknowledged
 	lda #%10
 	sta MMC5_ExRamMode
-	lda OriginalCHRBank           ;switch back to original CHR
-	sta MMC5_CHRBank+4
+	ldy OriginalCHRBank           ;switch back to original CHR
+	sty MMC5_CHRBank+4
+	iny
+	sty MMC5_CHRBank+5
 @Done:
 	pla
 	tay
@@ -305,3 +322,16 @@ IRQ:
 	.word MapperReset
 	.word IRQ
 .endmacro
+
+SB_Init      = %00000001
+SB_SockTimer = %00000010
+SB_Frame     = %00000100
+SB_GameTimer = %00001000
+SB_Remains   = %00010000
+
+.macro StatusbarUpdate value
+	lda #value
+	ora PendingWrites
+	sta PendingWrites
+.endmacro
+
