@@ -1,6 +1,8 @@
 ;
 ; Bank for all sound-related stuff
 ;
+.export LL_SoundEngine
+
 LL_SoundEngine:
     lda OperMode
     bne @SndOn

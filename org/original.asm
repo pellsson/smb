@@ -80,7 +80,7 @@ NonMaskableInterrupt:
                lda #$1F                  ;set interrupt scanline
                sta MMC5_SLCompare
                inc IRQAckFlag            ;reset flag to wait for next IRQ
-               lda #CHR_STATUSBAR
+               lda #MAKE_MMC5_CHRBANK 10
                sta MMC5_CHRBank+4        ;switch to statusbar chr
                lda #$80
                sta MMC5_SLIRQ            ;reset IRQ

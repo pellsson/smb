@@ -723,12 +723,12 @@ run_save_load:
 		jmp LoadState
 
 RedrawGameTimer:
-	lda $07F8
-	sta MMC5_ExRamOfs+$207A
-	lda $07F9
-	sta MMC5_ExRamOfs+$207B
-	lda $07FA
+	lda GameTimerDisplay
 	sta MMC5_ExRamOfs+$207C
+	lda GameTimerDisplay+1
+	sta MMC5_ExRamOfs+$207D
+	lda GameTimerDisplay+2
+	sta MMC5_ExRamOfs+$207E
 	rts
 
 PracticeOnFrame:
