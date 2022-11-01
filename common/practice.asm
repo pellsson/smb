@@ -4,6 +4,16 @@
 .include "rng.asm"
 .include "savestates.asm"
 
+StatusAddr_SockV   = MMC5_ExRamOfs+$2061
+StatusAddr_SockN   = MMC5_ExRamOfs+$206B
+StatusAddr_XVal    = MMC5_ExRamOfs+$2053
+StatusAddr_YVal    = MMC5_ExRamOfs+$2073
+StatusAddr_Rule    = MMC5_ExRamOfs+$204B
+StatusAddr_Frame   = MMC5_ExRamOfs+$206B
+StatusAddr_DPad    = MMC5_ExRamOfs+$2079
+StatusAddr_Remains = MMC5_ExRamOfs+$205C
+StatusAddr_Time    = MMC5_ExRamOfs+$207B
+
 RunPendingWrites:
 	lda PendingWrites
 	beq @DonePending
@@ -38,13 +48,11 @@ RunPendingWrites:
 	jmp ReturnBank
 
 WriteJoypad:
-	@DPadOfs = MMC5_ExRamOfs+$205D
-	@BtnOfs = MMC5_ExRamOfs+$205E
 	lda JoypadBitMask
 	and #%1111
 	tay
 	lda @DPadGfx,y
-	sta @DPadOfs
+	sta StatusAddr_DPad
 	lda JoypadBitMask
 	asl a
 	rol a
@@ -52,7 +60,7 @@ WriteJoypad:
 	and #%11
 	tay
 	lda @BtnGfx,y
-	sta @BtnOfs
+	sta StatusAddr_DPad+1
 	rts
 @DPadGfx:
 .byte $24 ; %0000 None
@@ -74,76 +82,48 @@ WriteJoypad:
 
 DrawRemainTimer:
 	lda #'R'
-	sta MMC5_ExRamOfs+$2048
+	sta StatusAddr_Remains
 	lda IntervalTimerControl
 	cmp #10
 	jsr DivByTen
-	stx MMC5_ExRamOfs+$2049
-	sta MMC5_ExRamOfs+$204A
+	stx StatusAddr_Remains+1
+	sta StatusAddr_Remains+2
 	rts
 
 WritePracticeTopReal:
 	lda #$24
-	ldx #$50
-:	sta MMC5_ExRamOfs+$2000 - $50,x
+	ldx #$60
+:	sta MMC5_ExRamOfs+$2000 - $60,x
 	inx
 	bne :-
-	lda #<@Text
-	sta $0
-	lda #>@Text
-	sta $1
-	jsr WriteMenuText
+	
+	lda #'F'
+	sta StatusAddr_Frame
 	lda #'R'
-	sta MMC5_ExRamOfs+$2061
+	sta StatusAddr_Rule
 	lda #'Y'
-	sta MMC5_ExRamOfs+$206D
+	sta StatusAddr_YVal
 	lda #'S'
-	sta MMC5_ExRamOfs+$2067
+	sta StatusAddr_SockV
+	lda #'T'
+	sta StatusAddr_Time
+	lda #'*'
+	sta StatusAddr_Frame+1
+	;sta StatusAddr_SockN
+	lda #'X'
+	sta StatusAddr_XVal
+	
 	lda #%10101010
-	sta MMC5_ExRamOfs+$23C2
+	sta MMC5_ExRamOfs+$23C0
+	sta MMC5_ExRamOfs+$23C1
+	sta MMC5_ExRamOfs+$23C3
 	sta MMC5_ExRamOfs+$23C4
+	sta MMC5_ExRamOfs+$23C5
 	sta MMC5_ExRamOfs+$23C6
 	sta MMC5_ExRamOfs+$23C7
-	lda #%10111010
-	sta MMC5_ExRamOfs+$23C0
-	lda #%00101010
-	sta MMC5_ExRamOfs+$23C1
-	lda #%10001010
-	sta MMC5_ExRamOfs+$23C3
-	lda #%10101010
-	sta MMC5_ExRamOfs+$23C5
+	lda #%11101010
+	sta MMC5_ExRamOfs+$23C2
 	rts
-@Text:
-.byte $40, "F*      *   X", $FF
-;.byte $58, "R", $FF
-.byte $7A, "T", $FF
-.byte $00
-@TextEnd:
-
-WriteMenuText:
-	ldy #0
-	lda ($00),y
-	beq @Exit
-	sta $3
-	lda #$5C
-	sta $4
-:	iny
-	lda ($00),y
-	cmp #$FF
-	bcs @Done
-	sta ($03),y
-	bcc :-
-@Done:
-	tya
-	adc $00
-	sta $00
-	lda $01
-	adc #0
-	sta $01
-	bcc WriteMenuText
-@Exit:
-	rts
-
 
 RedrawFramesRemaningInner:
         lda WRAM_PracticeFlags
@@ -177,20 +157,20 @@ RedrawFrameNumbersReal:
 	; frame counter
 	lda FrameCounter
 	jsr DivByTen
-	sta MMC5_ExRamOfs+$2045
+	sta StatusAddr_Frame+4
 	txa
 	jsr DivByTen
-	sta MMC5_ExRamOfs+$2044
-	stx MMC5_ExRamOfs+$2043
+	sta StatusAddr_Frame+3
+	stx StatusAddr_Frame+2
 	; rule counter
 	lda CurrentRule+0
-	sta MMC5_ExRamOfs+$2062
+	sta StatusAddr_Rule+1
 	lda CurrentRule+1
-	sta MMC5_ExRamOfs+$2063
+	sta StatusAddr_Rule+2
 	lda CurrentRule+2
-	sta MMC5_ExRamOfs+$2064
+	sta StatusAddr_Rule+3
 	lda CurrentRule+3
-	sta MMC5_ExRamOfs+$2065
+	sta StatusAddr_Rule+4
 	rts
 
 RedrawFrameNumbersInner:
@@ -741,11 +721,11 @@ run_save_load:
 
 RedrawGameTimer:
 	lda GameTimerDisplay
-	sta MMC5_ExRamOfs+$207C
+	sta StatusAddr_Time+1
 	lda GameTimerDisplay+1
-	sta MMC5_ExRamOfs+$207D
+	sta StatusAddr_Time+2
 	lda GameTimerDisplay+2
-	sta MMC5_ExRamOfs+$207E
+	sta StatusAddr_Time+3
 	rts
 
 PracticeOnFrame:
@@ -847,7 +827,7 @@ ToHexByte:
 
 
 
-.macro RedrawUserVarEx name, off
+.macro RedrawUserVarEx name, at
 		lda name
 		sta $00
 		lda name+1
@@ -858,11 +838,11 @@ ToHexByte:
 		;sta MMC5_ExRamOfs+$204F+off
 
 		jsr DivByTen
-		sta MMC5_ExRamOfs+$2050+off
+		sta at+2
 		txa
 		jsr DivByTen
-		sta MMC5_ExRamOfs+$204F+off
-		stx MMC5_ExRamOfs+$204E+off
+		sta at+1
+		stx at
 .endmacro
 
 PerFrameSock:
@@ -873,12 +853,12 @@ PerFrameSock:
 		lda BANK_SELECTED
 		cmp #BANK_ORG
 		beq @is_org
-		RedrawUserVarEx WRAM_LostUser0, $00
-		RedrawUserVarEx WRAM_LostUser1, $20
+		RedrawUserVarEx WRAM_LostUser0, StatusAddr_XVal+1
+		RedrawUserVarEx WRAM_LostUser1, StatusAddr_YVal+1
 		jmp @terminate
 @is_org:
-		RedrawUserVarEx WRAM_OrgUser0, $00
-		RedrawUserVarEx WRAM_OrgUser1, $20
+		RedrawUserVarEx WRAM_OrgUser0, StatusAddr_XVal+1
+		RedrawUserVarEx WRAM_OrgUser1, StatusAddr_YVal+1
 @terminate:
 PerFrameSockUpdate:
 		lda IntervalTimerControl
@@ -916,11 +896,11 @@ PerFrameSockUpdate:
 		adc @DataTemp                                ; and add the temp value
 		adc @DataX                                   ; then add our x position
 		jsr ToHexByte
-		stx MMC5_ExRamOfs+$2068
-		sta MMC5_ExRamOfs+$2069
+		stx StatusAddr_SockV+1
+		sta StatusAddr_SockV+2
 		lda @DataSubX
 		jsr ToHexByte
-		stx MMC5_ExRamOfs+$206A
+		stx StatusAddr_SockV+3
 		rts
 
 RequestRestartLevel:
@@ -1039,7 +1019,7 @@ nosock:	jmp ReturnBank
 
 WriteSockTimer:
     lda IntervalTimerControl
-	sta MMC5_ExRamOfs+$204A
+	sta StatusAddr_SockN
 	rts
 
 MagicByte0 = $70 ; P
