@@ -21,6 +21,10 @@ RunPendingWrites:
 	bcc :+
 	tax
 	jsr WritePracticeTopReal
+	jsr WriteSockTimer
+	jsr RedrawFrameNumbersReal
+	clc
+	bcc @ClearPending
 	txa
 :	lsr a
 	bcc :+
@@ -38,9 +42,10 @@ RunPendingWrites:
 	jsr RedrawGameTimer
 	tya
 :	lsr a
-	bcc :+
+	bcc @ClearPending
 	jsr DrawRemainTimer
-:	lda #0
+@ClearPending:
+	lda #0
 	sta PendingWrites
 @DonePending:
 	jsr PerFrameSock

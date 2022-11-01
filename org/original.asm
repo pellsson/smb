@@ -56,6 +56,9 @@ EndlessLoop:
 
 MACRO_ThrowFrameImpl
 
+StatusbarChrSet:
+      .byte CHR_STATUSBAR_ORG, CHR_STATUSBAR_ORG, CHR_STATUSBAR_LL
+
 NonMaskableInterrupt:
                lda #$44
                sta MMC5_Nametables
@@ -75,7 +78,9 @@ NonMaskableInterrupt:
                lda #$1F                  ;set interrupt scanline
                sta MMC5_SLCompare
                inc IRQAckFlag            ;reset flag to wait for next IRQ
-               ldy #CHR_STATUSBAR_ORG
+               ldy WRAM_CharSet
+               lda StatusbarChrSet,y
+               tay
                sty MMC5_CHRBank+4        ;switch to statusbar chr
                iny
                sty MMC5_CHRBank+5        ;switch to statusbar chr
@@ -6126,21 +6131,7 @@ WritePPUReg1:
 
 ;-------------------------------------------------------------------------------------
 
-InitializeExRam:
-      lda #$24
-      ldx #$00
-:     sta $5C00,x
-      inx
-      bne :-
-      lda #$AA
-:     sta $5F00,x
-      inx
-      bne :-
-      lda #$00
-      rts
-
 InitializeNameTables:
-              jsr InitializeExRam
               lda #$44
               sta MMC5_Nametables
               lda PPU_STATUS            ;reset flip-flop

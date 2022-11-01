@@ -1822,7 +1822,6 @@ JumpEngine:
 ;------------------------------------------------------------------------------------
 
 InitializeNameTables:
-			  StatusbarUpdate SB_Init
               lda PPU_STATUS            ;reset flip-flop
               lda Mirror_PPU_CTRL_REG1       ;load mirror of first ppu control reg
               ora #%00010000            ;set sprites for first 4k and background for second 4k
