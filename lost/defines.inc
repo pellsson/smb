@@ -675,15 +675,15 @@ SaveHeader            = $7000 ; 3 byte save file header
 GamesBeatenCount      = $7003 ; number of times the player has won
 
 ; copies of areadata and enemydata to minimize banking
-AreaDataRAM           = $6100
-EnemyDataRAM          = $6200
+AreaDataRAM           = $7300
+EnemyDataRAM          = $7400
 
 ; leaves the fly across the screen during wind
-LeavesEnabledRAM      = $6300 +  0
-LeavesYPosRAM         = $6302 +  0
-LeavesXPosRAM         = $6302 + 12
-LeavesTileRAM         = $6302 + 24
-LeavesEnd             = $6326
+LeavesEnabledRAM      = $7500 +  0
+LeavesYPosRAM         = $7502 +  0
+LeavesXPosRAM         = $7502 + 12
+LeavesTileRAM         = $7502 + 24
+LeavesEnd             = $7526
 
 ; hacky timer for the victory scene ending
 EndingTimer1          = $0100

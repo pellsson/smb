@@ -129,8 +129,8 @@ AreaDataHigh          = $e8
 EnemyData             = $e9
 EnemyDataLow          = $e9
 EnemyDataHigh         = $ea
-AreaDataRAM           = $6100
-EnemyDataRAM          = $6200
+AreaDataRAM           = $7300
+EnemyDataRAM          = $7400
 
 
 AreaParserTaskNum     = $071f
