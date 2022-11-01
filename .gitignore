@@ -10,6 +10,6 @@ inc/wram.inc
 wram/full.bin
 lost/wram-init.bin
 test.*
-smb.dbg
+/*.dbg
 chr/*.chr
 smb.tmp
