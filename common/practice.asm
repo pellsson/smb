@@ -82,24 +82,6 @@ DrawRemainTimer:
 	sta MMC5_ExRamOfs+$204A
 	rts
 
-WritePracticeTop:
-	lda #%1
-	ora PendingWrites
-	sta PendingWrites
-	jmp ReturnBank
-
-RedrawSockTimer:
-	lda #%10
-	ora PendingWrites
-	sta PendingWrites
-	jmp ReturnBank
-
-RedrawFrameNumbers:
-    lda #%100
-	ora PendingWrites
-	sta PendingWrites
-	jmp ReturnBank
-
 WritePracticeTopReal:
 	lda #$24
 	ldx #$50
@@ -178,9 +160,7 @@ RedrawFramesRemaningInner:
 		lda GameEngineSubroutine
 		cmp #$03
 		bne nodraw ; force remainder if warp zone
-@draw:	lda #%10000
-		ora PendingWrites
-		sta PendingWrites
+@draw:	StatusbarUpdate SB_Remains
 nodraw:	rts
 
 RedrawAllInner:

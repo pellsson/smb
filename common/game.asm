@@ -440,9 +440,7 @@ UpdateGameTimer:
 		lda #$ff
 		sta DigitModifier+5
 		jsr DigitsMathRoutine3
-		lda #%1000
-		ora PendingWrites
-		sta PendingWrites
+		StatusbarUpdate SB_GameTimer
 		ldx ObjectOffset
 		jmp ReturnBank
 

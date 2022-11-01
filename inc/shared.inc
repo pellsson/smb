@@ -106,6 +106,8 @@ ThrowFrame:
 .endmacro
 
 .macro MACRO_RunSlowMo gm
+		lda WRAM_SlowMotion
+		beq @Done
 		dec WRAM_SlowMotionLeft
 		bmi @allow_frame
 		lda DisableScreenFlag
@@ -124,6 +126,7 @@ ThrowFrame:
 @allow_frame:
 		lda WRAM_SlowMotion
 		sta WRAM_SlowMotionLeft
+@Done:
 .endmacro
 
 .define MMC5_MAKE_PRGBANK(id) ((id)*4)

@@ -38,10 +38,7 @@ NonMaskableInterrupt: ; Dummy
 	.export LoadMarioPhysics
 	.export RedrawAll
 	.export UpdateFrameRule
-	.export WritePracticeTop
 	.export RunPendingWrites
-	.export RedrawFrameNumbers
-	.export RedrawSockTimer
 	.export SetDefaultWRAM
 	.export FactoryResetWRAM
 	.export UpdateGameTimer

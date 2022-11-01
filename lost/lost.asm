@@ -152,13 +152,12 @@ StatusbarChrSet:
       .byte CHR_STATUSBAR_LL, CHR_STATUSBAR_ORG, CHR_STATUSBAR_LL
 
 NonMaskableInterrupt:
-	lda #$44
-	sta MMC5_Nametables
-	lda NameTableSelect
-	sta IRQNameTableSelect
-	lda HorizontalScroll
-	sta IRQHorizontalScroll
-	
+   lda #$44
+   sta MMC5_Nametables
+   lda NameTableSelect
+   sta IRQNameTableSelect
+   lda HorizontalScroll
+   sta IRQHorizontalScroll
    lda Mirror_PPU_CTRL_REG1       ;alter name table address to be $2800
    and #%01111110            ;(essentially $2000) and disable another NMI
    sta Mirror_PPU_CTRL_REG1       ;from interrupting this one
@@ -192,7 +191,7 @@ ScrnSwch:
    lda #$00
    jsr InitScroll
 
-   MACRO_RunSlowMo 3
+   MACRO_RunSlowMo 4
 
    lda #0
    sta PPU_SPR_ADDR
@@ -720,7 +719,7 @@ DecNumTimer:  dec FloateyNum_Timer,x       ;decrement value here
               bne LoadNumTiles             ;branch ahead if not found
               lda #Sfx_ExtraLife
               sta Square2SoundQueue        ;and play the 1-up sound
-LoadNumTiles: jsr Enter_RedrawFrameNumbers
+LoadNumTiles: StatusbarUpdate SB_Frame
 ChkTallEnemy: ldy Enemy_SprDataOffset,x    ;get OAM data offset for enemy object
               lda Enemy_ID,x               ;get enemy object identifier
               cmp #Spiny
@@ -906,11 +905,11 @@ SetVRAMAddr_B: sta VRAM_Buffer_AddrCtrl
 NoAltPal:      jmp IncSubtask           ;now onto the next task
 
 WriteTopStatusLine:
-      jsr Enter_WritePracticeTop
+      StatusbarUpdate SB_Init
       jmp IncSubtask    ;onto the next task
 
 WriteBottomStatusLine:
-      jsr Enter_RedrawSockTimer
+      StatusbarUpdate SB_SockTimer
       jmp IncSubtask
 
 GetWorldNumForDisplay:
@@ -2291,7 +2290,7 @@ ChkSwimE: ldy AreaType                ;if level not water-type,
           jsr SetupBubble             ;otherwise, execute sub to set up air bubbles
 SetPESub: lda #$07                    ;set to run player entrance subroutine
           sta GameEngineSubroutine    ;on the next frame of game engine
-          jsr Enter_RedrawFrameNumbers
+          StatusbarUpdate SB_Frame
           rts
 
 ;-------------------------------------------------------------------------------------
@@ -4083,8 +4082,6 @@ ChkNearMid: lda Player_Pos_ForScroll
             ldy Player_X_Scroll       ;otherwise get original value undecremented
 
 ScrollScreen:
-              lda IRQAckFlag
-              bne ScrollScreen           ;loop if IRQ has not yet happened
               tya
               sta ScrollAmount           ;save value here
               clc
@@ -4799,7 +4796,7 @@ ProcJumping:
            lda Player_Y_Speed         ;check player's vertical speed
            bpl InitJS                 ;if player's vertical speed motionless or down, branch
            jmp X_Physics              ;if timer at zero and player still rising, do not swim
-InitJS:    jsr Enter_RedrawFrameNumbers
+InitJS:    StatusbarUpdate SB_Frame
            lda #$20                   ;set jump/swim timer
            sta JumpSwimTimer
            ldy #$00                   ;initialize vertical force and dummy variable
@@ -5875,7 +5872,8 @@ MiscLoopBack:
 GiveOneCoin:
 AddToScore:
 WriteDigits:
-      jmp Enter_RedrawFrameNumbers
+      StatusbarUpdate SB_Frame
+      rts
 
 ;-------------------------------------------------------------------------------------
 

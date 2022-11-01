@@ -42,11 +42,6 @@
 		jsr SetBankFromA
 		jmp FactoryResetWRAM
 
-	Enter_RedrawSockTimer:
-		lda #BANK_COMMON
-		jsr SetBankFromA
-		jmp RedrawSockTimer
-
 	Enter_PracticeInit:
 		lda #BANK_COMMON
 		jsr SetBankFromA
@@ -72,20 +67,10 @@
 		jsr SetBankFromA
 		jmp RunPendingWrites
 
-	Enter_WritePracticeTop:
-		lda #BANK_COMMON
-		jsr SetBankFromA
-		jmp WritePracticeTop
-
 	Enter_RedrawAll:
 		lda #BANK_COMMON
 		jsr SetBankFromA
 		jmp RedrawAll
-
-	Enter_RedrawFrameNumbers:
-		lda #BANK_COMMON
-		jsr SetBankFromA
-		jmp RedrawFrameNumbers
 
 	Enter_ProcessLevelLoad:
 		lda #BANK_COMMON

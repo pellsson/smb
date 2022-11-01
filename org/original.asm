@@ -487,7 +487,7 @@ DecNumTimer:  dec FloateyNum_Timer,x       ;decrement value here
               bne LoadNumTiles             ;branch ahead if not found
               lda #Sfx_ExtraLife
               sta Square2SoundQueue        ;and play the 1-up sound
-LoadNumTiles: jsr Enter_RedrawFrameNumbers
+LoadNumTiles: StatusbarUpdate SB_Frame
 ChkTallEnemy: ldy Enemy_SprDataOffset,x    ;get OAM data offset for enemy object
               lda Enemy_ID,x               ;get enemy object identifier
               cmp #Spiny
@@ -589,7 +589,7 @@ SetupIntermediate:
 ;-------------------------------------------------------------------------------------
 
 WriteBottomStatusLine:
-      jsr Enter_RedrawSockTimer
+      StatusbarUpdate SB_SockTimer
       jmp IncSubtask
 
 ;-------------------------------------------------------------------------------------
@@ -607,7 +607,7 @@ NoTimeUp: inc ScreenRoutineTask     ;increment control task 2 tasks forward
 ;-------------------------------------------------------------------------------------
 
 WriteTopStatusLine:
-    jsr Enter_WritePracticeTop
+    StatusbarUpdate SB_Init
     jmp IncSubtask
 
 DisplayIntermediate:
@@ -1402,7 +1402,7 @@ ChkSwimE: ldy AreaType                ;if level not water-type,
           jsr SetupBubble             ;otherwise, execute sub to set up air bubbles
 SetPESub: lda #$07                    ;set to run player entrance subroutine
           sta GameEngineSubroutine    ;on the next frame of game engine
-          jsr Enter_RedrawFrameNumbers
+          StatusbarUpdate SB_Frame
           rts
 
 ;-------------------------------------------------------------------------------------
@@ -4362,7 +4362,7 @@ ProcJumping:
            bpl InitJS                 ;if player's vertical speed motionless or down, branch
            jmp X_Physics              ;if timer at zero and player still rising, do not swim
 InitJS:    
-           jsr Enter_RedrawFrameNumbers
+           StatusbarUpdate SB_Frame
            lda #$20                   ;set jump/swim timer
            sta JumpSwimTimer
            ldy #$00                   ;initialize vertical force and dummy variable
@@ -5113,7 +5113,8 @@ MiscLoopBack:
 
 GiveOneCoin:
 AddToScore:
-    jmp Enter_RedrawFrameNumbers
+    StatusbarUpdate SB_Frame
+    rts
 
 EnemyAddrHOffsets:
       .byte $1f, $06, $1c, $00
