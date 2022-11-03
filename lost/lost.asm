@@ -441,18 +441,6 @@ VictoryModeValueSubroutines2:
 
 VictoryModeValueSubsForW8:
     lda OperMode_Task
-    tay
-    cmp #7                   ; are we after princess reveal?
-    bcc :+                   ;
-    sec                      ; awful hack, we reduce this timer while
-    lda EndingTimer1         ; while in victory mode to simulate the
-    sbc #1                   ; smb2j victory music duration.
-    sta EndingTimer1         ;
-    lda EndingTimer2         ; open to suggestions for a better solution!
-    sbc #0                   ;
-    sta EndingTimer2         ;
-:   clc                      ;
-    tya
     jsr JumpEngine
 
     .word BridgeCollapse
@@ -14870,30 +14858,11 @@ SetEndingPalette:
 .endif
 
 RevealPrincess:
-    lda HardWorldFlag
-    bne @HardMode
-    lda #$E                   ; this timer is used to match 2j's victory music length
-    sta EndingTimer2
-    lda #$05
-    sta EndingTimer1
-    bne @Continue
-@HardMode:
-.ifndef ANN
-    lda #$D                   ; this timer is used to match 2j's victory music length
-    sta EndingTimer2
-    lda #$ED
-    sta EndingTimer1
-.else
-    lda #$E                   ; this timer is used to match 2j's victory music length
-    sta EndingTimer2
-    lda #$04
-    sta EndingTimer1
-.endif
-@Continue:
-    lda #VictoryMusic          ;residual code from original smb source, this will not
-    sta EventMusicQueue        ;be checked due to alternate vector for sound engine
     lda #$a2                   ;print game timer
-    lda #$00                   ;aka the victory music
+    jsr PrintStatusBarNumbers
+    lda #VictoryMusic          ;play victory music
+    sta EventMusicQueue
+    lda #$00
     sta $0c                    ;residual, this does nothing
     sta NameTableSelect
     sta DisableScreenFlag
@@ -15016,14 +14985,8 @@ ELL: lda TwoBlankRows,x
      rts
     
 RunMushroomRetainers:
-       lda EndingTimer1          ; check if simulated music delay is complete to framerule level
-       ora EndingTimer2
-       bne :+                    ; no - keep running
-       lda #0                    ; yes - end music.
-       sta EventMusicBuffer      ;
-:      clc
        jsr MushroomRetainersForW8  ;draw and flash the seven mushroom retainers
-       lda EventMusicBuffer          ;if still playing victory music, branch to leave
+       lda EventMusicBuffer        ;if still playing victory music, branch to leave
        bne ExRMR
        lda HardWorldFlag           ;if on world D, branch elsewhere
        bne BackToNormal
