@@ -431,8 +431,8 @@ dont_update_cursor:
 		ldx SEL_INDEX
 		dex
 		bpl @no_underflow
-		ldx #4
-		lda #SEL_START_Y+(5*16)
+		ldx #5
+		lda #SEL_START_Y+(6*16)
 @no_underflow:
 		sec
 		sbc #16
