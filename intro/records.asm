@@ -252,40 +252,40 @@ redraw_all_records:
 		tya
 	pha
 		lda RECORDS_MODE
-		bne @is_lost
+		bne @try_lost
 		lda WRAM_OrgTimes+1, x
 		tay
 		lda WRAM_OrgTimes, x
 		tax
 		jmp @render_it
-@is_lost:
+@try_lost:
 		cmp #2
-		bcs @is_lost_ext
+		bcs @try_lost_ext
 		lda WRAM_LostTimes+1, x
 		tay
 		lda WRAM_LostTimes, x
 		tax
 		jmp @render_it
-@is_lost_ext:
+@try_lost_ext:
         cmp #3
-		bcs @is_nippon
-		lda WRAM_ExtTimes+1,x
+		bcs @try_nippon
+		lda WRAM_LostExtTimes+1,x
 		tay
-		lda WRAM_ExtTimes, x
+		lda WRAM_LostExtTimes, x
 		tax
 		jmp @render_it
-@is_nippon:
+@try_nippon:
         cmp #4
 		beq @is_nippon_ext
-		lda WRAM_LostTimes+1, x
+		lda WRAM_NipponTimes+1, x
 		tay
-		lda WRAM_LostTimes, x
+		lda WRAM_NipponTimes, x
 		tax
 		jmp @render_it
 @is_nippon_ext:
-		lda WRAM_ExtTimes+(4*2)+1,x
+		lda WRAM_NipponExtTimes+1,x
 		tay
-		lda WRAM_ExtTimes+(4*2), x
+		lda WRAM_NipponExtTimes, x
 		tax
 @render_it:
 		jsr redraw_time

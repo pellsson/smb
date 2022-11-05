@@ -2,7 +2,7 @@
 ; This hack is just inlined into intro.asm
 ;
 SETTINGS_MENU_PPU = $1FF3
-MAX_SETTING = 14
+MAX_SETTING = 16
 
 .macro draw_simple_at at, txt
 		.local @copy
@@ -113,8 +113,8 @@ draw_buttons:
 @done:
 		rts
 
-_music_on: draw_simple_at 6, "ON "
-_music_off: draw_simple_at 6, "OFF"
+_music_on: draw_simple_at 5, "ON "
+_music_off: draw_simple_at 5, "OFF"
 
 _draw_music_opt:
 		lda WRAM_DisableMusic
@@ -123,8 +123,8 @@ _draw_music_opt:
 @on:
 		jmp _music_on
 
-_sound_on: draw_simple_at 7, "ON "
-_sound_off: draw_simple_at 7, "OFF"
+_sound_on: draw_simple_at 6, "ON "
+_sound_off: draw_simple_at 6, "OFF"
 
 _draw_sound_opt:
 		lda WRAM_DisableSound
@@ -155,52 +155,76 @@ get_uservar_ptr:
 		rts
 @try_l0:
 		dex
-		bne @do_lost1
+		bne @try_l1
 		lda #<WRAM_LostUser0
 		sta $00
 		lda #>WRAM_LostUser0
 		sta $01
 		rts
-@do_lost1:
+@try_l1:
+		dex
+		bne @try_n0
 		lda #<WRAM_LostUser1
 		sta $00
 		lda #>WRAM_LostUser1
 		sta $01
 		rts
+@try_n0:
+		dex
+		bne @do_nippon1
+		lda #<WRAM_NipponUser0
+		sta $00
+		lda #>WRAM_NipponUser0
+		sta $01
+		rts
+@do_nippon1:
+		lda #<WRAM_NipponUser1
+		sta $00
+		lda #>WRAM_NipponUser1
+		sta $01
+		rts
 
 _draw_user0org_opt:
 		jsr get_uservar_ptr
-		draw_hexopt_at 8, 1
+		draw_hexopt_at 7, 1
 
 _draw_user1org_opt:
 		jsr get_uservar_ptr
-		draw_hexopt_at 9, 1
+		draw_hexopt_at 8, 1
 
 _draw_user0lost_opt:
 		jsr get_uservar_ptr
-		draw_hexopt_at 10, 1
+		draw_hexopt_at 9, 1
 
 _draw_user1lost_opt:
 		jsr get_uservar_ptr
+		draw_hexopt_at 10, 1
+
+_draw_user0nippon_opt:
+		jsr get_uservar_ptr
 		draw_hexopt_at 11, 1
+
+_draw_user1nippon_opt:
+		jsr get_uservar_ptr
+		draw_hexopt_at 12, 1
 
 _draw_userdelay_opt:
 		lda #<WRAM_DelayUserFrames
 		sta $00
 		lda #>WRAM_DelayUserFrames
 		sta $01
-		draw_hexopt_at 12, 0
+		draw_hexopt_at 13, 0
 
 _draw_savedelay_opt:
 		lda #<WRAM_DelaySaveFrames
 		sta $00
 		lda #>WRAM_DelaySaveFrames
 		sta $01
-		draw_hexopt_at 13, 0
+		draw_hexopt_at 14, 0
 
-_char_native: draw_simple_at 14, "NATIVE"
-_char_org: draw_simple_at 14, "ORG   "
-_char_lost: draw_simple_at 14, "LOST  "
+_char_native: draw_simple_at 15, "NATIVE"
+_char_org: draw_simple_at 15, "ORG   "
+_char_lost: draw_simple_at 15, "LOST  "
 
 _draw_charset_opt:
 		ldx WRAM_CharSet
@@ -215,25 +239,25 @@ _draw_charset_opt:
 
 _draw_button_restart_opt:
 		lda WRAM_RestartButtons
-		draw_button_opt 15
+		draw_button_opt 16
 
 _draw_button_title_opt:
 		lda WRAM_TitleButtons
-		draw_button_opt 16
+		draw_button_opt 17
 
 _draw_button_save_opt:
 		lda WRAM_SaveButtons
-		draw_button_opt 17
+		draw_button_opt 18
 
 _draw_button_load_opt:
 		lda WRAM_LoadButtons
-		draw_button_opt 18
+		draw_button_opt 19
 
 _draw_reset_records_opt:
-		draw_simple_at 19, "NO ORG LL EXT"
+		draw_simple_at 20, "NO ORG LL ANN"
 
 _draw_reset_wram_opt:
-		draw_simple_at 20, "NO YES"
+		draw_simple_at 21, "NO YES"
 
 
 settings_renderers:
@@ -243,6 +267,8 @@ settings_renderers:
 		.word _draw_user1org_opt
 		.word _draw_user0lost_opt
 		.word _draw_user1lost_opt
+		.word _draw_user0nippon_opt
+		.word _draw_user1nippon_opt
 		.word _draw_userdelay_opt
 		.word _draw_savedelay_opt
 		.word _draw_charset_opt
@@ -276,7 +302,7 @@ set_selection_sprites:
 		asl ; *=4
 		asl ; *=8
 		clc
-		adc #$27
+		adc #$1f
 		sta $01
 
 		lda SETTINGS_X
@@ -388,6 +414,8 @@ _select_reset_records:
 select_option:
 		.word _select_music
 		.word _select_sound
+		.word _select_value
+		.word _select_value
 		.word _select_value
 		.word _select_value
 		.word _select_value
@@ -723,16 +751,16 @@ ResetRecords:
 		sta $00
 		lda #>WRAM_LostTimes
 		sta $01
-		ldx #(WRAM_LostTimesEnd-WRAM_LostTimes)
+		ldx #(WRAM_LostExtTimesEnd-WRAM_LostTimes)
 		bne @memset
 @not_ll:
 		dex
 		bne @nope ; this is fucked
-		lda #<WRAM_ExtTimes
+		lda #<WRAM_NipponTimes
 		sta $00
-		lda #>WRAM_ExtTimes
+		lda #>WRAM_NipponTimes
 		sta $01
-		ldx #(WRAM_ExtTimesEnd-WRAM_ExtTimes)
+		ldx #(WRAM_NipponExtTimesEnd-WRAM_NipponTimes)
 @memset:
 		ldy #0
 		lda #0
@@ -796,6 +824,8 @@ _reset_wram_input:
 option_inputs:
 		.word _music_input
 		.word _sound_input
+		.word _user_input
+		.word _user_input
 		.word _user_input
 		.word _user_input
 		.word _user_input

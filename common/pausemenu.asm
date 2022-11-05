@@ -187,6 +187,12 @@ _draw_pm_row_7:
 		lda BANK_SELECTED
 		cmp #BANK_ORG
 		beq @is_org
+		cmp #BANK_SMBLL
+		beq @is_lost
+		lda WRAM_NipponUser0
+		ldx WRAM_NipponUser0+1
+		jmp @save
+@is_lost:
 		lda WRAM_LostUser0
 		ldx WRAM_LostUser0+1
 		jmp @save
@@ -209,6 +215,12 @@ _draw_pm_row_8:
 		lda BANK_SELECTED
 		cmp #BANK_ORG
 		beq @is_org
+		cmp #BANK_SMBLL
+		beq @is_lost
+		lda WRAM_NipponUser1
+		ldx WRAM_NipponUser1+1
+		jmp @save
+@is_lost:
 		lda WRAM_LostUser1
 		ldx WRAM_LostUser1+1
 		jmp @save
@@ -691,14 +703,26 @@ get_user_selected:
 		lda BANK_SELECTED
 		cmp #BANK_ORG
 		beq @is_org
+		cmp #BANK_SMBLL
+		beq @is_lost
 		cpx #6
-		bne @is_0
-		lda #<WRAM_LostUser0
-		ldx #>WRAM_LostUser0
+		beq @is_nippon_0
+		lda #<WRAM_NipponUser1
+		ldx #>WRAM_NipponUser1
 		jmp @save
-@is_0:
+@is_nippon_0:
+		lda #<WRAM_NipponUser0
+		ldx #>WRAM_NipponUser0
+		jmp @save
+@is_lost:
+		cpx #6
+		beq @is_lost_0
 		lda #<WRAM_LostUser1
 		ldx #>WRAM_LostUser1
+		jmp @save
+@is_lost_0:
+		lda #<WRAM_LostUser0
+		ldx #>WRAM_LostUser0
 		jmp @save
 @is_org:
 		cpx #6

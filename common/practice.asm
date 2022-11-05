@@ -580,6 +580,14 @@ WriteRulePointer:
 		asl ; *=4
 		asl ; *=8
 		asl ; *=16
+		cmp #(8*16)
+		bcc @store
+		ldx BANK_SELECTED
+		cpx #BANK_ANNLL
+		bne @store
+		sec
+		sbc #16 ;subtract offset for nippon ext, no world 9
+@store:
 		sta $04
 		lda LevelNumber
 		asl ; *=2
@@ -589,6 +597,16 @@ WriteRulePointer:
 		ldx BANK_SELECTED
 		cpx #BANK_ORG
 		beq @is_org
+		cpx #BANK_SMBLL
+		beq @is_lost
+		clc
+		adc #<WRAM_NipponRules
+		sta $04
+		lda #0
+		adc #>WRAM_NipponRules
+		sta $05
+		rts
+@is_lost:
 		clc
 		adc #<WRAM_LostRules
 		sta $04
@@ -854,10 +872,18 @@ PerFrameSock:
 		ldy #0
 		lda FrameCounter
 		and #1
-		bne @terminate
+		beq @continue
+		jmp @terminate
+@continue:
 		lda BANK_SELECTED
 		cmp #BANK_ORG
 		beq @is_org
+		cmp #BANK_SMBLL
+		beq @is_lost
+		RedrawUserVarEx WRAM_NipponUser0, StatusAddr_XVal+1
+		RedrawUserVarEx WRAM_NipponUser1, StatusAddr_YVal+1
+		jmp @terminate
+@is_lost:
 		RedrawUserVarEx WRAM_LostUser0, StatusAddr_XVal+1
 		RedrawUserVarEx WRAM_LostUser1, StatusAddr_YVal+1
 		jmp @terminate
@@ -1070,15 +1096,19 @@ SetDefaultWRAM:
 		lda #<Player_Rel_XPos
 		sta WRAM_OrgUser0
 		sta WRAM_LostUser0
+		sta WRAM_NipponUser0
 		lda #>Player_Rel_XPos
 		sta WRAM_OrgUser0+1
 		sta WRAM_LostUser0+1
-		lda #<SprObject_X_MoveForce
+		sta WRAM_NipponUser0+1
+		lda #<Player_X_MoveForce
 		sta WRAM_OrgUser1
 		sta WRAM_LostUser1
-		lda #>SprObject_X_MoveForce
+		sta WRAM_NipponUser1
+		lda #>Player_X_MoveForce
 		sta WRAM_OrgUser1+1
 		sta WRAM_LostUser1+1
+		sta WRAM_NipponUser1+1
 
 		lda #30
 		sta WRAM_DelaySaveFrames
@@ -1131,6 +1161,14 @@ EndLevelInner:
 		lda BANK_SELECTED
 		cmp #BANK_ORG
 		beq @is_org
+		cmp #BANK_SMBLL
+		beq @is_lost
+		lda WRAM_NipponTimes, x
+		sta $01
+		lda WRAM_NipponTimes+1, x
+		sta $02
+		jmp @checktime
+@is_lost:
 		lda WRAM_LostTimes, x
 		sta $01
 		lda WRAM_LostTimes+1, x
@@ -1517,8 +1555,15 @@ GetPbTimeX:
 		ldx IsPlayingExtendedWorlds
 		beq @not_ext
 		and #$03
+		ldx BANK_SELECTED
+		cpx #BANK_SMBLL
+		beq @ll_ext
 		clc
-		adc #$09
+		adc #$08 ;nippon
+		jmp @not_ext
+@ll_ext:
+        clc
+		adc #$09 ;lost
 @not_ext:
 	    asl
 	    asl
@@ -1531,6 +1576,14 @@ GetPbTimeX:
 	    lda BANK_SELECTED
 	    cmp #BANK_ORG
 	    beq @org
+	    cmp #BANK_SMBLL
+	    beq @lost
+	    lda WRAM_NipponTimes, x
+	    sta $00
+	    lda WRAM_NipponTimes+1,x
+	    sta $01
+	    rts
+@lost:
 	    lda WRAM_LostTimes, x
 	    sta $00
 	    lda WRAM_LostTimes+1,x
@@ -1559,6 +1612,8 @@ RenderIntermediateTimeInner:
 	    ldx #3
 	    jsr WriteTimeText
 	    jmp @resettimer
+@dontshow:
+		rts
 @no_load:
 	    lda WRAM_Timer
 	    sta $00
@@ -1576,6 +1631,14 @@ RenderIntermediateTimeInner:
 	    lda BANK_SELECTED
 	    cmp #BANK_ORG
 	    beq @save_org
+		cmp #BANK_SMBLL
+		beq @save_lost
+	    lda WRAM_Timer
+	    sta WRAM_NipponTimes, x
+	    lda WRAM_Timer+1
+	    sta WRAM_NipponTimes+1, x
+	    jmp @printrecord
+@save_lost:
 	    lda WRAM_Timer
 	    sta WRAM_LostTimes, x
 	    lda WRAM_Timer+1
@@ -1605,7 +1668,6 @@ RenderIntermediateTimeInner:
 	    lda #0
 	    sta WRAM_Timer
 	    sta WRAM_Timer+1
-@dontshow:
     	rts
 
 EndOfCastle:

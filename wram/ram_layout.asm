@@ -81,6 +81,10 @@ WRAM_LostUser0:
 	.word 0
 WRAM_LostUser1:
 	.word 0
+WRAM_NipponUser0:
+	.word 0
+WRAM_NipponUser1:
+	.word 0
 
 WRAM_OrgRules:
 	.dword 0, 0, 0, 0 ; World 1
@@ -102,6 +106,20 @@ WRAM_LostRules:
 	.dword 0, 0, 0, 0 ; World 7
 	.dword 0, 0, 0, 0 ; World 8
 	.dword 0, 0, 0, 0 ; World 9
+	.dword 0, 0, 0, 0 ; World A
+	.dword 0, 0, 0, 0 ; World B
+	.dword 0, 0, 0, 0 ; World C
+	.dword 0, 0, 0, 0 ; World D
+
+WRAM_NipponRules:
+	.dword 0, 0, 0, 0 ; World 1
+	.dword 0, 0, 0, 0 ; World 2
+	.dword 0, 0, 0, 0 ; World 3
+	.dword 0, 0, 0, 0 ; World 4
+	.dword 0, 0, 0, 0 ; World 5
+	.dword 0, 0, 0, 0 ; World 6
+	.dword 0, 0, 0, 0 ; World 7
+	.dword 0, 0, 0, 0 ; World 8
 	.dword 0, 0, 0, 0 ; World A
 	.dword 0, 0, 0, 0 ; World B
 	.dword 0, 0, 0, 0 ; World C
@@ -129,13 +147,30 @@ WRAM_LostTimes:
 	.word 0, 0, 0, 0 ; World 7
 	.word 0, 0, 0, 0 ; World 8
 WRAM_LostTimesEnd:
-WRAM_ExtTimes:
+WRAM_LostExtTimes:
 	.word 0, 0, 0, 0 ; World 9
 	.word 0, 0, 0, 0 ; World A
 	.word 0, 0, 0, 0 ; World B
 	.word 0, 0, 0, 0 ; World C
 	.word 0, 0, 0, 0 ; World D
-WRAM_ExtTimesEnd:
+WRAM_LostExtTimesEnd:
+
+WRAM_NipponTimes:
+	.word 0, 0, 0, 0 ; World 1
+	.word 0, 0, 0, 0 ; World 2
+	.word 0, 0, 0, 0 ; World 3
+	.word 0, 0, 0, 0 ; World 4
+	.word 0, 0, 0, 0 ; World 5
+	.word 0, 0, 0, 0 ; World 6
+	.word 0, 0, 0, 0 ; World 7
+	.word 0, 0, 0, 0 ; World 8
+WRAM_NipponTimesEnd:
+WRAM_NipponExtTimes:
+	.word 0, 0, 0, 0 ; World A
+	.word 0, 0, 0, 0 ; World B
+	.word 0, 0, 0, 0 ; World C
+	.word 0, 0, 0, 0 ; World D
+WRAM_NipponExtTimesEnd:
 
 WRAM_Timer:
 	.word 0
