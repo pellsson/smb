@@ -773,7 +773,7 @@ ScreenRoutines:
 .ifdef ANN
    .word ANNDoNothing
 .else
-   .word DemoReset
+   .word PrintWorld9Msgs
 .endif
    .word ResetSpritesAndScreenTimer
    .word AreaParserTaskControl
