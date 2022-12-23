@@ -992,7 +992,8 @@ WorldLivesDisplay:
   .byte $29, $24, $24, $24, $24 ;lives display
   .byte $21, $4b, $09, $20, $18 ;"WORLD  - " used on lives display
   .byte $1b, $15, $0d, $24, $24, $28, $24
-  .byte $22, $0c, $47, $24 ;possibly used to clear time up
+  ;.byte $22, $0c, $47, $24 ;possibly used to clear time up
+  .byte $23, $c0, $7f, $aa
   .byte $23, $dc, $01, $ba ;attribute table data for crown if more than 9 lives
   .byte $ff
 
@@ -1068,7 +1069,7 @@ EndGameText:   lda #$00                  ;put null terminator at end
                tax
                dex                       ;if printing anything else besides world/lives display
                bne ExWGT                 ;then branch to leave
-               ldy #$9f                  ;next to the difference...strange things happen if
+               ldy #$ce                  ;next to the difference...strange things happen if
                sty VRAM_Buffer1+7        ;the number of lives exceeds 19
 PutLives:      jsr GetWorldNumForDisplay ;get world number or letter
                sta VRAM_Buffer1+19
@@ -4553,6 +4554,7 @@ NotW9:    BankJSR BANK_LLDATA, LL_LoadAreaPointer       ;get new level pointer
           inc FetchNewGameTimerFlag ;set flag to load new game timer
           jsr ChgAreaMode           ;do sub to set secondary mode, disable screen and sprite 0
           sta HalfwayPage           ;reset halfway page to 0 (beginning)
+          ;PF_SetToLevelEnd_A
           lda #Silence
           sta EventMusicQueue       ;silence music and leave
 ExitNA:   rts
@@ -6671,8 +6673,12 @@ FindLoop: dey
           lda Player_State          ;check to see if the player is
           cmp #$00                  ;on solid ground (i.e. not jumping or falling)
           bne WrongChk              ;if not, player fails to pass loop, and loopback
+          lda #Sfx_CoinGrab
           inc MultiLoopCorrectCntr  ;increment counter for correct progression
-WrongChk: inc MultiLoopPassCntr     ;increment master multi-part counter
+          bne StrLSfx
+WrongChk: lda #Sfx_TimerTick
+StrLSfx:  sta Square2SoundQueue
+          inc MultiLoopPassCntr     ;increment master multi-part counter
           lda MultiLoopPassCntr     ;have we done all parts?
           cmp MultiLoopCount,y
           bne InitLCmd              ;if not, skip this part
@@ -11278,8 +11284,10 @@ SetWDest: tay
           BankJSR BANK_LLDATA, LL_GetAreaPointer
 .endif
           sty AreaPointer           ;store area offset here to be used to change areas
+          sty WRAM_LevelAreaPointer
           lda #Silence
           sta EventMusicQueue       ;silence music
+          ;PF_SetToLevelEnd_A
           lda #$00
           sta EntrancePage          ;initialize starting page number
           sta AreaNumber            ;initialize area number used for area address offset
@@ -14351,14 +14359,13 @@ IsBigWorld:
 	.byte 0
 	.byte 1, 1, 0, 0
 
+.ifndef ANN
 NoGoTime:
     lda #0
-.ifndef ANN
     sta WindFlag
-.endif
     sta SavedJoypad1Bits
-    jsr GameCoreRoutine
-    rts
+    jmp GameCoreRoutine
+.endif
 
 GameMenuRoutine:
 RunTitleScreen:
@@ -14366,10 +14373,11 @@ RunTitleScreen:
     lda OperMode_Task
 .ifdef ANN
     cmp #6
+    bne @not_running
 .else
     cmp #5
-.endif
     bne NoGoTime
+.endif
     ldx LevelNumber
     ldy WorldNumber
     lda IsBigWorld, y

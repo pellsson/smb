@@ -331,6 +331,13 @@ menu_text:
 
 draw_menu:
 		jsr DrawTitleMario
+        ldy #1
+		lda PowerUps
+		beq @store
+		cmp #3
+		beq @store
+		dey
+@store: sty PlayerSize
 		lda FrameCounter
 		and #$1
 		beq @redraw_extra
@@ -626,7 +633,7 @@ WriteRulePointer:
 toggle_second_quest:
 		lda BANK_SELECTED
 		cmp #BANK_SMBLL
-		beq @not_org
+		beq @is_ll
 		lda PrimaryHardMode
 		eor #1
 		sta PrimaryHardMode
@@ -638,18 +645,22 @@ toggle_second_quest:
 		sta VRAM_Buffer1+4,x
 		lda #$01
 		sta VRAM_Buffer1+2,x
-		lda #$22 ; Original color
-		ldy PrimaryHardMode
-		beq @set_default
 		lda #$05 ; Hardmode color
-@set_default:
+		ldy PrimaryHardMode
+		bne @set_color
+		lda #$22 ; Original color
+		ldy BANK_SELECTED
+		cpy #BANK_ORG
+		beq @set_color
+		lda #$0f ; Nippon color
+@set_color:
 		sta VRAM_Buffer1+3,x
 		inx
 		inx
 		inx
 		inx
 		sta VRAM_Buffer1_Offset
-@not_org:
+@is_ll:
 		rts
 
 nuke_timer:

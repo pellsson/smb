@@ -716,7 +716,7 @@ WorldLivesDisplay:
   .byte $1b, $15, $0d, $24, $24, $28, $24
   ;.byte $22, $0c, $47, $24 ; possibly used to clear time up
   .byte $23, $c0, $7f, $aa
-  ;.byte $23, $dc, $01, $ba ; attribute table data for crown if more than 9 lives
+  .byte $23, $dc, $01, $ba ; attribute table data for crown if more than 9 lives
   .byte $ff
 
 OnePlayerTimeUp:

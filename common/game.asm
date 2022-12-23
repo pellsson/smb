@@ -119,7 +119,9 @@ SetMarioPalette:
 		beq @mario_pal
 		ldx #$07
 @mario_pal:
-		lda PowerUps
+		lda PlayerStatus
+		clc
+		adc PowerUps
 		cmp #$02
 		bcc @draw_pal
 		ldx #$0E

@@ -62,6 +62,7 @@ Start:
 		lda #$00
 		sta MirrorPPUCTRL
 		sta PPU_CTRL_REG1
+		sta MMC5_SLIRQ ; disable irqs
 		;
 		; Init Random
 		;

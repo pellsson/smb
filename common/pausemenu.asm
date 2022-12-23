@@ -323,13 +323,7 @@ prepare_draw_row:
 draw_prepared_row:
 		lda $00
 	pha
-		lda Mirror_PPU_CTRL_REG1
-		ldx BANK_SELECTED
-		cpx #BANK_ORG
-		beq @okok
-        lda UseNtBase2400
-@okok:
-		and #3
+        lda NameTableSelect
 		beq @ntbase_selected
 		lda $01
 		eor #$04

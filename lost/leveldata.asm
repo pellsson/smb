@@ -7,6 +7,7 @@
 .export LL_GetAreaPointer
 .export LL_GetAreaDataAddrs
 .endif
+.include "wram.inc"
 
 .ifdef ANN
 ANN_LoadAreaPointer:
@@ -17,6 +18,7 @@ LoadAreaPointer:
 LoadAreaPointerLW:
   jsr FindAreaPointer ;find it and store it here
   sta AreaPointer
+  sta WRAM_LevelAreaPointer
 GetAreaType:
   and #%01100000
   asl a
@@ -24,6 +26,7 @@ GetAreaType:
   rol a
   rol a
   sta AreaType
+  sta WRAM_LevelAreaType
   rts
 
 
