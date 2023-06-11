@@ -3,18 +3,25 @@
 .include "wram.inc"
 .include "rng.asm"
 .include "savestates.asm"
+.export WritePracticeTopReal
 
-StatusAddr_SockV   = MMC5_ExRamOfs+$2061
-StatusAddr_SockN   = MMC5_ExRamOfs+$206B
-StatusAddr_XVal    = MMC5_ExRamOfs+$2053
-StatusAddr_YVal    = MMC5_ExRamOfs+$2073
-StatusAddr_Rule    = MMC5_ExRamOfs+$204B
-StatusAddr_Frame   = MMC5_ExRamOfs+$206B
-StatusAddr_DPad    = MMC5_ExRamOfs+$2079
-StatusAddr_Remains = MMC5_ExRamOfs+$205C
-StatusAddr_Time    = MMC5_ExRamOfs+$207B
+StatusAddr_SockV      = MMC5_ExRamOfs+$2063
+StatusAddr_XVal       = MMC5_ExRamOfs+$206C
+StatusAddr_YVal       = MMC5_ExRamOfs+$2070
+StatusAddr_Rule       = MMC5_ExRamOfs+$2042
+StatusAddr_DPad       = MMC5_ExRamOfs+$2075
+StatusAddr_Remains    = MMC5_ExRamOfs+$207E
+StatusAddr_Time       = MMC5_ExRamOfs+$207A
+StatusAddr_SockN      = MMC5_ExRamOfs+$2061
+StatusAddr_Frame      = MMC5_ExRamOfs+$2067
+
+StatusAddr_LblRemain  = MMC5_ExRamOfs+$205E
+StatusAddr_LblTime    = MMC5_ExRamOfs+$2059
+StatusAddr_LblFrame   = MMC5_ExRamOfs+$2047
 
 RunPendingWrites:
+	lda SkipPendingWrites
+	bne @Exit
 	lda PendingWrites
 	beq @DonePending
 	lsr a
@@ -23,9 +30,11 @@ RunPendingWrites:
 	jsr WritePracticeTopReal
 	jsr WriteSockTimer
 	jsr RedrawFrameNumbersReal
+	jsr ClearRemainTimer
 	clc
 	bcc @ClearPending
 	txa
+	and #$FF ^ (SB_SockTimer | SB_Frame | SB_Remains)
 :	lsr a
 	bcc :+
 	tay
@@ -50,6 +59,10 @@ RunPendingWrites:
 @DonePending:
 	jsr PerFrameSock
 	jsr WriteJoypad
+	jmp ReturnBank
+@Exit:
+    lda #0
+	sta SkipPendingWrites
 	jmp ReturnBank
 
 WriteJoypad:
@@ -85,55 +98,70 @@ WriteJoypad:
 .byte $39 ; %10 B
 .byte $3A ; %11 A+B
 
-DrawRemainTimer:
-	lda #'R'
+ClearRemainTimer:
+	lda #$24
 	sta StatusAddr_Remains
+	rts
+
+
+DrawRemainTimer:
 	lda IntervalTimerControl
 	cmp #10
+	bcs @TwoDigits
+	sta StatusAddr_Remains
+	rts
+@TwoDigits:
 	jsr DivByTen
-	stx StatusAddr_Remains+1
-	sta StatusAddr_Remains+2
+	stx StatusAddr_Remains
+	sta StatusAddr_Remains+1
 	rts
 
 WritePracticeTopReal:
-	lda #$24
-	ldx #$60
-:	sta MMC5_ExRamOfs+$2000 - $60,x
-	inx
-	bne :-
-	
 	lda #'F'
-	sta StatusAddr_Frame
+	sta StatusAddr_LblFrame+0
 	lda #'R'
-	sta StatusAddr_Rule
-	lda #'Y'
-	sta StatusAddr_YVal
-	lda #'S'
-	sta StatusAddr_SockV
+	sta StatusAddr_LblRemain
+	sta StatusAddr_LblFrame+1
+	sta StatusAddr_Rule-1
+	lda #'A'
+	sta StatusAddr_LblFrame+2
 	lda #'T'
-	sta StatusAddr_Time
+	sta StatusAddr_LblTime+0
+	lda #'I'
+	sta StatusAddr_LblTime+1
+	lda #'M'
+	sta StatusAddr_LblTime+2
+	sta StatusAddr_LblFrame+3
+	lda #'E'
+	sta StatusAddr_LblTime+3
+	sta StatusAddr_LblFrame+4
+	lda #'Y'
+	sta StatusAddr_YVal-$20+2
 	lda #'*'
 	sta StatusAddr_Frame+1
-	;sta StatusAddr_SockN
 	lda #'X'
-	sta StatusAddr_XVal
+	sta StatusAddr_XVal-$20+2
+	lda #$2E
+	sta StatusAddr_Frame+0
+	lda #'*'
+	sta StatusAddr_SockV-1
 	
 	lda #%10101010
 	sta MMC5_ExRamOfs+$23C0
-	sta MMC5_ExRamOfs+$23C1
+	sta MMC5_ExRamOfs+$23C2
 	sta MMC5_ExRamOfs+$23C3
 	sta MMC5_ExRamOfs+$23C4
 	sta MMC5_ExRamOfs+$23C5
 	sta MMC5_ExRamOfs+$23C6
 	sta MMC5_ExRamOfs+$23C7
 	lda #%11101010
-	sta MMC5_ExRamOfs+$23C2
+	sta MMC5_ExRamOfs+$23C1
 	rts
 
 RedrawFramesRemaningInner:
         lda WRAM_PracticeFlags
         and #PF_DisablePracticeInfo
-        beq @draw
+        bne nodraw
 		lda StarFlagTaskControl
 		cmp #$04
 		beq @draw ; force remainder if flagpole end
@@ -159,83 +187,29 @@ RedrawAll:
 		jmp ReturnBank
 
 RedrawFrameNumbersReal:
-	; frame counter
-	lda FrameCounter
-	jsr DivByTen
-	sta StatusAddr_Frame+4
-	txa
-	jsr DivByTen
-	sta StatusAddr_Frame+3
-	stx StatusAddr_Frame+2
-	; rule counter
-	lda CurrentRule+0
-	sta StatusAddr_Rule+1
-	lda CurrentRule+1
-	sta StatusAddr_Rule+2
-	lda CurrentRule+2
-	sta StatusAddr_Rule+3
-	lda CurrentRule+3
-	sta StatusAddr_Rule+4
-	rts
-
-RedrawFrameNumbersInner:
-	lda #%110
-	ora PendingWrites
-	sta PendingWrites
-
-		lda OperMode
-		beq @draw ; slighty dumb
-		lda WRAM_PracticeFlags
-		and #PF_DisablePracticeInfo
-		bne nodraw
-@draw:	ldy VRAM_Buffer1_Offset
-		lda #$20
-		sta VRAM_Buffer1, y
-		lda #$6d
-		sta VRAM_Buffer1+1, y
-		lda #$03
-		sta VRAM_Buffer1+2, y
+		; frame counter
 		lda FrameCounter
 		jsr DivByTen
-		sta VRAM_Buffer1+5, y
+		sta StatusAddr_Frame+4
 		txa
 		jsr DivByTen
-		sta VRAM_Buffer1+4, y
-		txa
-		sta VRAM_Buffer1+3, y
-		lda #0
-		sta VRAM_Buffer1+6, y
+		sta StatusAddr_Frame+3
+		stx StatusAddr_Frame+2
+		; rule counter
+		lda CurrentRule+0
+		sta StatusAddr_Rule+0
+		lda CurrentRule+1
+		sta StatusAddr_Rule+1
+		lda CurrentRule+2
+		sta StatusAddr_Rule+2
+		lda CurrentRule+3
+		sta StatusAddr_Rule+3
+		rts
 
-		lda OperMode
-		beq @rule ; force RULE if on title screen
-		lda WRAM_PracticeFlags
-		and #PF_SockMode
-		beq @dont_draw_rule
-@rule:	lda #$20
-		sta VRAM_Buffer1+6, y ; Offset for RULE (if any)
-		lda #$64
-		sta VRAM_Buffer1+7, y
-		lda #$04
-		sta VRAM_Buffer1+8, y
-		ldx #0
-@copy_rule:
-		lda CurrentRule, x
-		sta VRAM_Buffer1+9, y
-		iny
-		inx
-		cpx #4
-		bne @copy_rule
-		lda #0
-		sta VRAM_Buffer1+9, y
-		iny
-		iny
-		iny
-@dont_draw_rule:
-		tya
-		clc
-		adc #6
-		sta VRAM_Buffer1_Offset
-		ldx ObjectOffset
+RedrawFrameNumbersInner:
+		lda #%110
+		ora PendingWrites
+		sta PendingWrites
 		rts
 
 UpdateFrameRule:
@@ -338,6 +312,7 @@ draw_menu:
 		beq @store
 		dey
 @store: sty PlayerSize
+		jsr DrawMushroomIcon
 		lda FrameCounter
 		and #$1
 		beq @redraw_extra
@@ -363,7 +338,6 @@ draw_menu:
 @redraw_extra:
 		jsr DrawRuleNumber
 		jsr DrawRuleCursor
-		jsr DrawMushroomIcon
 		jmp RedrawFrameNumbersInner
 
 ;-------------------------------------------------------------------------------------
@@ -399,31 +373,53 @@ WriteRuleCursor:
 		sta VRAM_Buffer1,x
 		rts
 
-MushroomIconData:
-		.byte $22, $29, $87, $24, $24, $24, $24, $24, $24, $24
+MenuCursorY:
+.byte $88-2, $90-2, $98-2, $A0-2, $B8-2
+
+MenuCursorXOfs:
+.byte $00, $01, $00, $FF
+
 DrawMushroomIcon:
-		ldy #$0a
-		lda VRAM_Buffer1_Offset
+		ldy WRAM_MenuIndex
+		lda WRAM_MenuCursorY
+		bne @ModifySpot
+		lda MenuCursorY,y
+		bne @CorrectSpot
+@ModifySpot:
+		cmp MenuCursorY,y
+		beq @CorrectSpot
 		clc
-		adc #$0a
-		sta VRAM_Buffer1_Offset
-		tax
-IconDataRead:
-		lda MushroomIconData,y
-		sta VRAM_Buffer1,x
-		dex
-		dey
-		bpl IconDataRead
-		lda WRAM_MenuIndex
-		cmp #4
-		bmi FirstFour
-		clc
+		cmp MenuCursorY,y
+		beq @CorrectSpot
+		bcc @Decrement
+		sbc #2
+		sta WRAM_MenuCursorY
+		bcs @CorrectSpot
+@Decrement:
 		adc #2
-FirstFour:
-		adc VRAM_Buffer1_Offset
-		tax
-		lda #$ce
-		sta VRAM_Buffer1+3-$0a,x
+		sta WRAM_MenuCursorY
+		bcc @CorrectSpot
+@StoreSpot:
+		lda MenuCursorY,y
+		sta WRAM_MenuCursorY
+@CorrectSpot:
+		sta WRAM_MenuCursorY
+		sta Sprite_Y_Position + (9*4)
+		lda FrameCounter
+		lsr a
+		lsr a
+		lsr a
+		lsr a
+		and #%00000011
+		tay
+		clc
+		lda MenuCursorXOfs,y
+		adc #9 * 8
+		sta Sprite_X_Position + (9*4)
+		lda #$75
+		sta Sprite_Tilenumber + (9*4)
+		lda #0
+		sta Sprite_Attributes + (9*4)
 		rts
 
 rule_input:
@@ -754,13 +750,13 @@ run_save_load:
 		jmp LoadState
 
 RedrawGameTimer:
-	lda GameTimerDisplay
-	sta StatusAddr_Time+1
-	lda GameTimerDisplay+1
-	sta StatusAddr_Time+2
-	lda GameTimerDisplay+2
-	sta StatusAddr_Time+3
-	rts
+		lda GameTimerDisplay
+		sta StatusAddr_Time
+		lda GameTimerDisplay+1
+		sta StatusAddr_Time+1
+		lda GameTimerDisplay+2
+		sta StatusAddr_Time+2
+		rts
 
 PracticeOnFrame:
 		jsr PracticeOnFrameInner
@@ -867,10 +863,6 @@ ToHexByte:
 		lda name+1
 		sta $01
 		lda ($00), y
-		;jsr ToHexByte
-		;stx MMC5_ExRamOfs+$204E+off
-		;sta MMC5_ExRamOfs+$204F+off
-
 		jsr DivByTen
 		sta at+2
 		txa
@@ -938,11 +930,11 @@ PerFrameSockUpdate:
 		adc @DataTemp                                ; and add the temp value
 		adc @DataX                                   ; then add our x position
 		jsr ToHexByte
-		stx StatusAddr_SockV+1
-		sta StatusAddr_SockV+2
+		stx StatusAddr_SockV+0
+		sta StatusAddr_SockV+1
 		lda @DataSubX
 		jsr ToHexByte
-		stx StatusAddr_SockV+3
+		stx StatusAddr_SockV+2
 		rts
 
 RequestRestartLevel:
@@ -1043,6 +1035,15 @@ ProcessLevelLoad:
 @done:
 		jmp ReturnBank
 
+.export ClearTopStatusBar
+ClearTopStatusBar:
+	lda #$24
+	ldx #$60
+:	sta MMC5_ExRamOfs+$2000 - $60,x
+	inx
+	bne :-
+	rts
+
 PracticeInit:
 		lda #0
 		sta WRAM_Timer
@@ -1060,14 +1061,14 @@ PracticeInit:
 nosock:	jmp ReturnBank
 
 WriteSockTimer:
-    lda IntervalTimerControl
+    lda WRAM_CurrentEntranceITC
 	sta StatusAddr_SockN
 	rts
 
-MagicByte0 = $70 ; P
-MagicByte1 = $56 ; V
-MagicByte2 = $35 ; 5
-MagicByte3 = $35 ; 5
+MagicByte0 = 'P'
+MagicByte1 = 'V'
+MagicByte2 = '6'
+MagicByte3 = '0'
 
 ValidWRAMMagic:
 		lda WRAM_Magic+0

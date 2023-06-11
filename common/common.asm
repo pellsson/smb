@@ -43,5 +43,5 @@ NonMaskableInterrupt: ; Dummy
 	.export FactoryResetWRAM
 	.export UpdateGameTimer
 
-practice_callgate
+practice_callgate BANK_COMMON
 control_bank BANK_COMMON

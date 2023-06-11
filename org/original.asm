@@ -74,6 +74,7 @@ NonMaskableInterrupt:
                lda Mirror_PPU_CTRL_REG2  ;disable OAM and background display by default
                and #%11100110
                ldy DisableScreenFlag     ;get screen disable flag
+               sty SkipPendingWrites
                bne ScreenOff             ;if set, used bits as-is
                lda #$1F                  ;set interrupt scanline
                sta MMC5_SLCompare
@@ -564,6 +565,7 @@ ScreenRoutines:
 ;-------------------------------------------------------------------------------------
 
 InitScreen:
+      BankJSR BANK_COMMON, ClearTopStatusBar
       jsr MoveAllSpritesOffscreen ;initialize all sprites including sprite #0
       jsr InitializeNameTables    ;and erase both name and attribute tables
       lda OperMode
@@ -594,6 +596,8 @@ SetupIntermediate:
 ;-------------------------------------------------------------------------------------
 
 WriteBottomStatusLine:
+      lda IntervalTimerControl
+      sta WRAM_CurrentEntranceITC
       StatusbarUpdate SB_SockTimer
       jmp IncSubtask
 
@@ -710,13 +714,10 @@ IncModeTask_B: inc OperMode_Task  ;move onto next mode
 
 GameText:
 WorldLivesDisplay:
-  .byte $21, $cd, $07, $24, $24 ; cross with spaces used on
-  .byte $29, $24, $24, $24, $24 ; lives display
-  .byte $21, $4b, $09, $20, $18 ; "WORLD  - " used on lives display
-  .byte $1b, $15, $0d, $24, $24, $28, $24
-  ;.byte $22, $0c, $47, $24 ; possibly used to clear time up
-  .byte $23, $c0, $7f, $aa
-  .byte $23, $dc, $01, $ba ; attribute table data for crown if more than 9 lives
+  .byte $21, $4b, $09, "WORLD X-X" ; "WORLD  - " used on lives display
+  .byte $21, $cf, $03, $29, $24, $CE ; lives display
+  .byte $23, $d2, $03, $AA, $AA, $AA
+  .byte $23, $db, $02, $AA, $FE
   .byte $ff
 
 OnePlayerTimeUp:
@@ -773,14 +774,12 @@ EndGameText:   lda #$00                 ;put null terminator at end
                bcs PrintWarpZoneNumbers
                dex                      ;are we printing the world/lives display?
                bne WriteTextDone      ;if not, branch to check player's name
-               lda #$ce
-PutLives:      sta VRAM_Buffer1+7
-               ldy WorldNumber          ;write world and level numbers (incremented for display)
+PutLives:      ldy WorldNumber          ;write world and level numbers (incremented for display)
                iny                      ;to the buffer in the spaces surrounding the dash
-               sty VRAM_Buffer1+19
+               sty VRAM_Buffer1+9
                ldy LevelNumber
                iny
-               sty VRAM_Buffer1+21      ;we're done here
+               sty VRAM_Buffer1+11      ;we're done here
 WriteTextDone:
                rts
 
@@ -13886,6 +13885,6 @@ NoHammer: ldx ObjectOffset         ;get original enemy object offset
 
           .include "utils.inc"
 
-practice_callgate
+practice_callgate BANK_ORG
 control_bank BANK_ORG
 

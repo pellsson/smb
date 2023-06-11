@@ -785,6 +785,7 @@ ScreenRoutines:
    .word WriteTopScore
 
 InitScreen:
+      BankJSR BANK_COMMON, ClearTopStatusBar
       jsr MoveAllSpritesOffscreen ;initialize all sprites including sprite #0
       jsr InitializeNameTables    ;and erase both name and attribute tables
       lda OperMode
@@ -15308,9 +15309,10 @@ SuperPlayerMsg:
     .byte $00
 .endif
 
-practice_callgate
 .ifdef ANN
+practice_callgate BANK_ANNLL
 control_bank BANK_ANNLL
 .else
+practice_callgate BANK_SMBLL
 control_bank BANK_SMBLL
 .endif

@@ -636,6 +636,7 @@ ScreenRoutines:
 ;-------------------------------------------------------------------------------------
 
 InitScreen:
+      BankJSR BANK_COMMON, ClearTopStatusBar
       jsr MoveAllSpritesOffscreen ;initialize all sprites including sprite #0
       jsr InitializeNameTables    ;and erase both name and attribute tables
       lda OperMode

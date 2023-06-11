@@ -875,5 +875,5 @@ bank_table:
 	.include "smlsound.asm"
 	.include "faxsound.asm"
 
-practice_callgate
+practice_callgate BANK_LOADER
 control_bank BANK_LOADER

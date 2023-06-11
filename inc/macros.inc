@@ -4,7 +4,7 @@
 	.endrep
 .endmacro
 
-.macro practice_callgate
+.macro practice_callgate CurrentBankNumber
 	.res $FE00 - *, $EA
 
 	Enter_EndOfCastle:
@@ -151,14 +151,17 @@ IRQHorizontalScroll   = $6996
 PendingWrites         = $6997
 IRQAckFlag            = $69A8
 NameTableSelect       = $69A9
+SkipPendingWrites     = $69B0
+WRAM_CurrentEntranceITC = $69B1
+WRAM_MenuCursorY      = $69B2
+
 
 .macro BankJSR bank, addr
-      sta BankJSRA
       lda #<addr
       sta BankJSRAddr
       lda #>addr
       sta BankJSRAddr+1
-      lda #bank
+      lda #bank|$80
       jsr _BankJSR
 .endmacro
 
@@ -169,15 +172,20 @@ NameTableSelect       = $69A9
 .res $FEF0 - *, $EA
 
 _BankJSR:
+	clc
     sta BankJSRTargetBank
-    lda #bank
+    lda #bank|$80
     pha
     lda BankJSRTargetBank
-    jsr SetBankFromA
-    lda BankJSRA
+	sta MMC5_PRGBank+2
+	adc #2
+	sta MMC5_PRGBank+4
     jsr @CallJSR
+	clc
     pla
-    jsr SetBankFromA
+	sta MMC5_PRGBank+2
+	adc #2
+	sta MMC5_PRGBank+4
     rts
 @CallJSR:
     jmp (BankJSRAddr)

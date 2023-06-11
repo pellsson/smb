@@ -2237,9 +2237,10 @@ L_WaterArea9:
 
 NonMaskableInterrupt: rti
 Start: rti
-practice_callgate
 .ifdef ANN
+practice_callgate BANK_ANNDATA
 control_bank BANK_ANNDATA
 .else
+practice_callgate BANK_LLDATA
 control_bank BANK_LLDATA
 .endif
