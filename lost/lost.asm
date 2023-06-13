@@ -898,6 +898,8 @@ WriteTopStatusLine:
       jmp IncSubtask    ;onto the next task
 
 WriteBottomStatusLine:
+      lda IntervalTimerControl
+      sta WRAM_CurrentEntranceITC
       StatusbarUpdate SB_SockTimer
       jmp IncSubtask
 
@@ -5860,6 +5862,14 @@ MiscLoopBack:
 ;-------------------------------------------------------------------------------------
 
 GiveOneCoin:
+      ;inc CoinTally          ;increment player's coin amount
+      ;lda CoinTally
+      ;cmp #100               ;does player have 100 coins yet?
+      ;bne WriteDigits        ;if not, skip all of this
+      ;lda #$00
+      ;sta CoinTally          ;otherwise, reinitialize coin amount
+      ;lda #Sfx_ExtraLife
+      ;sta Square2SoundQueue  ;play 1-up sound    
 AddToScore:
 WriteDigits:
       StatusbarUpdate SB_Frame

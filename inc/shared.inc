@@ -6,7 +6,6 @@ BANK_SELECTED = $07ff
 .define PF_RestartLevel $08
 .define PF_LevelEntrySaved $10
 .define PF_DisablePracticeInfo $20
-.define PF_EnableInputDisplay $40
 
 .macro PF_SetToLevelEnd_A
 	lda WRAM_PracticeFlags
@@ -23,50 +22,11 @@ ThrowFrame:
 		sta Mirror_PPU_CTRL_REG1
 		sta PPU_CTRL_REG1 ; Force NT-0 (in case no button was pressed)
 
-		;
-		; Wait for sprite 0
-		;
-		lda Sprite0HitDetectFlag  ;check for flag here
-		beq @SkipSprite0
-		ldx #0
-		;stx PPU_SPR_ADDR
-		;lda Sprite0Data
-		;sta PPU_SPR_DATA
-		;lda Sprite0Data+1
-		;sta PPU_SPR_DATA
-		;lda Sprite0Data+2
-		;sta PPU_SPR_DATA
-		;lda Sprite0Data+3
-		;sta PPU_SPR_DATA
-		lda PPU_STATUS
-		stx PPU_SCROLL_REG
-		stx PPU_SCROLL_REG
-@Sprite0Clr:
-		lda PPU_STATUS
-		and #$40
-		bne @Sprite0Clr
-@Sprite0Hit:
-		lda PPU_STATUS
-		and #$40
-		beq @Sprite0Hit
-		ldy #$14
-@HBlankDelay:
-		dey
-		bne @HBlankDelay
-@SkipSprite0:
-		lda PPU_STATUS
-		lda HorizontalScroll
-		sta PPU_SCROLL_REG
-		lda VerticalScroll
-		sta PPU_SCROLL_REG
-
-		lda ScreenLeft_PageLoc
-		lsr Mirror_PPU_CTRL_REG1
-		and #$01
-		ror
-		rol Mirror_PPU_CTRL_REG1
-		lda Mirror_PPU_CTRL_REG1
-		sta PPU_CTRL_REG1
+		lda #%00
+        sta MMC5_ExRamMode
+        lda #$AA
+        sta MMC5_Nametables
+:       cli
 
 		lda WRAM_SlowMotion
 		cmp #4
@@ -99,8 +59,13 @@ ThrowFrame:
 		bpl @VBlank0
 		jmp ThrowFrame
 @done:
-		lda Mirror_PPU_CTRL_REG1
-		ora #$80 ; NMI
+		lda IRQAckFlag            ;wait for IRQ
+		bne @done
+		jsr Enter_RunPendingWrites
+		lda PPU_STATUS
+		lda Mirror_PPU_CTRL_REG1       ;reenable NMIs 
+		ora #$80
+		sta Mirror_PPU_CTRL_REG1       ;then park it at endless loop until next NMI
 		sta PPU_CTRL_REG1
 		jmp Enter_SoundEngine
 .endmacro

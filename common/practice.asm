@@ -6,18 +6,18 @@
 .export WritePracticeTopReal
 
 StatusAddr_SockV      = MMC5_ExRamOfs+$2063
-StatusAddr_XVal       = MMC5_ExRamOfs+$206C
-StatusAddr_YVal       = MMC5_ExRamOfs+$2070
-StatusAddr_Rule       = MMC5_ExRamOfs+$2042
-StatusAddr_DPad       = MMC5_ExRamOfs+$2075
+StatusAddr_XVal       = MMC5_ExRamOfs+$2054
+StatusAddr_YVal       = MMC5_ExRamOfs+$2074
+StatusAddr_Rule       = MMC5_ExRamOfs+$2043
+StatusAddr_DPad       = MMC5_ExRamOfs+$2068
 StatusAddr_Remains    = MMC5_ExRamOfs+$207E
 StatusAddr_Time       = MMC5_ExRamOfs+$207A
-StatusAddr_SockN      = MMC5_ExRamOfs+$2061
-StatusAddr_Frame      = MMC5_ExRamOfs+$2067
+StatusAddr_SockN      = MMC5_ExRamOfs+$2071
+StatusAddr_Frame      = MMC5_ExRamOfs+$206B
 
 StatusAddr_LblRemain  = MMC5_ExRamOfs+$205E
 StatusAddr_LblTime    = MMC5_ExRamOfs+$2059
-StatusAddr_LblFrame   = MMC5_ExRamOfs+$2047
+StatusAddr_LblFrame   = MMC5_ExRamOfs+$204B
 
 RunPendingWrites:
 	lda SkipPendingWrites
@@ -103,9 +103,35 @@ ClearRemainTimer:
 	sta StatusAddr_Remains
 	rts
 
+WarpZoneRemains:
+.byte 8, 6, 5
 
 DrawRemainTimer:
+	lda WarpZoneControl
+	beq @DrawRemains
+	lda GameEngineSubroutine
+	cmp #$03
+	bne @DrawRemains
+	ldx #0
+	lda BANK_SELECTED
+	cmp #BANK_ORG
+	beq @AdjustWZRemains
+	inx
+	cmp #BANK_SMBLL
+	beq @AdjustWZRemains
+	inx
+@AdjustWZRemains:
 	lda IntervalTimerControl
+	clc
+	adc WarpZoneRemains,x
+	cmp #21
+	bcc @DigitsCheck
+	sec
+	sbc #21
+	bpl @DigitsCheck
+@DrawRemains:
+	lda IntervalTimerControl
+@DigitsCheck:
 	cmp #10
 	bcs @TwoDigits
 	sta StatusAddr_Remains
@@ -122,7 +148,7 @@ WritePracticeTopReal:
 	lda #'R'
 	sta StatusAddr_LblRemain
 	sta StatusAddr_LblFrame+1
-	sta StatusAddr_Rule-1
+	sta StatusAddr_Rule-2
 	lda #'A'
 	sta StatusAddr_LblFrame+2
 	lda #'T'
@@ -135,33 +161,44 @@ WritePracticeTopReal:
 	lda #'E'
 	sta StatusAddr_LblTime+3
 	sta StatusAddr_LblFrame+4
+	lda #'S'
+	sta StatusAddr_SockV-2
+	lda #'P'
+	sta StatusAddr_DPad-31
+	lda #'0'
+	sta StatusAddr_SockV+3
+	lda #'1'
+	sta StatusAddr_DPad-32
 	lda #'Y'
-	sta StatusAddr_YVal-$20+2
+	sta StatusAddr_YVal-1
 	lda #'*'
+	sta StatusAddr_Rule-1
+	sta StatusAddr_SockV-1
+	sta StatusAddr_SockN-32
 	sta StatusAddr_Frame+1
+	sta StatusAddr_XVal
+	sta StatusAddr_YVal
 	lda #'X'
-	sta StatusAddr_XVal-$20+2
+	sta StatusAddr_XVal-1
 	lda #$2E
 	sta StatusAddr_Frame+0
-	lda #'*'
-	sta StatusAddr_SockV-1
 	
 	lda #%10101010
 	sta MMC5_ExRamOfs+$23C0
-	sta MMC5_ExRamOfs+$23C2
+	sta MMC5_ExRamOfs+$23C1
 	sta MMC5_ExRamOfs+$23C3
 	sta MMC5_ExRamOfs+$23C4
 	sta MMC5_ExRamOfs+$23C5
 	sta MMC5_ExRamOfs+$23C6
 	sta MMC5_ExRamOfs+$23C7
 	lda #%11101010
-	sta MMC5_ExRamOfs+$23C1
+	sta MMC5_ExRamOfs+$23C2
 	rts
 
 RedrawFramesRemaningInner:
         lda WRAM_PracticeFlags
         and #PF_DisablePracticeInfo
-        bne nodraw
+        beq @draw
 		lda StarFlagTaskControl
 		cmp #$04
 		beq @draw ; force remainder if flagpole end
@@ -529,7 +566,7 @@ ChangeWorldNumber:
 @checked_ann_r:                ;
 	cpx #BANK_ORG              ; are we playing smb1?
 	bne @check_ll_r            ; nope - we have more worlds to consider
-    cpy #8                     ; yes - are we past the end of the game?
+    cpy #9                     ; yes - are we past the end of the game?
 	bcc @store                 ; no - we're done, store the world
 	ldy #0                     ; yes - wrap around to world 1
 	beq @store                 ; and store
@@ -544,13 +581,13 @@ ChangeWorldNumber:
 	bne @checked_ann_l         ; no - skip ahead
 	cpy #8                     ; yes - have we selected world 9?
 	bne @checked_ann_l         ; no - skip ahead
-	dey                        ; yep - derement cpast world 9 (it doesnt exist in ANN)
+	dey                        ; yep - decrement past world 9 (it doesnt exist in ANN)
 @checked_ann_l:				   ;
 	cpy #$FF                   ; have we wrapped around?
 	bne @store                 ; no - we're done, store the world
 	cpx #BANK_ORG              ; are we playing smb1?
 	bne @check_ll_l            ; nope - we have more worlds to consider
-	ldy #$07                   ; yes - wrap around to world 8
+	ldy #$08                   ; yes - wrap around to world 9
 	bne @store                 ; and store
 @check_ll_l:                   ;
     ldy #$0C                   ; we are playing LL / ANN, wrap to world D

@@ -3,7 +3,12 @@
 ; Bank for all sound-related stuff
 ;
 SoundEngineExternal:
-        jsr SoundEngine
+		cpx #BANK_ORG
+		bne @lost_sound
+		jsr SoundEngine
+		jmp ReturnBank
+@lost_sound:
+		jsr LL_SoundEngine
         jmp ReturnBank
 
 SoundEngine:

@@ -120,12 +120,16 @@ ppu_world_titles:
 
 game_names:
 		.word org_name
+		.word org_ext_name
 		.word lost_name
 		.word lost_ext_name
 		.word nippon_name
 		.word nippon_ext_name
 org_name:
 		.byte "SUPER MARIO BROS.         "
+		.byte 0
+org_ext_name:
+		.byte "SUPER MARIO BROS. EXT     "
 		.byte 0
 lost_name:
 		.byte "SMB 2: THE LOST LEVELS    "
@@ -198,16 +202,24 @@ redraw_all_records:
 		sta $01
 
 		lda RECORDS_MODE
-		cmp #2
+		cmp #1
+		beq @org_ext
+		cmp #3
 		beq @lost_ext
-		cmp #4
+		cmp #5
 		bne @next_world
 		ldy #9 ;nippon
 		bne @cont
 @lost_ext:
 		ldy #8 ;lost
+		bne @cont
+@org_ext:
+		ldy #8 ;org
+		lda #$09
+		bne @max_world
 @cont:
 		lda #$0D
+@max_world:
 		sta $01
 @next_world:
 		lda ppu_world_titles+1, x
@@ -233,14 +245,19 @@ redraw_all_records:
 		ldx #0
 		ldy #8*4
 		lda RECORDS_MODE
-		cmp #2
+		cmp #1
+		beq @orginal_ext
+		cmp #3
 		beq @ll_ext
-		cmp #4
+		cmp #5
 		bne @more
 		ldy #4*4 ;nippon
-		jmp @more
+		bne @more
 @ll_ext:
 		ldy #5*4 ;lost
+		bne @more
+@orginal_ext:
+		ldy #1*4 ;org
 @more:
 		lda PPU_STATUS ; Latch
 		lda ppu_record_vram+1, x
@@ -252,14 +269,22 @@ redraw_all_records:
 		tya
 	pha
 		lda RECORDS_MODE
-		bne @try_lost
+		bne @try_org_ext
 		lda WRAM_OrgTimes+1, x
 		tay
 		lda WRAM_OrgTimes, x
 		tax
 		jmp @render_it
-@try_lost:
+@try_org_ext:
 		cmp #2
+		bcs @try_lost
+		lda WRAM_OrgExtTimes+1, x
+		tay
+		lda WRAM_OrgExtTimes, x
+		tax
+		jmp @render_it
+@try_lost:
+		cmp #3
 		bcs @try_lost_ext
 		lda WRAM_LostTimes+1, x
 		tay
@@ -267,7 +292,7 @@ redraw_all_records:
 		tax
 		jmp @render_it
 @try_lost_ext:
-        cmp #3
+        cmp #4
 		bcs @try_nippon
 		lda WRAM_LostExtTimes+1,x
 		tay
@@ -275,7 +300,7 @@ redraw_all_records:
 		tax
 		jmp @render_it
 @try_nippon:
-        cmp #4
+        cmp #5
 		beq @is_nippon_ext
 		lda WRAM_NipponTimes+1, x
 		tay
@@ -400,12 +425,12 @@ run_records:
 @go_left:
 		dex
 		bmi @wrap_up
-		cpx #5
+		cpx #6
 		bne @save_mode
 		ldx #0
 		beq @save_mode
 @wrap_up:
-		ldx #4
+		ldx #5
 @save_mode:
 		stx RECORDS_MODE
 		jsr screen_off

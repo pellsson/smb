@@ -208,23 +208,16 @@ _draw_user1nippon_opt:
 		jsr get_uservar_ptr
 		draw_hexopt_at 12, 1
 
-_draw_userdelay_opt:
-		lda #<WRAM_DelayUserFrames
-		sta $00
-		lda #>WRAM_DelayUserFrames
-		sta $01
-		draw_hexopt_at 13, 0
-
 _draw_savedelay_opt:
 		lda #<WRAM_DelaySaveFrames
 		sta $00
 		lda #>WRAM_DelaySaveFrames
 		sta $01
-		draw_hexopt_at 14, 0
+		draw_hexopt_at 13, 0
 
-_char_native: draw_simple_at 15, "NATIVE"
-_char_org: draw_simple_at 15, "ORG   "
-_char_lost: draw_simple_at 15, "LOST  "
+_char_native: draw_simple_at 14, "NATIVE"
+_char_org: draw_simple_at 14, "ORG   "
+_char_lost: draw_simple_at 14, "LOST  "
 
 _draw_charset_opt:
 		ldx WRAM_CharSet
@@ -236,6 +229,16 @@ _draw_charset_opt:
 		jmp _char_org
 @native:
 		jmp _char_native
+
+_char_fds: draw_simple_at 15, "FDS"
+_char_nes: draw_simple_at 15, "NES"
+
+_draw_minusworld_opt:
+		lda WRAM_MinusWorld
+		beq @fds
+		jmp _char_nes
+@fds:
+		jmp _char_fds
 
 _draw_button_restart_opt:
 		lda WRAM_RestartButtons
@@ -269,9 +272,9 @@ settings_renderers:
 		.word _draw_user1lost_opt
 		.word _draw_user0nippon_opt
 		.word _draw_user1nippon_opt
-		.word _draw_userdelay_opt
 		.word _draw_savedelay_opt
 		.word _draw_charset_opt
+		.word _draw_minusworld_opt
 		.word _draw_button_restart_opt
 		.word _draw_button_title_opt
 		.word _draw_button_save_opt
@@ -368,6 +371,11 @@ _select_charset:
 @draw:
 		jmp set_selection_sprites
 
+_select_minusworld:
+		ldx #3
+@draw:
+		jmp set_selection_sprites
+
 select_buttons:
 		ldx #7
 		cmp #0
@@ -401,7 +409,7 @@ _select_reset_wram:
 		jmp set_selection_sprites
 
 _select_reset_records:
-		; NO ORG LL EXT
+		; NO ORG LL ANN
 		jsr get_setting_idx
 		txa
 		ldx #2
@@ -421,8 +429,8 @@ select_option:
 		.word _select_value
 		.word _select_value
 		.word _select_value
-		.word _select_value
 		.word _select_charset
+		.word _select_minusworld
 		.word _select_retry_buttons
 		.word _select_title_buttons
 		.word _select_save_buttons
@@ -620,14 +628,6 @@ byte_input:
 		sta ($00), Y
 		rts
 
-
-_drawdelay_input:
-		lda #<WRAM_DelayUserFrames
-		sta $00
-		lda #>WRAM_DelayUserFrames
-		sta $01
-		jmp byte_input
-
 _savedelay_input:
 		lda #<WRAM_DelaySaveFrames
 		sta $00
@@ -645,6 +645,15 @@ _charset_input:
 		ldx #0
 @save:
 		stx WRAM_CharSet
+@nothing:
+		rts
+
+_minusworld_input:
+		and #(B_Button|A_Button)
+		beq @nothing
+		lda WRAM_MinusWorld
+		eor #1
+		sta WRAM_MinusWorld
 @nothing:
 		rts
 
@@ -742,7 +751,7 @@ ResetRecords:
 		sta $00
 		lda #>WRAM_OrgTimes
 		sta $01
-		ldx #(WRAM_OrgTimesEnd-WRAM_OrgTimes)
+		ldx #(WRAM_OrgExtTimesEnd-WRAM_OrgTimes)
 		bne @memset
 @not_org:
 		dex
@@ -830,9 +839,9 @@ option_inputs:
 		.word _user_input
 		.word _user_input
 		.word _user_input
-		.word _drawdelay_input
 		.word _savedelay_input
 		.word _charset_input
+		.word _minusworld_input
 		.word _retrybuttons_input
 		.word _titlebuttons_input
 		.word _savebuttons_input

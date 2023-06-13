@@ -192,6 +192,7 @@ _BankJSR:
 
 
 Enter_SoundEngine:
+	ldx BANK_SELECTED
 	lda #BANK_COMMON
 	jsr SetBankFromA
 	jmp SoundEngineExternal

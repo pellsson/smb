@@ -273,7 +273,7 @@ TitleScreenMode:
       .word RunTitleScreen
 
 IsBigWorld:
-  .byte 1, 1, 0, 1, 0, 0, 1, 0
+  .byte 1, 1, 0, 1, 0, 0, 1, 0, 0
 
 RunTitleScreen:
     jsr Enter_PracticeTitleMenu
@@ -737,7 +737,7 @@ WarpZoneWelcome:
 
 WarpZoneNumbers:
   .byte $04, $03, $02, $00         ; warp zone numbers, note spaces on middle
-  .byte $24, $05, $24, $00         ; zone, partly responsible for
+  .byte $09, $05, $09, $00         ; zone, partly responsible for
   .byte $08, $07, $06, $00         ; the minus world
 
 GameTextOffsets:
@@ -1421,6 +1421,7 @@ HalfwayPageNybbles:
       .byte $66, $60
       .byte $65, $70
       .byte $00, $00
+      .byte $4a, $24
 
 PlayerLoseLife:
              inc DisableScreenFlag    ;disable screen and sprite 0 check
@@ -2792,6 +2793,7 @@ EnemyDataAddrLow:
       .byte <E_GroundArea13, <E_GroundArea14, <E_GroundArea15, <E_GroundArea16, <E_GroundArea17, <E_GroundArea18
       .byte <E_GroundArea19, <E_GroundArea20, <E_GroundArea21, <E_GroundArea22, <E_UndergroundArea1
       .byte <E_UndergroundArea2, <E_UndergroundArea3, <E_WaterArea1, <E_WaterArea2, <E_WaterArea3
+      .byte $00, $00, $00, $00, $00, $00, <E_MWELevel1
 
 EnemyDataAddrHigh:
       .byte >E_CastleArea1, >E_CastleArea2, >E_CastleArea3, >E_CastleArea4, >E_CastleArea5, >E_CastleArea6
@@ -2800,6 +2802,7 @@ EnemyDataAddrHigh:
       .byte >E_GroundArea13, >E_GroundArea14, >E_GroundArea15, >E_GroundArea16, >E_GroundArea17, >E_GroundArea18
       .byte >E_GroundArea19, >E_GroundArea20, >E_GroundArea21, >E_GroundArea22, >E_UndergroundArea1
       .byte >E_UndergroundArea2, >E_UndergroundArea3, >E_WaterArea1, >E_WaterArea2, >E_WaterArea3
+      .byte $00, $00, $00, $00, $00, $00, >E_MWELevel1
 
 AreaDataHOffsets:
       .byte $00, $03, $19, $1c
@@ -5116,6 +5119,14 @@ MiscLoopBack:
 ;-------------------------------------------------------------------------------------
 
 GiveOneCoin:
+    ;inc CoinTally          ;increment player's coin amount
+    ;lda CoinTally
+    ;cmp #100               ;does player have 100 coins yet?
+    ;bne AddToScore         ;if not, skip all of this
+    ;lda #$00
+    ;sta CoinTally          ;otherwise, reinitialize coin amount
+    ;lda #Sfx_ExtraLife
+    ;sta Square2SoundQueue  ;play 1-up sound    
 AddToScore:
     StatusbarUpdate SB_Frame
     rts
@@ -5238,8 +5249,14 @@ HandlePipeEntry:
 GetWNum: ldy WarpZoneNumbers,x     ;get warp zone numbers
          dey                       ;decrement for use as world number
          sty WorldNumber           ;store as world number and offset
+         cpy #World9               ;are we going to the minus world?
+         bne @getpointer           ;if not, get area pointer normally
+         lda WRAM_MinusWorld       ;if we are, check which minus world we're going to
+         bne @storepointer         ;if NES minus world, change area pointer manually
+@getpointer:
          ldx WorldAddrOffsets,y    ;get offset to where this world's area offsets are
          lda AreaAddrOffsets,x     ;get area offset based on world offset
+@storepointer:
          sta AreaPointer           ;store area offset here to be used to change areas
          sta WRAM_LevelAreaPointer
          PF_SetToLevelEnd_A
@@ -6212,6 +6229,7 @@ WorldAddrOffsets:
       .byte World3Areas-AreaAddrOffsets, World4Areas-AreaAddrOffsets
       .byte World5Areas-AreaAddrOffsets, World6Areas-AreaAddrOffsets
       .byte World7Areas-AreaAddrOffsets, World8Areas-AreaAddrOffsets
+      .byte World9Areas-AreaAddrOffsets
 
 AreaAddrOffsets:
 World1Areas: .byte $25, $29, $c0, $26, $60
@@ -6222,6 +6240,7 @@ World5Areas: .byte $2a, $31, $26, $62
 World6Areas: .byte $2e, $23, $2d, $60
 World7Areas: .byte $33, $29, $01, $27, $64
 World8Areas: .byte $30, $32, $21, $65
+World9Areas: .byte $09, $27, $44, $01
 
 ;-------------------------------------------------------------------------------------
 
@@ -12000,7 +12019,9 @@ EnemyAnimTimingBMask:
       .byte $08, $18
 
 JumpspringFrameOffsets:
-      .byte $18, $19, $1a, $19, $18
+      .byte $18, $19
+E_MWELevel1:
+      .byte $1a, $19, $18
 
 EnemyGfxHandler:
       lda Enemy_Y_Position,x      ;get enemy object vertical position
