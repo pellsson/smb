@@ -101,6 +101,7 @@ WriteJoypad:
 ClearRemainTimer:
 	lda #$24
 	sta StatusAddr_Remains
+	sta StatusAddr_Remains+1
 	rts
 
 WarpZoneRemains:
