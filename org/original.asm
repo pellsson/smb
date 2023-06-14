@@ -185,6 +185,9 @@ WaitForIRQ:
    ora #$80
    sta Mirror_PPU_CTRL_REG1       ;then park it at endless loop until next NMI
    sta PPU_CTRL_REG1
+   lda GamePauseStatus
+   and #%11111101
+   sta GamePauseStatus
    rti
 
 ;-------------------------------------------------------------------------------------
