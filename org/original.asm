@@ -45,6 +45,9 @@ ColdBoot:    jsr InitializeMemory         ;clear memory using pointer in Y
              jsr MoveAllSpritesOffscreen
              jsr InitializeNameTables     ;initialize both name tables
              inc DisableScreenFlag        ;set flag to disable screen output
+             lda #%10                               ; make sure exram is writable
+             sta MMC5_ExRamMode                     ;
+             BankJSR BANK_COMMON, ClearTopStatusBar ; and clear the statusbar area
              lda Mirror_PPU_CTRL_REG1
              ora #%10000000               ;enable NMIs
              jsr WritePPUReg1
@@ -565,7 +568,6 @@ ScreenRoutines:
 ;-------------------------------------------------------------------------------------
 
 InitScreen:
-      BankJSR BANK_COMMON, ClearTopStatusBar
       jsr MoveAllSpritesOffscreen ;initialize all sprites including sprite #0
       jsr InitializeNameTables    ;and erase both name and attribute tables
       lda OperMode
