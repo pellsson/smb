@@ -122,6 +122,9 @@ LoadState:
 		lda WRAM_PracticeFlags
 		and #PF_LoadState^$FF
 		sta WRAM_PracticeFlags
+		lda ScreenLeft_PageLoc    ; restore cleared nametable select
+		and #$01
+		sta NameTableSelect
 		lda #0
 		sta DisableScreenFlag
 		; Controllers will be read again this frame. Reset them (very buggy otherwise ;)).
