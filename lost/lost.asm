@@ -4,35 +4,23 @@
 ;-------------------------------------------------------------------------------------
 
 Start:
-            sei                         ;pretty standard 6502 type init here
-            cld
-            lda #%00010000              ;init PPU control register 1
-            sta PPU_CTRL_REG1
-            ldx #$ff                    ;reset stack pointer
-            txs
-            lda WorldNumber             ;get world number and save it temporarily
-            pha
-            ldy #ColdBootOffset         ;load default cold boot pointer
-            ldx #$05
-WBootCheck: lda TopScoreDisplay,x       ;first checkpoint, check each score digit
-            cmp #10                     ;in the top score for a valid digit
-            bcs ColdBoot                ;if even one digit isn't valid (greater than 10 decimal)
-            dex                         ;then branch to perform cold boot
-            bpl WBootCheck
-            lda #0 ;WarmBootValidation      ;second checkpoint, check to see if 
-            cmp #$a5                    ;another location has a specific value
-            bne ColdBoot   
-            ldy #WarmBootOffset         ;if passed both, load warm boot pointer
-ColdBoot:   jsr InitializeMemory        ;clear memory using pointer in Y  
-            sta SND_DELTA_REG+1
-            sta OperMode                ;now manually reset some other stuff
-            sta DiskIOTask
-            pla
-            sta WorldNumber
-            jsr InitializeSaveData      ;reset PRG-RAM if needed
-            lda #$a5                    ;set warm boot flag in case the player hits reset
-            sta PseudoRandomBitReg      ;set seed for pseudorandom register
-            ;sta WarmBootValidation     
+             lda #%00010000               ;init PPU control register 1 
+             sta PPU_CTRL_REG1
+             lda #0
+             sta PPU_CTRL_REG2
+             ldx #$ff                     ;reset stack pointer
+             txs
+VBlank1:     lda PPU_STATUS               ;wait two frames
+             bpl VBlank1
+VBlank2:     lda PPU_STATUS
+             bpl VBlank2
+             ldy #ColdBootOffset          ;load default cold boot pointer
+ColdBoot:    jsr InitializeMemory         ;clear memory using pointer in Y
+             sta SND_DELTA_REG+1
+             sta OperMode                ;now manually reset some other stuff
+             sta DiskIOTask
+             lda #$a5                    ;set warm boot flag in case the player hits reset
+             sta PseudoRandomBitReg      ;set seed for pseudorandom register
              
              jsr Enter_PracticeInit
 .ifdef ANN
@@ -58,10 +46,10 @@ ColdBoot:   jsr InitializeMemory        ;clear memory using pointer in Y
             jsr MoveAllSpritesOffscreen
             jsr InitializeNameTables
             inc DisableScreenFlag
-            cli
             lda Mirror_PPU_CTRL_REG1
             ora #%10000000
             jsr WritePPUReg1
+            cli
 EndlessLoop:
             lda $00                     ;endless loop
             jmp EndlessLoop
@@ -230,9 +218,9 @@ InitVRAMVars:
 
    jsr Enter_PracticeOnFrame
 
-   lda GamePauseStatus       ;check d0 of game pause flags
-   lsr                       ;if set, branch to skip 
-   bcs SeedLFSR
+   lda GamePauseStatus       ;check for pause status
+   and #3
+   bne PauseSkip
    lda TimerControl          ;if master timer control not set, branch
    beq CheckIntervalTC       ;to decrement frame and interval timers
    dec TimerControl          ;otherwise count this timer down
@@ -274,14 +262,21 @@ RotateLFSR:
    inx                       ;then rotate the entire LFSR
    dey
    bne RotateLFSR
-   lda GamePauseStatus       ;if d0 of game pause flag is set, skip this part
-   lsr
-   bcs WaitForIRQ
+PauseSkip:
+   lda GamePauseStatus
+   and #$02
+   bne ExecutionTree
    lda IRQUpdateFlag
    beq ExecutionTree
+   lda GamePauseStatus
+   and #3
+   bne ExecutionTree
    jsr MoveSpritesOffscreen
    jsr SpriteShuffler
 ExecutionTree:
+   lda GamePauseStatus
+   and #3
+   bne WaitForIRQ
    jsr OperModeExecutionTree ;run one of the program's four modes
 WaitForIRQ:
    lda IRQAckFlag            ;wait for IRQ
@@ -293,46 +288,6 @@ WaitForIRQ:
    sta Mirror_PPU_CTRL_REG1       ;then park it at endless loop until next NMI
    sta PPU_CTRL_REG1
    rti
-
-;-------------------------------------------------------------------------------------
-
-PauseRoutine:
-               lda OperMode           ;are we in victory mode?
-               cmp #VictoryModeValue       ;if so, go ahead
-               beq ChkPauseTimer
-               cmp #GameModeValue          ;are we in game mode?
-               bne ExitPause          ;if not, leave
-               lda OperMode_Task      ;if we are in game mode, are we running game engine?
-.ifdef ANN
-               cmp #$05
-.else
-               cmp #$04
-.endif
-               bne ExitPause          ;if not, leave
-ChkPauseTimer: lda GamePauseTimer     ;check if pause timer is still counting down
-               beq ChkStart
-               dec GamePauseTimer     ;if so, decrement and leave
-               rts
-ChkStart:      lda SavedJoypad1Bits   ;check to see if start is pressed
-               and #Start_Button
-               beq ClrPauseTimer
-               lda GamePauseStatus    ;check to see if timer flag is set
-               and #%10000000         ;and if so, do not reset timer (residual,
-               bne ExitPause          ;joypad reading routine makes this unnecessary)
-               lda #$2b               ;set pause timer
-               sta GamePauseTimer
-               lda GamePauseStatus
-               tay
-               iny                    ;set pause sfx queue for next pause mode
-               sty PauseSoundQueue
-               eor #%00000001         ;invert d0 and set d7
-               ora #%10000000
-               bne SetPause           ;unconditional branch
-ClrPauseTimer: lda GamePauseStatus    ;clear timer flag if timer is at zero and start button
-               and #%01111111         ;is not pressed
-SetPause:      sta GamePauseStatus
-ExitPause:     rts
-
 
 ;-------------------------------------------------------------------------------------
 ;$00 - used for preset value
@@ -14307,7 +14262,7 @@ LoadEnding:
         sta FileListNumber
         lda #$00                 ; mimic FDS bios
         sta FrameCounter
-        lda GamesBeatenCount     ;get the new count of games beaten we loaded (or reset)
+        lda #$20                 ;get the new count of games beaten we loaded (or reset)
         clc                      ;add one to it, to a maximum of 24/$18
         adc #$01
 .ifdef ANN
@@ -14321,7 +14276,7 @@ LoadEnding:
 .else
         lda #24                  ;sorry, only 24 stars allowed
 .endif
-SetS2S: sta GamesBeatenCount
+SetS2S: 
 .ifdef ANN
         lda #$01
         sta PrimaryHardMode
@@ -14331,27 +14286,6 @@ SetS2S: sta GamesBeatenCount
         sta ScreenRoutineTask    ;init screen routine task
         sta DiskIOTask
         inc OperMode_Task     ;move on to next task in the current mode
-        rts
-
-InitializeSaveData:
-        lda #'A'                 ; check for magic header "ANN"
-        cmp $7000                ; in PRG bank at $7000
-        bne @Clear               ; clear save data if not found
-        lda #'N'                 ; check next byte..
-        cmp $7001                ;
-        bne @Clear               ; clear save data if not found
-        cmp $7002                ; check final byte
-        beq @SaveOK              ; if found, exit        
-@Clear:
-        lda #'A'                 ; write magic header
-        sta $7000                ;
-        lda #'N'                 ;
-        sta $7001                ;
-        sta $7002                ;
-        lda #0                   ; and clear save data
-        sta GamesBeatenCount     ;
-@SaveOK:
-        clc
         rts
 
 ;-------------------------------------------------------------------------------------
@@ -14433,7 +14367,7 @@ WriteTitleScreenStars:
     @PPU_Line1 = $20D0
     @PPU_Line2 = $20F0
 .endif
-    lda GamesBeatenCount          ; copy game beaten count to temp value
+    lda #$24                      ; copy game beaten count to temp value
     beq @Exit                     ; no need to draw if the player has not beaten the game
     sta $0                        ;
     ldx VRAM_Buffer1_Offset       ; load buffer offset
