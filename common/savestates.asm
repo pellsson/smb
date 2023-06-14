@@ -9,6 +9,9 @@ LoadState:
 		rts
 @do_loadstate:
 		sta WRAM_Timer+1 ; Invalidate timer
+		lda Mirror_PPU_CTRL_REG1  ; disable vertical write - todo, this should probably never happen..
+		and #%11111011
+		sta PPU_CTRL_REG1
 		ldx #$7F
 @save_wram:
 		lda WRAM_SaveWRAM, x
@@ -134,6 +137,10 @@ SaveState:
 		sta GamePauseStatus
 		rts
 @do_savestate:
+		lda Mirror_PPU_CTRL_REG1  ; disable vertical write - todo, this should probably never happen..
+		and #%11111011
+		sta PPU_CTRL_REG1
+
 		lda PPU_STATUS
 		lda #$3F
 		sta PPU_ADDRESS
