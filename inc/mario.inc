@@ -129,9 +129,6 @@ AreaDataHigh          = $e8
 EnemyData             = $e9
 EnemyDataLow          = $e9
 EnemyDataHigh         = $ea
-AreaDataRAM           = $7300
-EnemyDataRAM          = $7400
-
 
 AreaParserTaskNum     = $071f
 ColumnSets            = $071e
@@ -680,16 +677,5 @@ GameModeValue         = 1
 VictoryModeValue      = 2
 GameOverModeValue     = 3
 
-SaveHeader            = $7000 ; 3 byte save file header
-GamesBeatenCount      = $7003 ; number of times the player has won
-
-; leaves the fly across the screen during wind
-LeavesEnabledRAM      = $6300 +  0
-LeavesYPosRAM         = $6302 +  0
-LeavesXPosRAM         = $6302 + 12
-LeavesTileRAM         = $6302 + 24
-LeavesEnd             = $6326
-
-; hacky timer for the victory scene ending
-EndingTimer1          = $0100
-EndingTimer2          = $0101
+PendingWrites = $77c
+IRQAckFlag = $77b

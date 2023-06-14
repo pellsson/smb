@@ -189,11 +189,50 @@ WRAM_PrettyTimeSec:
 WRAM_PrettyTimeFrac:
 	.byte 0
 
+
+OriginalCHRBank:     
+	.byte 0 ; $68FE
+BankJSRAddr:     
+	.byte 0, 0 ; $6990
+BankJSRTargetBank:     
+	.byte 0 ; $6992
+BankJSRA:     
+	.byte 0 ; $6993
+ActiveBank:     
+	.byte 0 ; $6994
+IRQNameTableSelect:     
+	.byte 0 ; $6995
+IRQHorizontalScroll:     
+	.byte 0 ; $6996
+NameTableSelect:     
+	.byte 0 ; $69A9
+SkipPendingWrites:     
+	.byte 0 ; $69B0
+WRAM_CurrentEntranceITC:     
+	.byte 0 ; $69B1
+WRAM_MenuCursorY:     
+	.byte 0 ; $69B2
+
+AreaDataRAM:
+	.res $100, $00
+EnemyDataRAM:
+	.res $100, $00
+
+
 ;
 ; Number of stars collected
 ;
 WRAM_LostStart:
 
+WRAM_AreaDataPtr:
+	.byte $00, $00
+WRAM_EnemyDataPtr:
+	.byte $00, $00
+
+LeavesEnabledRAM:
+	.byte 0
+
+LeavesYPosRAM:
 WRAM_LeafY:
 		.byte $30
 		.byte $70
@@ -207,6 +246,8 @@ WRAM_LeafY:
 		.byte $98
 		.byte $30
 		.byte $70
+
+LeavesXPosRAM:
 WRAM_LeafX:
 		.byte $30
 		.byte $30
@@ -220,6 +261,10 @@ WRAM_LeafX:
 		.byte $D0
 		.byte $D0
 		.byte $60
+
+LeavesTileRAM:
+        .byte $7b, $7b, $7b, $7b, $7a, $7a
+        .byte $7b, $7b, $7b, $7a, $7b, $7a
 
 ;
 ; Player palette colors

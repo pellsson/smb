@@ -668,23 +668,3 @@ AttractMode           = 0
 GameMode              = 1
 VictoryMode           = 2
 GameOverMode          = 3
-
-
-
-SaveHeader            = $7000 ; 3 byte save file header
-GamesBeatenCount      = $7003 ; number of times the player has won
-
-; copies of areadata and enemydata to minimize banking
-AreaDataRAM           = $7300
-EnemyDataRAM          = $7400
-
-; leaves the fly across the screen during wind
-LeavesEnabledRAM      = $7500 +  0
-LeavesYPosRAM         = $7502 +  0
-LeavesXPosRAM         = $7502 + 12
-LeavesTileRAM         = $7502 + 24
-LeavesEnd             = $7526
-
-; hacky timer for the victory scene ending
-EndingTimer1          = $0100
-EndingTimer2          = $0101

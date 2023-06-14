@@ -1,3 +1,5 @@
+.include "wram.inc"
+
 	.export ScenLoadArea
 	.export ScenReset
 	.export ScenUpdateSelected

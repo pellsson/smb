@@ -2171,9 +2171,6 @@ SkipByte:     dey
               bpl InitPageLoop  ;do this until all desired pages of memory have been erased
               lda #0
               ldy #0
-:             sta $6900,y       ; clear a bit of temporary PRG-RAM
-              iny
-              bne :-
               rts
 
 

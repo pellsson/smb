@@ -1,6 +1,7 @@
 .include "mario.inc"
 .include "shared.inc"
 .include "macros.inc"
+.include "wram.inc"
 
 ; # Super Mario Bros 2J
 .segment "bank7"

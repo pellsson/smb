@@ -24,6 +24,7 @@
     .include "mario.inc"
     .include "shared.inc"
     .include "macros.inc"
+    .include "wram.inc"
     .segment "bank5"
     .org $8000
 

@@ -140,21 +140,6 @@ MMC5_SLCompare        = $5203
 MMC5_SLIRQ            = $5204
 MMC5_ExRamOfs         = $3C00
 
-; todo - move these :D
-OriginalCHRBank       = $68FE
-BankJSRAddr           = $6990
-BankJSRTargetBank     = $6992
-BankJSRA              = $6993
-ActiveBank            = $6994
-IRQNameTableSelect    = $6995
-IRQHorizontalScroll   = $6996
-PendingWrites         = $6997
-IRQAckFlag            = $69A8
-NameTableSelect       = $69A9
-SkipPendingWrites     = $69B0
-WRAM_CurrentEntranceITC = $69B1
-WRAM_MenuCursorY      = $69B2
-
 
 .macro BankJSR bank, addr
       lda #<addr
