@@ -182,7 +182,11 @@ ScrnSwch:
    lda #$00
    jsr InitScroll
 
+.ifdef ANN
+   MACRO_RunSlowMo 5
+.else
    MACRO_RunSlowMo 4
+.endif
 
    lda #0
    sta PPU_SPR_ADDR
