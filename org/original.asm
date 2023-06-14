@@ -74,11 +74,8 @@ NonMaskableInterrupt:
                ora #%00010000
                sta Mirror_PPU_CTRL_REG1
                sta PPU_CTRL_REG1         ;(essentially $2000) but save other bits
-               lda Mirror_PPU_CTRL_REG2  ;disable OAM and background display by default
-               and #%11100110
-               ldy DisableScreenFlag     ;get screen disable flag
-               sty SkipPendingWrites
-               bne ScreenOff             ;if set, used bits as-is
+               ldy DisableScreenFlag
+               bne SkipIRQ
                lda #$1F                  ;set interrupt scanline
                sta MMC5_SLCompare
                inc IRQAckFlag            ;reset flag to wait for next IRQ
@@ -91,9 +88,14 @@ NonMaskableInterrupt:
                lda #$80
                sta MMC5_SLIRQ            ;reset IRQ
 SkipIRQ:
-               lda Mirror_PPU_CTRL_REG2  ;otherwise reenable bits and save them
+               lda Mirror_PPU_CTRL_REG2
+               and #%11100110            ;disable OAM and background display by default
+               ldy DisableScreenFlag     ;if screen disabled, skip this
+               bne ScrnSwch
+               lda Mirror_PPU_CTRL_REG2       ;otherwise reenable bits and save them
                ora #%00011110
-ScreenOff:     sta Mirror_PPU_CTRL_REG2  ;save bits for later but not in register at the moment
+ScrnSwch:
+               sta Mirror_PPU_CTRL_REG2  ;save bits for later but not in register at the moment
                and #%11100111            ;disable screen for now
                sta PPU_CTRL_REG2
                ldx PPU_STATUS            ;reset flip-flop and reset scroll registers to zero
