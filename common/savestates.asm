@@ -103,6 +103,16 @@ LoadState:
 		sta WRAM_LostStart, x
 		dex
 		bpl @copy_lost
+		ldy BANK_SELECTED
+		cpy #BANK_SMBLL
+		bne :+
+		BankJSR BANK_LLDATA, LL_RestoreAreaAndEnemyRAMAfterLoad
+		jmp @ExitLoad
+:		cpy #BANK_ANNLL
+		bne @ExitLoad
+		BankJSR BANK_ANNDATA, ANN_RestoreAreaAndEnemyRAMAfterLoad
+@ExitLoad:
+
 		lda GamePauseStatus
 		ora #2
 		sta GamePauseStatus

@@ -2,10 +2,12 @@
 .export ANN_LoadAreaPointer
 .export ANN_GetAreaPointer
 .export ANN_GetAreaDataAddrs
+.export ANN_RestoreAreaAndEnemyRAMAfterLoad
 .else
 .export LL_LoadAreaPointer
 .export LL_GetAreaPointer
 .export LL_GetAreaDataAddrs
+.export LL_RestoreAreaAndEnemyRAMAfterLoad
 .endif
 .include "wram.inc"
 
@@ -87,8 +89,10 @@ GetAreaDataAddrs:
   tay
   lda EnemyDataAddrs+1,y
   sta EnemyDataHigh
+  sta WRAM_EnemyDataPtr+1
   lda EnemyDataAddrs+0,y
   sta EnemyDataLow
+  sta WRAM_EnemyDataPtr+0
   ldy AreaType
   lda AreaDataHOffsets,y
   clc
@@ -97,8 +101,10 @@ GetAreaDataAddrs:
   tay
   lda AreaDataAddrs+1,y
   sta AreaDataHigh
+  sta WRAM_AreaDataPtr+1
   lda AreaDataAddrs+0,y
   sta AreaDataLow
+  sta WRAM_AreaDataPtr+0
   clc
   bcc @Shared
 @HardWorld:
@@ -109,8 +115,10 @@ GetAreaDataAddrs:
   tay
   lda EnemyDataAddrsLW+1,y
   sta EnemyDataHigh
+  sta WRAM_EnemyDataPtr+1
   lda EnemyDataAddrsLW+0,y
   sta EnemyDataLow
+  sta WRAM_EnemyDataPtr+0
   ldy AreaType
   lda AreaDataHOffsetsLW,y
   clc
@@ -119,8 +127,10 @@ GetAreaDataAddrs:
   tay
   lda AreaDataAddrsLW+1,y
   sta AreaDataHigh
+  sta WRAM_AreaDataPtr+1
   lda AreaDataAddrsLW+0,y
   sta AreaDataLow
+  sta WRAM_AreaDataPtr+0
 @Shared:
 
 
@@ -203,6 +213,34 @@ CopyAreaAndEnemyData:
   lda #<EnemyDataRAM      ;
   sta EnemyDataLow        ;
   rts                     ; there we are.
+
+.ifdef ANN
+ANN_RestoreAreaAndEnemyRAMAfterLoad:
+.else
+LL_RestoreAreaAndEnemyRAMAfterLoad:
+.endif
+  ldy #0                  ; copy current area data to PRG-RAM
+  lda WRAM_AreaDataPtr+1
+  sta $1
+  lda WRAM_AreaDataPtr+0
+  sta $0
+: lda ($0),y              ; so we don't need to bank as much
+  sta AreaDataRAM,y       ;
+  iny                     ;
+  cmp #$FD                ; area data EOF is $FD
+  bne :-                  ;
+  ldy #0                  ; then copy enemy data..
+  lda WRAM_EnemyDataPtr+1
+  sta $1
+  lda WRAM_EnemyDataPtr+0
+  sta $0
+: lda ($0),y       ;
+  sta EnemyDataRAM,y      ;
+  iny                     ;
+  cmp #$FF                ; enemy data EOF is $FF
+  bne :-                  ;
+  rts
+
 
 ; Letter worlds
 
