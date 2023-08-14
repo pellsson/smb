@@ -55,7 +55,14 @@ Looking to practice on PAL? [Try out threecreepio's independent PAL-conversion.]
 To keep settings, frame rules and stuff persistent; configure your game
 system (emulator, PowerPAK, EverDrive etc.) to allow the SMB Practice ROM
 battery-backed WRAM. Essentially, figure out how to make it so that you can
-save in Zelda (without savestates), power off the system, and load (without using save states). Then do the same for the SMB Practice ROM.
+save in Zelda (without savestates), power off the system, and load (without 
+using save states). Then do the same for the SMB Practice ROM.
+
+It is possible that the flag indicating battery-backed WRAM doesn't get set 
+in the patched ROM, preventing the emulator or flash cart from automatically
+persisting data. In this case, you can use a header editor such as nes2edit
+to manually set the "Battery Backed WRAM" flag.
+
 
 ## Feature list
 - Practice both **SMB** and **SMB Lost Levels**
